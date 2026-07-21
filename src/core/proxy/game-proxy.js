@@ -6,7 +6,54 @@ const cache = require('../cache');
 const router = express.Router();
 
 const GAME_ORIGIN = 'https://games.poki.com';
+const GDN_ORIGIN = 'https://gdn.poki.com';
 
+// Proxy gdn.poki.com subdomain assets
+router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
+  const subdomainPath = req.params.subdomain;
+  const cacheKey = `gdn:${subdomainPath}`;
+
+  const cached = cache.getAsset(cacheKey);
+  if (cached) {
+    res.set('X-Cache', 'HIT');
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Content-Type', cached.contentType);
+    return res.send(Buffer.from(cached.body, 'base64'));
+  }
+
+  try {
+    const url = `https://${subdomainPath}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': 'https://poki.com/',
+        'Origin': 'https://poki.com',
+      },
+      redirect: 'follow',
+      timeout: 30000,
+      compress: true,
+    });
+
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const body = await response.buffer();
+
+    res.set({
+      'Content-Type': contentType,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Cache-Control': 'public, max-age=86400',
+      'X-Cache': 'MISS',
+    });
+
+    cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
+    res.send(body);
+  } catch (err) {
+    console.error(`[GDN PROXY ERROR] ${subdomainPath}: ${err.message}`);
+    res.status(502).send('Asset temporarily unavailable.');
+  }
+});
+
+// Proxy games.poki.com requests
 router.get('*', async (req, res) => {
   const gamePath = req.path;
   const cacheKey = `game:${gamePath}`;
@@ -21,7 +68,7 @@ router.get('*', async (req, res) => {
   if (cachedAsset) {
     res.set('X-Cache', 'HIT');
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Content-Type', cachedAsset.contentType || 'application/octet-stream');
+    res.set('Content-Type', cachedAsset.contentType);
     return res.send(Buffer.from(cachedAsset.body, 'base64'));
   }
 
@@ -31,6 +78,7 @@ router.get('*', async (req, res) => {
       headers: {
         'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://poki.com/',
+        'Origin': 'https://poki.com',
         'Accept': '*/*',
       },
       redirect: 'follow',
@@ -49,10 +97,14 @@ router.get('*', async (req, res) => {
       'X-Cache': 'MISS',
     });
 
-    // For HTML responses, inject a script to spoof referrer for the game SDK
     if (contentType.includes('text/html')) {
       let html = body.toString('utf-8');
-      // Inject before </head> to override referrer checks
+      // Rewrite gdn.poki.com and poki-gdn.com URLs to go through our proxy
+      html = html.replace(/https?:\/\/([a-zA-Z0-9.-]+\.(?:gdn\.poki\.com|poki-gdn\.com)(\/[^\s"'<>&]*)?)/g,
+        '/game-proxy/gdn-proxy/$1');
+      html = html.replace(/\/\/([a-zA-Z0-9.-]+\.(?:gdn\.poki\.com|poki-gdn\.com)(\/[^\s"'<>&]*)?)/g,
+        '/game-proxy/gdn-proxy/$1');
+      // Inject referrer override
       html = html.replace('</head>',
         '<script>' +
         'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
@@ -62,7 +114,6 @@ router.get('*', async (req, res) => {
       return res.send(html);
     }
 
-    // Cache non-HTML responses with longer TTL
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
     res.send(body);
   } catch (err) {
