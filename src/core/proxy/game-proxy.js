@@ -9,11 +9,13 @@ const GAME_ORIGIN = 'https://games.poki.com';
 
 // Lightweight interceptor: rewrites poki domain URLs via fetch/XHR + element src/href setters + MO
 var GAME_INTERCEPTOR = `<script>(function(){
-var h=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";
+var gp="games.poki.com";var gdp=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";
 function rw(u){if(!u||typeof u!=="string")return u;
 if(u.indexOf("/game-proxy/")===0)return u;
-for(var i=0;i<h.length;i++){if(u.indexOf(h[i])!==-1)
-return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}return u}
+for(var i=0;i<gdp.length;i++){if(u.indexOf(gdp[i])!==-1)
+return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}
+if(u.indexOf(gp)!==-1)return u.replace(/https?:\\/\\/games\\.poki\\.com/,"/game-proxy");
+return u}
 var of=window.fetch;window.fetch=function(u,o){
 return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};
 var ox=XMLHttpRequest.prototype.open;
@@ -134,8 +136,13 @@ router.get('*', async (req, res) => {
         return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
       });
 
-      // Bypass anti-embedding check: if(top===self||...) → if(true||...)
-      html = html.replace(/if\s*\(\s*top\s*===\s*self/g, 'if(true');
+      // Bypass anti-embedding check: catch all top/self comparisons
+      html = html.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
+        return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
+      });
+      html = html.replace(/if\s*\(\s*window\s*(={2,3}|!==?)\s*window\.top/g, function(m, op) {
+        return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
+      });
 
       var headMatch = html.match(/<head[^>]*>/i);
       if (headMatch) {
