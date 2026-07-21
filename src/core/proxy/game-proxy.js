@@ -8,41 +8,37 @@ const router = express.Router();
 const GAME_ORIGIN = 'https://games.poki.com';
 
 // Lightweight interceptor: rewrites poki domain URLs via fetch/XHR + element src/href setters + MO
-var GAME_INTERCEPTOR = '<script>(function(){' +
-  'var h=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";' +
-  'function rw(u){if(!u||typeof u!=="string")return u;' +
-  'for(var i=0;i<h.length;i++){if(u.indexOf(h[i])!==-1)' +
-  'return pp+u.replace(/https?:\\\/\\\//,"").replace(/^\\\/\\\//,"")}return u}' +
-  'var of=window.fetch;window.fetch=function(u,o){' +
-  'return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};' +
-  'var ox=XMLHttpRequest.prototype.open;' +
-  'XMLHttpRequest.prototype.open=function(m,u,a){' +
-  'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
-  'function op(p,pr){var d=Object.getOwnPropertyDescriptor(p,pr);' +
-  'if(d&&d.set){Object.defineProperty(p,pr,{get:d.get,' +
-  'set:function(v){return d.set.call(this,rw(v)||v)},configurable:true})}}' +
-  'op(HTMLScriptElement.prototype,"src");' +
-  'op(HTMLIFrameElement.prototype,"src");' +
-  'op(HTMLImageElement.prototype,"src");' +
-  'op(HTMLSourceElement.prototype,"src");' +
-  'op(HTMLLinkElement.prototype,"href");' +
-  'function fixEl(n){if(n.nodeType!==1)return;' +
-  'if(n.src){var s=rw(n.src);if(s!==n.src)n.src=s}' +
-  'if(n.href){var h=rw(n.href);if(h!==n.href)n.href=h}' +
-  'var els=n.querySelectorAll&&n.querySelectorAll("[src],[href]");' +
-  'if(els){for(var i=0;i<els.length;i++){' +
-  'if(els[i].src){var s2=rw(els[i].src);if(s2!==els[i].src)els[i].src=s2}' +
-  'if(els[i].href){var h2=rw(els[i].href);if(h2!==els[i].href)els[i].href=h2}}}' +
-  'if(n.tagName==="SCRIPT"&&n.textContent){' +
-  'n.textContent=n.textContent.replace(/https?:\\\/\\\/[^"\\'\\s<>]*gdn\\.poki\\.com[^"\\'\\s<>]*/g,function(m){return rw(m)});' +
-  'n.textContent=n.textContent.replace(/https?:\\\/\\\/[^"\\'\\s<>]*poki-gdn\\.com[^"\\'\\s<>]*/g,function(m){return rw(m)});' +
-  '}}' +
-  'var mo=new MutationObserver(function(ms){' +
-  'for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
-  'for(var j=0;j<ns.length;j++)fixEl(ns[j])}' +
-  '});' +
-  'mo.observe(document.documentElement||document.body,{childList:true,subtree:true});' +
-  '})();</script>';
+var GAME_INTERCEPTOR = `<script>(function(){
+var h=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";
+function rw(u){if(!u||typeof u!=="string")return u;
+for(var i=0;i<h.length;i++){if(u.indexOf(h[i])!==-1)
+return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}return u}
+var of=window.fetch;window.fetch=function(u,o){
+return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};
+var ox=XMLHttpRequest.prototype.open;
+XMLHttpRequest.prototype.open=function(m,u,a){
+arguments[1]=rw(u)||u;return ox.apply(this,arguments)};
+function op(p,pr){var d=Object.getOwnPropertyDescriptor(p,pr);
+if(d&&d.set){Object.defineProperty(p,pr,{get:d.get,
+set:function(v){return d.set.call(this,rw(v)||v)},configurable:true})}}
+op(HTMLScriptElement.prototype,"src");
+op(HTMLIFrameElement.prototype,"src");
+op(HTMLImageElement.prototype,"src");
+op(HTMLSourceElement.prototype,"src");
+op(HTMLLinkElement.prototype,"href");
+function fixEl(n){if(n.nodeType!==1)return;
+if(n.src){var s=rw(n.src);if(s!==n.src)n.src=s}
+if(n.href){var h=rw(n.href);if(h!==n.href)n.href=h}
+var els=n.querySelectorAll&&n.querySelectorAll("[src],[href]");
+if(els){for(var i=0;i<els.length;i++){
+if(els[i].src){var s2=rw(els[i].src);if(s2!==els[i].src)els[i].src=s2}
+if(els[i].href){var h2=rw(els[i].href);if(h2!==els[i].href)els[i].href=h2}}}}
+var mo=new MutationObserver(function(ms){
+for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;
+for(var j=0;j<ns.length;j++)fixEl(ns[j])}
+});
+mo.observe(document.documentElement||document.body,{childList:true,subtree:true});
+})();</script>`;
 
 // Proxy gdn.poki.com / poki-gdn.com assets with correct referrer
 router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
