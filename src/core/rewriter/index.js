@@ -230,7 +230,7 @@ function replaceGamePageAds($, sourcePath) {
     // Step 2a: Rewrite games.poki.com URLs in INITIAL_STATE before React reads them
     'var gp="games.poki.com";var pp="/game-proxy";' +
     'function rewriteGameUrls(o){' +
-    'if(typeof o==="string"&&o.indexOf(gp)!==-1){return o.replace("https://"+gp,pp).replace("http://"+gp,pp)}' +
+    'if(typeof o==="string"&&o.indexOf(gp)!==-1){return o.replace("https://"+gp,pp).replace("http://"+gp,pp).replace("//"+gp,pp)}' +
     'if(o&&typeof o==="object"){for(var k in o){if(o.hasOwnProperty(k)){var v=rewriteGameUrls(o[k]);if(v!==o[k]){o[k]=v}}}' +
     '}return o}' +
     'setTimeout(function(){if(window.INITIAL_STATE)rewriteGameUrls(window.INITIAL_STATE)},0);' +
@@ -395,7 +395,7 @@ function rewriteGameUrls(obj, visited) {
     if (Object.prototype.hasOwnProperty.call(obj, k)) {
       var v = obj[k];
       if (typeof v === 'string' && v.indexOf('games.poki.com') !== -1) {
-        obj[k] = v.replace(/https?:\/\/games\.poki\.com/g, '/game-proxy');
+        obj[k] = v.replace(/(?:https?:)?\/\/games\.poki\.com/g, '/game-proxy');
         changed = true;
       } else if (typeof v === 'object' && v !== null) {
         if (rewriteGameUrls(v, visited)) changed = true;
