@@ -50,7 +50,7 @@ mo.observe(document.documentElement||document.body,{childList:true,subtree:true}
 setInterval(nukeAndReplace,1000)}
 catch(e){}
 var gp="games.poki.com";
-var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com","user-vault.poki.com"];
+var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com","user-vault.poki.com","t.poki.io","poki.io","poki-cdn.com"];
 var pp="/game-proxy/gdn-proxy/";
 function rw(u){if(!u||typeof u!=="string")return u;
 if(u.indexOf("/game-proxy/")===0)return u;
@@ -139,9 +139,24 @@ for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;
 for(var j=0;j<ns.length;j++)fixEl(ns[j])}
 });
 mo2.observe(document.documentElement||document.body,{childList:true,subtree:true});
-setInterval(function(){
-var ex=document.querySelectorAll(".poki-ad-slot");
-for(var i=0;i<ex.length;i++)placeAd(ex[i])},3000);
+// Override document.write/writeln to rewrite poki.com URLs inline
+var _dw=document.write;document.write=function(){
+for(var i=0;i<arguments.length;i++){if(typeof arguments[i]==="string"&&arguments[i].indexOf("poki.")!==-1){arguments[i]=rw(arguments[i])}}
+return _dw.apply(document,arguments)};
+var _dwl=document.writeln;document.writeln=function(){
+for(var i=0;i<arguments.length;i++){if(typeof arguments[i]==="string"&&arguments[i].indexOf("poki.")!==-1){arguments[i]=rw(arguments[i])}}
+return _dwl.apply(document,arguments)};
+// Override innerHTML setter to catch poki.com URLs injected dynamically
+var _ih=Object.getOwnPropertyDescriptor(Element.prototype,"innerHTML");
+if(_ih&&_ih.set){Object.defineProperty(Element.prototype,"innerHTML",{get:_ih.get,
+set:function(v){if(typeof v==="string"&&v.indexOf("poki.")!==-1){v=rw(v)}return _ih.set.call(this,v)},
+configurable:true})}
+// Block form submissions to external domains
+document.addEventListener("submit",function(e){try{var a=e.target.action;if(a&&a.indexOf("poki.")!==-1){e.preventDefault();e.stopPropagation()}}catch(ex){}},true);
+var _fs=HTMLFormElement.prototype.submit;
+HTMLFormElement.prototype.submit=function(){try{if(this.action&&this.action.indexOf("poki.")!==-1)return}catch(ex){}return _fs.apply(this,arguments)};
+// Prevent page navigation via beforeunload
+window.addEventListener("beforeunload",function(e){e.preventDefault();e.returnValue=""});
 })();</script>`;
 
 // Proxy gdn.poki.com / poki-gdn.com assets + API calls (including POST/PUT)
