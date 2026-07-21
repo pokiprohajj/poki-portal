@@ -77,6 +77,24 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
       'X-Cache': 'MISS',
     });
 
+    // For HTML responses from gdn.poki.com, also bypass anti-embedding checks
+    // and inject the GAME_INTERCEPTOR (catches PokiSDK checks in inner game HTML)
+    if (contentType.includes('text/html')) {
+      let html = body.toString('utf-8');
+      html = html.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
+        return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
+      });
+      html = html.replace(/if\s*\(\s*window\s*(={2,3}|!==?)\s*window\.top/g, function(m, op) {
+        return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
+      });
+      var headMatch = html.match(/<head[^>]*>/i);
+      if (headMatch) {
+        html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
+      }
+      cache.setAsset(cacheKey, { body: Buffer.from(html).toString('base64'), contentType }, 86400);
+      return res.send(html);
+    }
+
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
     res.send(body);
   } catch (err) {
