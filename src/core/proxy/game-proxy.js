@@ -7,16 +7,34 @@ const router = express.Router();
 
 const GAME_ORIGIN = 'https://games.poki.com';
 
-// Proxy all gdn.poki.com / poki-gdn.com requests with correct referrer
+// Lightweight interceptor for game HTML from gdn.poki.com
+// Only rewrites asset URLs - no referrer spoofing needed since we skip the embed page
+var GAME_INTERCEPTOR = '<script>(function(){' +
+  'var h=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";' +
+  'function rw(u){if(!u||typeof u!=="string")return u;' +
+  'for(var i=0;i<h.length;i++){if(u.indexOf(h[i])!==-1)' +
+  'return pp+u.replace(/https?:\\\/\\\//,"").replace(/^\\\/\\\//,"")}return u}' +
+  'var of=window.fetch;window.fetch=function(u,o){' +
+  'return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};' +
+  'var ox=XMLHttpRequest.prototype.open;' +
+  'XMLHttpRequest.prototype.open=function(m,u,a){' +
+  'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
+  'var mo=new MutationObserver(function(m){' +
+  'for(var i=0;i<m.length;i++){var t=m[i].addedNodes;' +
+  'for(var j=0;j<t.length;j++){var n=t[j];if(n.nodeType!==1)continue;' +
+  '["src","href"].forEach(function(a){var v=n.getAttribute(a);' +
+  'if(v){var r=rw(v);if(r!==v)n.setAttribute(a,r)}})}}});' +
+  'mo.observe(document.documentElement,{childList:true,subtree:true});' +
+  '})();</script>';
+
+// Proxy gdn.poki.com / poki-gdn.com assets with correct referrer
 router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
   const fullPath = req.params.subdomain + (req._parsedUrl.search || '');
   const cacheKey = `gdn:${fullPath}`;
 
   const cached = cache.getAsset(cacheKey);
   if (cached) {
-    res.set('X-Cache', 'HIT');
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Content-Type', cached.contentType);
+    res.set({ 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': '*', 'Content-Type': cached.contentType });
     return res.send(Buffer.from(cached.body, 'base64'));
   }
 
@@ -24,7 +42,7 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
     const url = `https://${fullPath}`;
     const response = await fetch(url, {
       headers: {
-        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://poki.com/',
         'Origin': 'https://poki.com',
       },
@@ -39,30 +57,18 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
     res.set({
       'Content-Type': contentType,
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': 'true',
       'Cache-Control': 'public, max-age=86400',
       'X-Cache': 'MISS',
     });
 
-      // For game HTML from gdn, inject referrer override + asset interceptor at <head>
+    // For game HTML, inject lightweight asset rewriter
     if (contentType.includes('text/html')) {
       var html = body.toString('utf-8');
-      var gdnHeadMatch = html.match(/<head[^>]*>/i);
-      if (gdnHeadMatch) {
-        html = html.replace(gdnHeadMatch[0],
-          gdnHeadMatch[0] +
-          '<script>' +
-          'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
-          'try{Object.defineProperty(document,"domain",{get:function(){return "poki.com"}})}catch(e){}' +
-          'try{document.cookie="poki=1; path=/; domain="+location.hostname}catch(e){}' +
-          'var gdnHosts=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";' +
-          'function rw(u){if(!u)return u;for(var i=0;i<gdnHosts.length;i++){if(u.indexOf(gdnHosts[i])!==-1)return pp+u.replace(/https?:\\\/\\\//,"").replace(/^\\\/\\\//,"")}return u}' +
-          'var of=window.fetch;window.fetch=function(u,o){return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};' +
-          'var ox=window.XMLHttpRequest.prototype.open;window.XMLHttpRequest.prototype.open=function(m,u,a){arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
-          'var mo=new MutationObserver(function(m){for(var i=0;i<m.length;i++){for(var j=0;j<m[i].addedNodes.length;j++){var n=m[i].addedNodes[j];if(n.nodeType===1){["src","href"].forEach(function(a){var v=n.getAttribute(a);if(v){var rw2=rw(v);if(rw2!==v)n.setAttribute(a,rw2)}});var q=n.querySelectorAll("[src],[href]");for(var l=0;l<q.length;l++){["src","href"].forEach(function(a){var v=q[l].getAttribute(a);if(v){var rw2=rw(v);if(rw2!==v)q[l].setAttribute(a,rw2)}})}}}}});mo.observe(document.documentElement,{childList:true,subtree:true});' +
-          '</script>');
+      var headMatch = html.match(/<head[^>]*>/i);
+      if (headMatch) {
+        html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
       }
-      cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
+      cache.setAsset(cacheKey, { body: Buffer.from(html), contentType }, 86400);
       return res.send(html);
     }
 
@@ -74,30 +80,29 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
   }
 });
 
-// Proxy games.poki.com requests
+// Proxy games.poki.com — extract gameUri and redirect to game directly
 router.get('*', async (req, res) => {
   const gamePath = req.path;
   const cacheKey = `game:${gamePath}`;
+
+  // Check HTML cache for redirect target
+  const cachedRedirect = cache.getAsset(cacheKey + ':redirect');
+  if (cachedRedirect) {
+    res.set('X-Cache', 'HIT');
+    return res.redirect(302, cachedRedirect.body);
+  }
+
   const cachedHtml = cache.getHtml(cacheKey);
   if (cachedHtml) {
-    res.set('X-Cache', 'HIT');
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Content-Type', 'text/html');
+    res.set({ 'Content-Type': 'text/html; charset=utf-8', 'X-Cache': 'HIT' });
     return res.send(cachedHtml);
-  }
-  const cachedAsset = cache.getAsset(cacheKey);
-  if (cachedAsset) {
-    res.set('X-Cache', 'HIT');
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Content-Type', cachedAsset.contentType);
-    return res.send(Buffer.from(cachedAsset.body, 'base64'));
   }
 
   try {
     const url = `${GAME_ORIGIN}${gamePath}`;
     const response = await fetch(url, {
       headers: {
-        'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://poki.com/',
         'Origin': 'https://poki.com',
         'Accept': '*/*',
@@ -110,95 +115,48 @@ router.get('*', async (req, res) => {
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     const body = await response.buffer();
 
-    res.set({
-      'Content-Type': contentType,
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': 'true',
-      'Cache-Control': 'public, max-age=600',
-      'X-Cache': 'MISS',
-    });
-
     if (contentType.includes('text/html')) {
-      let html = body.toString('utf-8');
-      // Inject comprehensive API interceptor that rewrites ALL gdn.poki.com URLs
-      var interceptor = '<script>' +
-      '(function(){' +
-      'var gdnHosts=["gdn.poki.com","poki-gdn.com"];' +
-      'var proxyPrefix="/game-proxy/gdn-proxy/";' +
-      'function rewriteUrl(u){' +
-      'if(!u)return u;' +
-      'for(var i=0;i<gdnHosts.length;i++){' +
-      'if(u.indexOf(gdnHosts[i])!==-1){' +
-      'return proxyPrefix+u.replace(/https?:\\\/\\\//,"").replace(/^\\\/\\\//,"");' +
-      '}' +
-      '}' +
-      'return u;' +
-      '}' +
-      'var origFetch=window.fetch;' +
-      'window.fetch=function(u,o){' +
-      'var rw=rewriteUrl(typeof u==="string"?u:u&&u.url);' +
-      'return origFetch(rw||u,o);' +
-      '};' +
-      'var origXhr=window.XMLHttpRequest.prototype.open;' +
-      'window.XMLHttpRequest.prototype.open=function(m,u,a){' +
-      'arguments[1]=rewriteUrl(u)||u;' +
-      'return origXhr.apply(this,arguments);' +
-      '};' +
-      // MutationObserver to catch dynamically added elements with gdn URLs
-      // Intercept existing gameframe iframe's src setter (this is the main entry point)
-      'var gf=document.getElementById("gameframe");' +
-      'if(gf){var _src=gf.getAttribute("src");' +
-      'Object.defineProperty(gf,"src",{get:function(){return _src},set:function(v){_src=rewriteUrl(v)||v}});}' +
-      // Also override HTMLIFrameElement.prototype.src to catch ALL iframes
-      'try{var _origSrc=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,"src");' +
-      'if(_origSrc&&_origSrc.set){var _origSet=_origSrc.set;' +
-      'Object.defineProperty(HTMLIFrameElement.prototype,"src",{configurable:true,' +
-      'get:_origSrc.get,' +
-      'set:function(v){return _origSet.call(this,rewriteUrl(v)||v)}});}}catch(e){}' +
-      // MutationObserver to catch dynamically added elements
-      'var mo=new MutationObserver(function(muts){' +
-      'for(var i=0;i<muts.length;i++){var m=muts[i];' +
-      'if(m.type==="attributes"&&m.attributeName==="src"){' +
-      'var v=m.target.getAttribute("src");' +
-      'var rw=rewriteUrl(v);' +
-      'if(rw&&rw!==v)m.target.setAttribute("src",rw);' +
-      '}' +
-      'for(var j=0;j<m.addedNodes.length;j++){var n=m.addedNodes[j];' +
-      'if(n.nodeType===1){' +
-      '["src","href"].forEach(function(a){' +
-      'var v=n.getAttribute(a);' +
-      'if(v){var rw=rewriteUrl(v);if(rw!==v)n.setAttribute(a,rw);}' +
-      '});' +
-      'var q=n.querySelectorAll("[src],[href]");' +
-      'for(var l=0;l<q.length;l++){var el=q[l];' +
-      '["src","href"].forEach(function(a){' +
-      'var v=el.getAttribute(a);' +
-      'if(v){var rw=rewriteUrl(v);if(rw!==v)el.setAttribute(a,rw);}' +
-      '});' +
-      '}' +
-      '}' +
-      '}' +
-      '}' +
-      '});' +
-      'mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src","href"]});' +
-      '})();' +
-      '</script>';
-      // Inject interceptor at <head> (BEFORE any embed page scripts run)
-      var headMatch = html.match(/<head[^>]*>/i);
+      const html = body.toString('utf-8');
+
+      // Try to extract gameUri from PARAMS — this is the actual game URL on gdn.poki.com
+      const gameUriMatch = html.match(/"gameUri"\s*:\s*"([^"]+)"/);
+      if (gameUriMatch) {
+        const gameUri = gameUriMatch[1].replace(/\\u002F/g, '/');
+        try {
+          const parsed = new URL(gameUri);
+          const gdnHost = parsed.hostname;
+          const gdnPath = parsed.pathname + parsed.search;
+          const redirectPath = `/game-proxy/gdn-proxy/${gdnHost}${gdnPath}`;
+
+          // Cache the redirect for 1 hour
+          cache.setAsset(cacheKey + ':redirect', { body: redirectPath, contentType: 'text/plain' }, 3600);
+          console.log(`[GAME REDIRECT] ${gamePath} -> ${redirectPath}`);
+          return res.redirect(302, redirectPath);
+        } catch (e) {
+          console.error(`[GAME REDIRECT ERROR] Invalid gameUri: ${gameUri}`);
+        }
+      }
+
+      // Fallback: serve embed HTML with referrer override + cookie
+      let patched = html;
+      var headMatch = patched.match(/<head[^>]*>/i);
       if (headMatch) {
-        html = html.replace(headMatch[0],
+        patched = patched.replace(headMatch[0],
           headMatch[0] +
           '<script>' +
           'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
-          'try{Object.defineProperty(document,"domain",{get:function(){return "poki.com"}})}catch(e){}' +
-          'try{document.cookie="poki=1; path=/; domain="+location.hostname}catch(e){}' +
-          '</script>' + interceptor);
+          'try{document.cookie="poki=1; path=/"}catch(e){}' +
+          'try{window.top=window}catch(e){}' +
+          '</script>' + GAME_INTERCEPTOR);
       }
-      cache.setHtml(cacheKey, html);
-      return res.send(html);
+
+      cache.setHtml(cacheKey, patched);
+      res.set({ 'Content-Type': 'text/html; charset=utf-8', 'X-Cache': 'MISS', 'Cache-Control': 'public, max-age=600' });
+      return res.send(patched);
     }
 
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
+    res.set({ 'Content-Type': contentType, 'X-Cache': 'MISS' });
     res.send(body);
   } catch (err) {
     console.error(`[GAME PROXY ERROR] ${gamePath}: ${err.message}`);
