@@ -8,7 +8,13 @@ const router = express.Router();
 const GAME_ORIGIN = 'https://games.poki.com';
 
 // Lightweight interceptor: rewrites poki domain URLs via fetch/XHR + element src/href setters + MO
+// Also overrides Document.prototype.referrer so the SDK core inside the game iframe
+// sees a referrer from poki.com and doesn't raise "unauthorized hosting" alert.
 var GAME_INTERCEPTOR = `<script>(function(){
+try{var dr=Object.getOwnPropertyDescriptor(Document.prototype,'referrer');
+if(dr&&dr.configurable){Object.defineProperty(Document.prototype,'referrer',
+{get:function(){return'https://poki.com/'}})}}
+catch(e){}
 var gp="games.poki.com";
 var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com"];
 var pp="/game-proxy/gdn-proxy/";
