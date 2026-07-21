@@ -11,8 +11,16 @@ function getRandomUA() {
   return config.userAgents[Math.floor(Math.random() * config.userAgents.length)];
 }
 
+function normalizeGamePath(path) {
+  // Strip trailing numeric game IDs from game page URLs
+  // e.g. /en/g/subway-surfers/818075 -> /en/g/subway-surfers
+  const match = path.match(/^(\/en\/g\/[^/]+)\/\d+$/);
+  if (match) return match[1];
+  return path;
+}
+
 async function fetchSource(path, visitorUA) {
-  const normalizedPath = (!path || path === '/') ? '/' : path;
+  const normalizedPath = (!path || path === '/') ? '/' : normalizeGamePath(path);
   const url = `${config.sourceOrigin}${normalizedPath}`;
   const userAgent = visitorUA || getRandomUA();
 
