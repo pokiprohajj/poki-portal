@@ -233,7 +233,7 @@ function replaceGamePageAds($, sourcePath) {
     'if(typeof o==="string"&&o.indexOf(gp)!==-1){return o.replace("https://"+gp,pp).replace("http://"+gp,pp)}' +
     'if(o&&typeof o==="object"){for(var k in o){if(o.hasOwnProperty(k)){var v=rewriteGameUrls(o[k]);if(v!==o[k]){o[k]=v}}}' +
     '}return o}' +
-    'rewriteGameUrls(window.INITIAL_STATE);' +
+    'setTimeout(function(){if(window.INITIAL_STATE)rewriteGameUrls(window.INITIAL_STATE)},0);' +
     // Step 2b: Keep gp_* containers empty for React hydration, then inject our ads after React mounts
     'var c=["gp_728x90","gp_300x250","gp_160x600"];' +
     'var cc=["okjidGhocmXN7zKxDo6s"];' +
