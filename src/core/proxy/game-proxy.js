@@ -15,8 +15,32 @@ try{var dr=Object.getOwnPropertyDescriptor(Document.prototype,'referrer');
 if(dr&&dr.configurable){Object.defineProperty(Document.prototype,'referrer',
 {get:function(){return'https://poki.com/'}})};
 var st=document.createElement('style');
-st.textContent='#adInfo,#adProgress,#bottom-ad,#top-ad,.ad-container{display:none!important}';
-document.head.appendChild(st)}
+st.textContent='#adInfo,#adProgress,#top-ad,.ad-container,.footer,.footer-wrapper{display:none!important}';
+document.head.appendChild(st);
+if(window.PARAMS){setTimeout(function(){
+var s=document.createElement('script');
+s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7128312414229788';
+s.crossOrigin='anonymous';s.async=true;document.head.appendChild(s);
+var ba=document.getElementById('bottom-ad');
+if(ba){ba.innerHTML='';ba.style.display='block';
+var i1=document.createElement('ins');i1.className='adsbygoogle';
+i1.style.display='inline-block';i1.style.width='728px';i1.style.height='90px';
+i1.setAttribute('data-ad-client','ca-pub-7128312414229788');
+i1.setAttribute('data-ad-slot','3616266206');ba.appendChild(i1);
+(adsbygoogle=window.adsbygoogle||[]).push({})}
+var gc=document.querySelector('#game-frame,.game-wrapper,#main-content');
+if(gc){gc.style.display='flex';gc.style.flexDirection='column';gc.style.alignItems='center';
+var r1=document.createElement('ins');r1.className='adsbygoogle';
+r1.style.display='inline-block';r1.style.width='300px';r1.style.height='250px';
+r1.setAttribute('data-ad-client','ca-pub-7128312414229788');
+r1.setAttribute('data-ad-slot','7744193417');gc.parentNode.insertBefore(r1,gc);
+(adsbygoogle=window.adsbygoogle||[]).push({});
+var r2=document.createElement('ins');r2.className='adsbygoogle';
+r2.style.display='inline-block';r2.style.width='160px';r2.style.height='600px';
+r2.setAttribute('data-ad-client','ca-pub-7128312414229788');
+r2.setAttribute('data-ad-slot','3025953274');gc.parentNode.insertBefore(r2,gc);
+(adsbygoogle=window.adsbygoogle||[]).push({})}
+},2000)}}
 catch(e){}
 var gp="games.poki.com";
 var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com","user-vault.poki.com"];
@@ -33,6 +57,10 @@ if(url&&url.indexOf("devs-api.poki.com/gameinfo/@sdk")!==-1)
 return Promise.resolve(new Response(
 '{"gameID":"1","cachedContentGameID":"1"}',
 {status:200,headers:{"Content-Type":"application/json"}}));
+if(url&&url.indexOf("user-vault.poki.com")!==-1)
+return Promise.resolve(new Response(
+'{"id":"","name":""}',
+{status:200,headers:{"Content-Type":"application/json"}}));
 return of(rw(url)||u,o)};
 var ox=XMLHttpRequest.prototype.open;
 XMLHttpRequest.prototype.open=function(m,u,a){
@@ -45,6 +73,11 @@ op(HTMLIFrameElement.prototype,"src");
 op(HTMLImageElement.prototype,"src");
 op(HTMLSourceElement.prototype,"src");
 op(HTMLLinkElement.prototype,"href");
+// Catch setAttribute for SCRIPT elements (Poki SDK creates core script via setAttribute)
+var osa=Element.prototype.setAttribute;
+Element.prototype.setAttribute=function(n,v){
+if(n==="src"&&(this.tagName==="IFRAME"||this.tagName==="SCRIPT")){v=rw(v)}
+return osa.call(this,n,v)};
 function fixEl(n){if(n.nodeType!==1)return;
 if(n.src){var s=rw(n.src);if(s!==n.src)n.src=s}
 if(n.href){var h=rw(n.href);if(h!==n.href)n.href=h}
