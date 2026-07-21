@@ -210,24 +210,10 @@ function replaceGamePageAds($, sourcePath) {
   var isGamePage = typeof sourcePath === 'string' && (sourcePath.match(/\/[a-z]{2}\/g\/.+/i) || sourcePath.indexOf('/g/') !== -1);
   if (!hasAd && !isGamePage) return;
   if (!$('head').length) return;
-  // Insert our own AdSense ad units into gp_* containers (server-side SSR exists)
-  var clientId = config.ads.adsenseClientId;
-  if (clientId) {
-    var slots = {
-      'gp_728x90': { slot: config.ads.slotLeaderboard, w: 728, h: 90 },
-      'gp_300x250': { slot: config.ads.slotRectangle, w: 300, h: 250 },
-      'gp_160x600': { slot: config.ads.slotSkyscraper, w: 160, h: 600 }
-    };
-    Object.keys(slots).forEach(function (id) {
-      var el = $('#' + id);
-      if (el.length && el.children().length === 0) {
-        var s = slots[id];
-        el.html('<ins class="adsbygoogle" style="display:inline-block;width:' + s.w + 'px;height:' + s.h + 'px" data-ad-client="' + clientId + '" data-ad-slot="' + s.slot + '"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>');
-      }
-    });
-  }
   // Nullify Poki house ad data in INITIAL_STATE before React boots
-  // Inject MutationObserver to block Poki ad networks (NOT our own AdSense)
+  // Keep gp_* containers empty for React hydration (don't inject ad units here - React would break)
+  // Inject MutationObserver to block Poki ad networks and set up our own ad injection
+  var clientId = config.ads.adsenseClientId;
   $('head').append('<script id="portal-ad-blocker">' +
     '(function(){' +
     // Step 1: Nullify house ad replacement data
@@ -241,55 +227,81 @@ function replaceGamePageAds($, sourcePath) {
     '}}' +
     '}' +
     'if(s&&s.ads){s.ads.takeover=null}' +
-    // Step 2: Block only Poki-specific ad networks (allow our AdSense through)
-    'var p=["ads.poki.com","taboola","outbrain","criteo","moatads","adnxs","adsrvr","prebid","amazon-adsystem"];' +
-    // Step 3: On tablets where gp_* doesn't exist in SSR, fill okjid* containers client-side
+    // Step 2: Keep gp_* containers empty for React hydration, then inject our ads after React mounts
+    'var c=["gp_728x90","gp_300x250","gp_160x600"];' +
+    'var cc=["okjidGhocmXN7zKxDo6s"];' +
+    'function emptyContainers(){' +
+    'for(var i=0;i<c.length;i++){var el=document.getElementById(c[i]);if(el&&el.children.length>0&&!el.querySelector("ins.adsbygoogle")){el.innerHTML=""}}' +
+    'for(var i=0;i<cc.length;i++){var els=document.querySelectorAll("."+cc[i]);for(var j=0;j<els.length;j++){if(els[j].children.length>0&&!els[j].querySelector("ins.adsbygoogle")){els[j].innerHTML=""}}}' +
+    '}' +
+    // Step 3: Inject our AdSense ads into empty containers
     'var clientId=' + JSON.stringify(clientId) + ';' +
     'var slots={"728x90":' + JSON.stringify(config.ads.slotLeaderboard) + ',"300x250":' + JSON.stringify(config.ads.slotRectangle) + ',"160x600":' + JSON.stringify(config.ads.slotSkyscraper) + '};' +
-    'function injectAd(el){' +
-    'if(el.querySelector("ins.adsbygoogle"))return;' +
-    'var style=el.getAttribute("style")||"";' +
-    'var m=style.match(/width:\\s*(\\d+)/);' +
-    'var h=style.match(/height:\\s*(\\d+)/);' +
-    'if(!m||!h)return;var key=m[1]+"x"+h[1];var slot=slots[key];' +
-    'if(!slot||!clientId)return;' +
+    'function injectOurAds(){' +
+    'emptyContainers();' +
+    'for(var i=0;i<c.length;i++){var el=document.getElementById(c[i]);if(el&&el.children.length===0){' +
+    'var w=el.style&&el.style.width?parseInt(el.style.width):0;' +
+    'var h=el.style&&el.style.height?parseInt(el.style.height):0;' +
+    'if(!w||!h){var style=(el.getAttribute("style")||"");var mw=style.match(/width:\\s*(\\d+)/);var mh=style.match(/height:\\s*(\\d+)/);if(mw&&mh){w=parseInt(mw[1]);h=parseInt(mh[1])}}' +
+    'var key=w+"x"+h;var slot=slots[key];' +
+    'if(slot&&clientId){' +
     'var ins=document.createElement("ins");' +
     'ins.className="adsbygoogle";' +
     'ins.style.display="inline-block";' +
-    'ins.style.width=m[1]+"px";' +
-    'ins.style.height=h[1]+"px";' +
+    'ins.style.width=w+"px";' +
+    'ins.style.height=h+"px";' +
     'ins.setAttribute("data-ad-client",clientId);' +
     'ins.setAttribute("data-ad-slot",slot);' +
     'el.appendChild(ins);' +
-    'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}' +
-    // Inject into existing okjid* containers (tablet)
+    'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}}}' +
+    // Inject into okjid* containers
     'var els=document.querySelectorAll(".okjidGhocmXN7zKxDo6s");' +
-    'for(var i=0;i<els.length;i++){injectAd(els[i])}' +
-    // Watch for new containers React adds client-side
+    'for(var i=0;i<els.length;i++){var el=els[i];' +
+    'if(el.children.length===0){' +
+    'var style=(el.getAttribute("style")||"");' +
+    'var mw=style.match(/width:\\s*(\\d+)/);' +
+    'var mh=style.match(/height:\\s*(\\d+)/);' +
+    'if(mw&&mh){var key=mw[1]+"x"+mh[1];var slot=slots[key];' +
+    'if(slot&&clientId){' +
+    'var ins=document.createElement("ins");' +
+    'ins.className="adsbygoogle";' +
+    'ins.style.display="inline-block";' +
+    'ins.style.width=mw[1]+"px";' +
+    'ins.style.height=mh[1]+"px";' +
+    'ins.setAttribute("data-ad-client",clientId);' +
+    'ins.setAttribute("data-ad-slot",slot);' +
+    'el.appendChild(ins);' +
+    'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}}}}' +
+    // Block Poki-specific ad networks
+    'var p=["ads.poki.com","taboola","outbrain","criteo","moatads","adnxs","adsrvr","prebid","amazon-adsystem"];' +
+    // Rewrite games.poki.com iframes to go through our proxy (prevents embed fallback)
+    'var gp="games.poki.com";' +
+    'var proxyPrefix="/game-proxy";' +
+    'function rewriteGameIframe(el){' +
+    'if(el.tagName==="IFRAME"&&el.src&&el.src.indexOf(gp)!==-1){' +
+    'var newSrc=el.src.replace("https://"+gp,"").replace("http://"+gp,"");' +
+    'if(newSrc.indexOf("/")!==0)newSrc="/"+newSrc;' +
+    'el.src=proxyPrefix+newSrc;return true}return false}' +
+    'function matchUrl(u){if(!u)return false;for(var i=0;i<p.length;i++){if(u.indexOf(p[i])!==-1)return true}return false}' +
     'var o=new MutationObserver(function(m){' +
     'for(var i=0;i<m.length;i++){var mut=m[i];' +
     'for(var j=0;j<mut.addedNodes.length;j++){var n=mut.addedNodes[j];' +
-    'if(n.tagName==="SCRIPT"&&n.src){' +
-    'var u=n.src;' +
-    'for(var pi=0;pi<p.length;pi++){if(u.indexOf(p[pi])!==-1){n.type="text/placeholder";n.src="";try{n.remove()}catch(e){}break;}}' +
-    '}' +
+    'if(n.tagName==="SCRIPT"&&n.src&&matchUrl(n.src)){n.type="text/placeholder";n.src="";try{n.remove()}catch(e){}}' +
     'if(n.tagName==="IFRAME"&&n.src){' +
-    'var u=n.src;' +
-    'for(var pi=0;pi<p.length;pi++){if(u.indexOf(p[pi])!==-1){n.src="about:blank";try{n.remove()}catch(e){}break;}}' +
+    'if(rewriteGameIframe(n)){}else if(matchUrl(n.src)){n.src="about:blank";try{n.remove()}catch(e){}}' +
     '}' +
-    'if(n.tagName==="IMG"&&n.src){' +
-    'var u=n.src;' +
-    'for(var pi=0;pi<p.length;pi++){if(u.indexOf(p[pi])!==-1){n.src="";try{n.remove()}catch(e){}break;}}' +
-    '}' +
+    'if(n.tagName==="IMG"&&n.src&&matchUrl(n.src)){n.src="";try{n.remove()}catch(e){}}' +
     'if(n.nodeType===1){' +
-    'if(n.matches&&n.matches(".okjidGhocmXN7zKxDo6s")){injectAd(n)}' +
-    'var c=n.querySelectorAll&&n.querySelectorAll(".okjidGhocmXN7zKxDo6s");' +
-    'if(c){for(var ci=0;ci<c.length;ci++){injectAd(c[ci])}}' +
-    'var a=n.querySelectorAll&&n.querySelectorAll("script,iframe,img");' +
-    'if(a){for(var li=0;li<a.length;li++){var s=a[li];if(s.src){var u=s.src;for(var pi=0;pi<p.length;pi++){if(u.indexOf(p[pi])!==-1){s.src="";try{s.remove()}catch(e){}break;}}}}}}' +
-    '}}' +
+    'if(n.matches&&n.matches(".okjidGhocmXN7zKxDo6s")){' +
+    'var el=n;if(el.children.length===0){var style=(el.getAttribute("style")||"");var mw=style.match(/width:\\s*(\\d+)/);var mh=style.match(/height:\\s*(\\d+)/);if(mw&&mh){var key=mw[1]+"x"+mh[1];var slot=slots[key];if(slot&&clientId){var ins=document.createElement("ins");ins.className="adsbygoogle";ins.style.display="inline-block";ins.style.width=mw[1]+"px";ins.style.height=mh[1]+"px";ins.setAttribute("data-ad-client",clientId);ins.setAttribute("data-ad-slot",slot);el.appendChild(ins);try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}}}' +
+    'var a=n.querySelectorAll&&n.querySelectorAll("script,iframe,img");if(a){for(var l=0;l<a.length;l++){var s=a[l];if(s.src){if(rewriteGameIframe(s)){}else if(matchUrl(s.src)){s.src="";try{s.remove()}catch(e){}}}}}}' +
+    '}' +
     '});' +
     'var t=document.documentElement;if(t){o.observe(t,{childList:true,subtree:true})}' +
+    // Run after React has a chance to hydrate (timeout to let React settle)
+    'setTimeout(injectOurAds,500);' +
+    'setTimeout(injectOurAds,2000);' +
+    'setInterval(injectOurAds,5000);' +
     '})();' +
     '</script>');
 }

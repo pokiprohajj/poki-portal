@@ -87,6 +87,7 @@ app.get('/', (req, res, next) => {
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
+app.use('/game-proxy', require('./core/proxy/game-proxy'));
 
 app.use('/', proxyRouter);
 

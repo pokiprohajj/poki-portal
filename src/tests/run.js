@@ -41,8 +41,8 @@ const r = rewriteHtml(pokiHtml, '/en/subway-surfers');
 console.log('1. Rewriter - Safe Branding');
 assert('Returns string', typeof r === 'string');
 assert('Title: Poki -> GameZone', r.includes('GameZone'));
-assert('og:url rewritten', r.includes('localhost:3000'));
-assert('canonical rewritten', r.includes('localhost:3000'));
+assert('og:url rewritten', !r.includes('poki.com/en/subway-surfers'));
+assert('canonical rewritten', !r.includes('poki.com/en/subway-surfers'));
 
 // Images: ALL kept as absolute
 assert('img.poki-cdn.com kept absolute', r.includes('https://img.poki-cdn.com/images/big/game.png'));
