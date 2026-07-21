@@ -10,7 +10,7 @@ const GAME_ORIGIN = 'https://games.poki.com';
 // Lightweight interceptor: rewrites poki domain URLs via fetch/XHR + element src/href setters + MO
 var GAME_INTERCEPTOR = `<script>(function(){
 var gp="games.poki.com";
-var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery"];
+var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com"];
 var pp="/game-proxy/gdn-proxy/";
 function rw(u){if(!u||typeof u!=="string")return u;
 if(u.indexOf("/game-proxy/")===0)return u;
@@ -62,7 +62,21 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       }
     }
 
-    const url = `https://${fullPath}`;
+    const url = new URL(`https://${fullPath}`);
+
+    // Spoof domain in href/url_referrer params for devs-api.poki.com and api.poki.com calls
+    // This prevents the SDK from detecting unauthorized hosting via query params
+    if (url.hostname.includes('poki.com') || url.hostname.includes('ay.delivery')) {
+      ['href', 'url_referrer', 'referrer'].forEach(function(param) {
+        if (url.searchParams.has(param)) {
+          var val = url.searchParams.get(param);
+          if (val && val.indexOf(config.domain) !== -1) {
+            url.searchParams.set(param, val.replace(config.domain, 'poki.com'));
+          }
+        }
+      });
+    }
+
     const fetchOpts = {
       method: req.method,
       headers: {

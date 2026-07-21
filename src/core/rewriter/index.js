@@ -157,8 +157,11 @@ function rewriteHtml(html, sourcePath) {
     $('head').append('<script id="portal-iframe-rw">' +
       '(function(){' +
       'var gp="games.poki.com";var pp="/game-proxy";' +
+      'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery"];' +
+      'var ssp="/game-proxy/gdn-proxy/";' +
       'function rw(v){if(typeof v!=="string")return v;' +
       'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
+      'for(var i=0;i<sdp.length;i++){if(v.indexOf(sdp[i])!==-1){return ssp+v.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}}' +
       'if(v.indexOf("poki.com")!==-1){return v.replace(/https?:\\/\\/(www\\.)?poki\\.com/,window.location.origin)}' +
       'return v}' +
       'var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,"src");' +
@@ -168,6 +171,12 @@ function rewriteHtml(html, sourcePath) {
       'Element.prototype.setAttribute=function(n,v){' +
       'if(n==="src"&&this.tagName==="IFRAME"){v=rw(v)}' +
       'return osa.call(this,n,v)};' +
+      // Also override fetch/XHR on main page to rewrite SDK domain calls
+      'var of=window.fetch;window.fetch=function(u,o){' +
+      'return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};' +
+      'var ox=XMLHttpRequest.prototype.open;' +
+      'XMLHttpRequest.prototype.open=function(m,u,a){' +
+      'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
       '})();</script>');
   }
 
