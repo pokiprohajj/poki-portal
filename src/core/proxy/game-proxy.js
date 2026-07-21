@@ -9,7 +9,7 @@ const GAME_ORIGIN = 'https://games.poki.com';
 
 // Lightweight interceptor: rewrites poki domain URLs via fetch/XHR + element src/href setters + MO
 var GAME_INTERCEPTOR = `<script>(function(){
-var gp="games.poki.com";var gdp=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";
+var gp="games.poki.com";var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com"];var pp="/game-proxy/gdn-proxy/";
 function rw(u){if(!u||typeof u!=="string")return u;
 if(u.indexOf("/game-proxy/")===0)return u;
 for(var i=0;i<gdp.length;i++){if(u.indexOf(gdp[i])!==-1)
@@ -81,6 +81,16 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
     // and inject the GAME_INTERCEPTOR (catches PokiSDK checks in inner game HTML)
     if (contentType.includes('text/html')) {
       let html = body.toString('utf-8');
+
+      // Server-side: rewrite game-cdn.poki.com URLs through our proxy
+      // (otherwise the Poki SDK bootloader loads unproxied and detects embedding)
+      html = html.replace(/https?:\/\/[^"'\s<>]*game-cdn\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
+      });
+      html = html.replace(/\/\/[^"'\s<>]*game-cdn\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
+      });
+
       html = html.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
         return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
       });
@@ -93,6 +103,19 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
       }
       cache.setAsset(cacheKey, { body: Buffer.from(html).toString('base64'), contentType }, 86400);
       return res.send(html);
+    }
+
+    // For JavaScript responses (Poki SDK core), apply anti-embedding bypass
+    if (contentType.includes('javascript') || contentType.includes('application/x-javascript') || contentType.includes('text/javascript') || req.path.endsWith('.js')) {
+      let js = body.toString('utf-8');
+      js = js.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
+        return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
+      });
+      js = js.replace(/if\s*\(\s*window\s*(={2,3}|!==?)\s*window\.top/g, function(m, op) {
+        return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
+      });
+      cache.setAsset(cacheKey, { body: Buffer.from(js).toString('base64'), contentType }, 86400);
+      return res.send(js);
     }
 
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
@@ -141,12 +164,15 @@ router.get('*', async (req, res) => {
     if (contentType.includes('text/html')) {
       let html = body.toString('utf-8');
 
-      // Server-side: rewrite all gdn.poki.com / poki-gdn.com URLs to go through gdn-proxy
+      // Server-side: rewrite all gdn.poki.com / poki-gdn.com / game-cdn.poki.com URLs to go through gdn-proxy
       // This catches URLs in <script src>, <link href>, inline scripts, document.write(), etc.
       html = html.replace(/https?:\/\/[^"'\s<>]*gdn\.poki\.com[^"'\s<>]*/g, function(match) {
         return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
       });
       html = html.replace(/https?:\/\/[^"'\s<>]*poki-gdn\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
+      });
+      html = html.replace(/https?:\/\/[^"'\s<>]*game-cdn\.poki\.com[^"'\s<>]*/g, function(match) {
         return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
       });
       // Also handle protocol-relative URLs
