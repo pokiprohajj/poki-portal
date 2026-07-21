@@ -152,6 +152,9 @@ function rewriteHtml(html, sourcePath) {
   // Pass 9b: Replace Poki logo with custom logo (responsive for all devices)
   replacePokiLogo($);
 
+  // Pass 9c: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
+  rewriteGameInitState($);
+
   // Pass 10: Inject navigation overlay for SPA-style link interception
   injectNavigationOverlay($, targetDomain);
 
@@ -345,6 +348,65 @@ function replacePokiLogo($) {
       '@media(max-width:640px){img[src*="YRRj3Hw"]{height:24px}}' +
       '</style>');
   }
+}
+
+function rewriteGameInitState($) {
+  $('script').each(function () {
+    var text = $(this).html() || '';
+    var idx = text.indexOf('window.INITIAL_STATE=');
+    if (idx === -1) idx = text.indexOf('window.INITIAL_STATE =');
+    if (idx === -1) return;
+    var start = text.indexOf('{', idx);
+    if (start === -1) return;
+    // Parse the JSON object by counting braces
+    var depth = 0;
+    var inStr = false;
+    var esc = false;
+    var end = -1;
+    for (var i = start; i < text.length; i++) {
+      var c = text[i];
+      if (esc) { esc = false; continue; }
+      if (c === '\\' && inStr) { esc = true; continue; }
+      if (c === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if (c === '{') depth++;
+      else if (c === '}') { depth--; if (depth === 0) { end = i + 1; break; } }
+    }
+    if (end === -1) return;
+    try {
+      var jsonStr = text.substring(start, end);
+      // Replace \u002F with / for proper parsing
+      var cleanJson = jsonStr.replace(/\\u002F/g, '/');
+      var data = JSON.parse(cleanJson);
+      var modified = rewriteGameUrls(data);
+      if (!modified) return;
+      var newJson = JSON.stringify(data).replace(/\//g, '\\u002F');
+      var newText = text.substring(0, start) + newJson + text.substring(end);
+      $(this).html(newText);
+    } catch (e) {
+      // Silent fail - don't break page rendering
+    }
+  });
+}
+
+function rewriteGameUrls(obj, visited) {
+  if (!obj || typeof obj !== 'object') return false;
+  if (!visited) visited = new WeakSet();
+  if (visited.has(obj)) return false;
+  visited.add(obj);
+  var changed = false;
+  for (var k in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, k)) {
+      var v = obj[k];
+      if (typeof v === 'string' && v.indexOf('games.poki.com') !== -1) {
+        obj[k] = v.replace(/https?:\/\/games\.poki\.com/g, '/game-proxy');
+        changed = true;
+      } else if (typeof v === 'object' && v !== null) {
+        if (rewriteGameUrls(v, visited)) changed = true;
+      }
+    }
+  }
+  return changed;
 }
 
 function injectNavigationOverlay($, targetDomain) {

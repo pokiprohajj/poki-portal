@@ -1,6 +1,5 @@
 const config = require('./config');
 const proxyRouter = require('./core/proxy/router');
-const homepage = require('./frontend/homepage');
 const express = require('express');
 const compression = require('compression');
 const helmet = require('helmet');
@@ -76,14 +75,6 @@ app.get('/sitemap.xml', async (req, res) => {
   ).join('\n');
 
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n</urlset>`);
-});
-
-app.get('/', (req, res, next) => {
-  // Serve custom homepage for root, proxy everything else
-  if (req.path === '/') {
-    return homepage.render(req, res);
-  }
-  next();
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
