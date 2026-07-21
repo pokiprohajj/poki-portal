@@ -9,7 +9,7 @@ const GAME_ORIGIN = 'https://games.poki.com';
 
 // Proxy all gdn.poki.com / poki-gdn.com requests with correct referrer
 router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
-  const fullPath = req.params.subdomain;
+  const fullPath = req.params.subdomain + (req._parsedUrl.search || '');
   const cacheKey = `gdn:${fullPath}`;
 
   const cached = cache.getAsset(cacheKey);
@@ -123,8 +123,17 @@ router.get('*', async (req, res) => {
       'return origXhr.apply(this,arguments);' +
       '};' +
       // MutationObserver to catch dynamically added elements with gdn URLs
+      // Intercept existing gameframe iframe's src setter (this is the main entry point)
+      'var gf=document.getElementById("gameframe");' +
+      'if(gf){var _src=gf.getAttribute("src");' +
+      'Object.defineProperty(gf,"src",{get:function(){return _src},set:function(v){_src=rewriteUrl(v)||v}});}' +
+      // MutationObserver to catch dynamically added elements
       'var mo=new MutationObserver(function(muts){' +
       'for(var i=0;i<muts.length;i++){var m=muts[i];' +
+      'if(m.type==="attributes"&&m.attributeName==="src"){' +
+      'var rw=rewriteUrl(m.target.getAttribute("src"));' +
+      'if(rw)m.target.setAttribute("src",rw);' +
+      '}' +
       'for(var j=0;j<m.addedNodes.length;j++){var n=m.addedNodes[j];' +
       'if(n.nodeType===1){' +
       '["src","href"].forEach(function(a){' +
@@ -142,7 +151,7 @@ router.get('*', async (req, res) => {
       '}' +
       '}' +
       '});' +
-      'mo.observe(document.documentElement,{childList:true,subtree:true});' +
+      'mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:["src","href"]});' +
       '})();' +
       '</script>';
       // Inject gdn interceptor before </head> along with referrer override
