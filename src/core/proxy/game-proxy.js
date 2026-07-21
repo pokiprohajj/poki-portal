@@ -11,6 +11,7 @@ const GAME_ORIGIN = 'https://games.poki.com';
 var GAME_INTERCEPTOR = `<script>(function(){
 var h=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";
 function rw(u){if(!u||typeof u!=="string")return u;
+if(u.indexOf("/game-proxy/")===0)return u;
 for(var i=0;i<h.length;i++){if(u.indexOf(h[i])!==-1)
 return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}return u}
 var of=window.fetch;window.fetch=function(u,o){
