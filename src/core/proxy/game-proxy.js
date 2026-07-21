@@ -44,6 +44,24 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
       'X-Cache': 'MISS',
     });
 
+    // For game HTML from gdn, inject referrer override + parent isolation
+    if (contentType.includes('text/html')) {
+      var html = body.toString('utf-8');
+      html = html.replace('</head>',
+        '<script>' +
+        'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
+        'try{Object.defineProperty(document,"domain",{get:function(){return "poki.com"}})}catch(e){}' +
+        // Also intercept fetch/XHR/MO for assets within the game HTML
+        'var gdnHosts=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";' +
+        'function rw(u){if(!u)return u;for(var i=0;i<gdnHosts.length;i++){if(u.indexOf(gdnHosts[i])!==-1)return pp+u.replace(/https?:\\\/\\\//,"").replace(/^\\\/\\\//,"")}return u}' +
+        'var of=window.fetch;window.fetch=function(u,o){return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};' +
+        'var ox=window.XMLHttpRequest.prototype.open;window.XMLHttpRequest.prototype.open=function(m,u,a){arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
+        'var mo=new MutationObserver(function(m){for(var i=0;i<m.length;i++){for(var j=0;j<m[i].addedNodes.length;j++){var n=m[i].addedNodes[j];if(n.nodeType===1){["src","href"].forEach(function(a){var v=n.getAttribute(a);if(v){var rw2=rw(v);if(rw2!==v)n.setAttribute(a,rw2)}});var q=n.querySelectorAll("[src],[href]");for(var l=0;l<q.length;l++){["src","href"].forEach(function(a){var v=q[l].getAttribute(a);if(v){var rw2=rw(v);if(rw2!==v)q[l].setAttribute(a,rw2)}})}}}}});mo.observe(document.documentElement,{childList:true,subtree:true});' +
+        '</script></head>');
+      cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
+      return res.send(html);
+    }
+
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
     res.send(body);
   } catch (err) {
@@ -92,7 +110,7 @@ router.get('*', async (req, res) => {
       'Content-Type': contentType,
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': 'true',
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'public, max-age=600',
       'X-Cache': 'MISS',
     });
 
@@ -159,7 +177,6 @@ router.get('*', async (req, res) => {
         '<script>' +
         'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
         'try{Object.defineProperty(document,"domain",{get:function(){return "poki.com"}})}catch(e){}' +
-        'try{window.top=window;window.parent=window}catch(e){}' +
         '</script>' + interceptor + '</head>');
       cache.setHtml(cacheKey, html);
       return res.send(html);

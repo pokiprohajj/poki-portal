@@ -74,7 +74,7 @@ assert('Google iframe removed', !r.includes('googleadservices'));
 // Navigation
 assert('Normal link preserved', r.includes('href="/en/two-player"'));
 assert('Full poki.com link rewritten', r.includes('href="/en/action"'));
-assert('Navigation overlay injected', r.includes('portal-nav-overlay'));
+assert('No navigation overlay', !r.includes('portal-nav-overlay'));
 
 // Ad injection
 const withAds = injectAds(r);

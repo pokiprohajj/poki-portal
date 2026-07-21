@@ -112,7 +112,7 @@ async function handlePageRequest(req, res) {
     res.set({
       'Content-Type': 'text/html; charset=utf-8',
       'X-Cache': 'HIT',
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'public, max-age=600',
     });
     return res.send(cached);
   }
@@ -131,7 +131,7 @@ async function handlePageRequest(req, res) {
     res.set({
       'Content-Type': 'text/html; charset=utf-8',
       'X-Cache': 'MISS',
-      'Cache-Control': 'public, max-age=300',
+      'Cache-Control': 'public, max-age=600',
       'X-Robots-Tag': 'index, follow',
     });
     res.send(html);

@@ -155,9 +155,6 @@ function rewriteHtml(html, sourcePath) {
   // Pass 9c: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
   rewriteGameInitState($);
 
-  // Pass 10: Inject navigation overlay for SPA-style link interception
-  injectNavigationOverlay($, targetDomain);
-
   return $.html();
 }
 
@@ -407,38 +404,6 @@ function rewriteGameUrls(obj, visited) {
     }
   }
   return changed;
-}
-
-function injectNavigationOverlay($, targetDomain) {
-  // SPA-safe: only intercept clicks/touches on external links to poki domains
-  // Uses both click and touchstart events for mobile compatibility
-  const script = `
-    <script id="portal-nav-overlay">
-      (function() {
-        function interceptLink(e) {
-          if (e.defaultPrevented) return;
-          if (e.type === 'click' && e.button !== 0) return;
-          var link = e.target.closest('a');
-          if (!link) return;
-          var href = link.getAttribute('href');
-          if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:')) return;
-          if (href.startsWith('http') && (href.includes('poki.com') || href.includes('poki.io'))) {
-            if (link.hasAttribute('data-spa') || link.closest('[data-spa]')) return;
-            e.preventDefault();
-            try {
-              var path = new URL(href).pathname + (new URL(href).search || '');
-              window.location.href = path;
-            } catch(err) {}
-          }
-        }
-        document.addEventListener('click', interceptLink);
-        document.addEventListener('touchstart', interceptLink, {passive:false});
-      })();
-    </script>
-  `;
-  if ($('body').length) {
-    $('body').append(script);
-  }
 }
 
 module.exports = { rewriteHtml };

@@ -18,7 +18,7 @@ const config = {
   },
 
   cache: {
-    ttl: parseInt(process.env.CACHE_TTL, 10) || 300,
+    ttl: parseInt(process.env.CACHE_TTL, 10) || 600,
     checkPeriod: parseInt(process.env.CACHE_CHECK_PERIOD, 10) || 60,
     maxCacheSizeMb: parseInt(process.env.MAX_CACHE_SIZE_MB, 10) || 200,
   },
