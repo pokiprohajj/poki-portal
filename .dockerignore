@@ -9,3 +9,6 @@ npm-debug.log
 test-*
 .DS_Store
 Thumbs.db
+nginx
+docker-compose.yml
+Dockerfile

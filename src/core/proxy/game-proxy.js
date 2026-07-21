@@ -61,7 +61,7 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
       },
       redirect: 'follow',
       timeout: 30000,
-      compress: true,
+      compress: false,
     });
 
     const contentType = response.headers.get('content-type') || 'application/octet-stream';

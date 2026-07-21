@@ -37,7 +37,13 @@ router.get('/', async (req, res) => {
     decodedUrl = `https:${decodedUrl}`;
   }
 
-  const host = new URL(decodedUrl).hostname;
+  let host;
+  try {
+    host = new URL(decodedUrl).hostname;
+  } catch {
+    return res.status(400).json({ error: 'Malformed URL' });
+  }
+
   const blockedHosts = [
     'pagead2.googlesyndication.com',
     'www.googleadservices.com',
@@ -73,7 +79,7 @@ router.get('/', async (req, res) => {
       },
       redirect: 'follow',
       timeout: 10000,
-      compress: true,
+      compress: false,
     });
 
     if (!response.ok) {

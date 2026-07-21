@@ -1,3 +1,10 @@
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught exception:', err.message);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled rejection:', reason && reason.message ? reason.message : reason);
+});
+
 const config = require('./config');
 const proxyRouter = require('./core/proxy/router');
 const express = require('express');
@@ -46,6 +53,10 @@ app.use('/static', express.static(path.join(__dirname, 'frontend/public'), {
   lastModified: true,
 }));
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.get('/ads.txt', (req, res) => {
   res.type('text/plain');
   res.send(`google.com, pub-7128312414229788, DIRECT, f08c47fec0942fa0\n`);
@@ -56,7 +67,7 @@ app.get('/robots.txt', (req, res) => {
   res.send(`User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: https://${config.domain}/sitemap.xml\n`);
 });
 
-app.get('/sitemap.xml', async (req, res) => {
+app.get('/sitemap.xml', (req, res) => {
   const cacheHeaders = { 'Cache-Control': 'public, max-age=86400' };
   res.set(cacheHeaders);
   res.type('application/xml');
@@ -89,11 +100,16 @@ app.use((err, req, res, _next) => {
   }
 });
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`[Poki Portal] Running on port ${config.port}`);
   console.log(`[Poki Portal] Domain: ${config.domain}`);
   console.log(`[Poki Portal] Source: ${config.sourceDomain}`);
   console.log(`[Poki Portal] Env: ${config.nodeEnv}`);
+});
+
+server.on('error', (err) => {
+  console.error(`[FATAL] Server listen error: ${err.message}`);
+  process.exit(1);
 });
 
 module.exports = app;
