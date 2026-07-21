@@ -157,12 +157,18 @@ function rewriteHtml(html, sourcePath) {
   if (isGamePage && $('head').length) {
     $('head').append('<script id="portal-iframe-rw">' +
       '(function(){' +
+      'var gp="games.poki.com";var pp="/game-proxy";' +
+      'function rw(v){if(typeof v!=="string")return v;' +
+      'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
+      'if(v.indexOf("poki.com")!==-1){return v.replace(/https?:\\/\\/(www\\.)?poki\\.com/,window.location.origin)}' +
+      'return v}' +
       'var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,"src");' +
       'if(d&&d.set){Object.defineProperty(HTMLIFrameElement.prototype,"src",{' +
-      'get:d.get,set:function(v){' +
-      'if(typeof v==="string"&&v.indexOf("games.poki.com")!==-1){' +
-      'v="/game-proxy"+v.replace(/https?:\\/\\/games\\.poki\\.com/,"");' +
-      '}return d.set.call(this,v)},configurable:true});}' +
+      'get:d.get,set:function(v){return d.set.call(this,rw(v))},configurable:true})}' +
+      'var osa=Element.prototype.setAttribute;' +
+      'Element.prototype.setAttribute=function(n,v){' +
+      'if(n==="src"&&this.tagName==="IFRAME"){v=rw(v)}' +
+      'return osa.call(this,n,v)};' +
       '})();</script>');
   }
 
