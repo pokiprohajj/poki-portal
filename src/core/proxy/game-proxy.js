@@ -25,7 +25,12 @@ return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}
 if(u.indexOf(gp)!==-1)return u.replace(/https?:\\/\\/games\\.poki\\.com/,"/game-proxy");
 return u}
 var of=window.fetch;window.fetch=function(u,o){
-return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};
+var url=typeof u==="string"?u:u&&u.url;
+if(url&&url.indexOf("devs-api.poki.com/gameinfo/@sdk")!==-1)
+return Promise.resolve(new Response(
+'{"gameID":"1","cachedContentGameID":"1"}',
+{status:200,headers:{"Content-Type":"application/json"}}));
+return of(rw(url)||u,o)};
 var ox=XMLHttpRequest.prototype.open;
 XMLHttpRequest.prototype.open=function(m,u,a){
 arguments[1]=rw(u)||u;return ox.apply(this,arguments)};
