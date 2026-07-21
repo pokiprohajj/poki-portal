@@ -195,28 +195,32 @@ function rewriteHtml(html, sourcePath) {
       'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
       'var clientId=' + JSON.stringify(config.ads.adsenseClientId || '') + ';' +
       'var slots={"728x90":' + JSON.stringify(config.ads.slotLeaderboard || '') + ',"300x250":' + JSON.stringify(config.ads.slotRectangle || '') + ',"160x600":' + JSON.stringify(config.ads.slotSkyscraper || '') + '};' +
-      'function replacePokiAd(el){' +
-      'if(!clientId||!el)return;' +
-      'if(el.querySelector&&el.querySelector("ins.adsbygoogle"))return;' +
-      'var size=el.getAttribute("data-poki-ad-size")||"";' +
-      'var slot=slots[size];if(!slot)return;' +
+      'function nukeAndReplace(){' +
+      'if(!clientId)return;' +
+      'var targets=document.querySelectorAll(".poki-ad-slot,[data-poki-ad-size]");' +
+      'for(var i=0;i<targets.length;i++){var t=targets[i];' +
+      'if(t.querySelector&&t.querySelector("ins.adsbygoogle"))continue;' +
+      'var sizeAttr=t.getAttribute("data-poki-ad-size")||"";' +
+      'var slot=slots[sizeAttr];if(!slot)continue;' +
+      'var w=sizeAttr.split("x")[0]||"300";var h=sizeAttr.split("x")[1]||"250";' +
+      'var c=document.createElement("div");' +
+      'c.style.cssText="width:"+w+"px;height:"+h+"px;overflow:hidden;";' +
       'var ins=document.createElement("ins");ins.className="adsbygoogle";' +
-      'ins.style.display="inline-block";ins.style.width=el.style.width||"300px";ins.style.height=el.style.height||"250px";' +
+      'ins.style.display="inline-block";ins.style.width=w+"px";ins.style.height=h+"px";' +
       'ins.setAttribute("data-ad-client",clientId);ins.setAttribute("data-ad-slot",slot);' +
-      'el.innerHTML="";el.appendChild(ins);' +
-      'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}' +
+      'c.appendChild(ins);' +
+      't.parentNode.replaceChild(c,t);' +
+      'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}' +
+      'nukeAndReplace();' +
       'var adObs=new MutationObserver(function(muts){' +
       'for(var i=0;i<muts.length;i++){var added=muts[i].addedNodes;' +
       'for(var j=0;j<added.length;j++){var n=added[j];' +
       'if(n.nodeType!==1)continue;' +
-      'if(n.classList&&n.classList.contains("poki-ad-slot")){replacePokiAd(n);continue}' +
-      'var els=n.querySelectorAll&&n.querySelectorAll(".poki-ad-slot");' +
-      'if(els){for(var k=0;k<els.length;k++)replacePokiAd(els[k])}}}});' +
+      'if((n.classList&&(n.classList.contains("poki-ad-slot")||(n.hasAttribute&&n.hasAttribute("data-poki-ad-size"))))||' +
+      '(n.querySelectorAll&&(n.querySelectorAll(".poki-ad-slot,[data-poki-ad-size]").length>0))){' +
+      'nukeAndReplace();break}}}});' +
       'adObs.observe(document.documentElement||document.body,{childList:true,subtree:true});' +
-      'var existing=document.querySelectorAll(".poki-ad-slot");' +
-      'for(var i=0;i<existing.length;i++)replacePokiAd(existing[i]);' +
-      'setInterval(function(){var ex=document.querySelectorAll(".poki-ad-slot");' +
-      'for(var i=0;i<ex.length;i++)replacePokiAd(ex[i])},3000);' +
+      'setInterval(nukeAndReplace,1000);' +
       '})();</script>');
   }
 
@@ -302,6 +306,10 @@ function replaceGamePageAds($, sourcePath) {
     // Step 2b: Keep gp_* containers empty for React hydration, then inject our ads after React mounts
     'var c=["gp_728x90","gp_300x250","gp_160x600"];' +
     'var cc=["okjidGhocmXN7zKxDo6s"];' +
+    'function nukePokiAds(){' +
+    'var pa=document.querySelectorAll(".poki-ad-slot,[data-poki-ad-size]");' +
+    'for(var i=0;i<pa.length;i++){var el=pa[i];if(el.parentNode)el.parentNode.removeChild(el)}' +
+    '}' +
     'function emptyContainers(){' +
     'for(var i=0;i<c.length;i++){var el=document.getElementById(c[i]);if(el&&el.children.length>0&&!el.querySelector("ins.adsbygoogle")){el.innerHTML=""}}' +
     'for(var i=0;i<cc.length;i++){var els=document.querySelectorAll("."+cc[i]);for(var j=0;j<els.length;j++){if(els[j].children.length>0&&!els[j].querySelector("ins.adsbygoogle")){els[j].innerHTML=""}}}' +
@@ -310,7 +318,7 @@ function replaceGamePageAds($, sourcePath) {
     'var clientId=' + JSON.stringify(clientId) + ';' +
     'var slots={"728x90":' + JSON.stringify(config.ads.slotLeaderboard) + ',"300x250":' + JSON.stringify(config.ads.slotRectangle) + ',"160x600":' + JSON.stringify(config.ads.slotSkyscraper) + '};' +
     'function injectOurAds(){' +
-    'emptyContainers();' +
+    'nukePokiAds();emptyContainers();' +
     'for(var i=0;i<c.length;i++){var el=document.getElementById(c[i]);if(el&&el.children.length===0){' +
     'var w=el.style&&el.style.width?parseInt(el.style.width):0;' +
     'var h=el.style&&el.style.height?parseInt(el.style.height):0;' +
@@ -368,9 +376,11 @@ function replaceGamePageAds($, sourcePath) {
     '}' +
     '});' +
     'var t=document.documentElement;if(t){o.observe(t,{childList:true,subtree:true})}' +
-    // Run after React has a chance to hydrate
-    'setTimeout(injectOurAds,500);' +
-    'setTimeout(injectOurAds,2000);' +
+    // Run after React has a chance to hydrate, then periodically
+    'setTimeout(function(){nukePokiAds();injectOurAds()},300);' +
+    'setTimeout(function(){nukePokiAds();injectOurAds()},1000);' +
+    'setTimeout(function(){nukePokiAds();injectOurAds()},3000);' +
+    'setInterval(function(){nukePokiAds();injectOurAds()},2000);' +
     '})();' +
     '</script>');
 }

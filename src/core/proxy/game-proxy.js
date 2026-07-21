@@ -12,32 +12,42 @@ try{var dr=Object.getOwnPropertyDescriptor(Document.prototype,'referrer');
 if(dr&&dr.configurable){Object.defineProperty(Document.prototype,'referrer',
 {get:function(){return'https://poki.com/'}})}
 var st=document.createElement('style');
-st.textContent='.poki-ad-slot{display:none!important}';
+st.textContent='.poki-ad-slot,.poki-ad-slot *,[data-poki-ad-size]{display:none!important;visibility:hidden!important;height:0!important;width:0!important;overflow:hidden!important;position:absolute!important;top:-9999px!important;left:-9999px!important}';
 document.head.appendChild(st);
-var adSizes=[{slot:'3616266206',w:728,h:90},{slot:'7744193417',w:300,h:250},{slot:'3025953274',w:160,h:600}];
+var clientId='ca-pub-7128312414229788';
+var adSizes=[{slot:'3616266206',w:728,h:90,match:'728x90'},{slot:'7744193417',w:300,h:250,match:'300x250'},{slot:'3025953274',w:160,h:600,match:'160x600'}];
 function loadAds(){
 if(window._adsLoaded)return;window._adsLoaded=true;
 var s=document.createElement('script');
-s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7128312414229788';
+s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+clientId;
 s.crossOrigin='anonymous';s.async=true;document.head.appendChild(s)}
-function placeAd(el){
-loadAds();var size=adSizes.find(function(s){return s.w+'x'+s.h===el.getAttribute('data-poki-ad-size')});
-if(!size)size=el.getAttribute('data-poki-ad-size')==='300x250'?adSizes[1]:el.getAttribute('data-poki-ad-size')==='160x600'?adSizes[2]:adSizes[0];
+function nukeAndReplace(){
+loadAds();
+var targets=document.querySelectorAll('.poki-ad-slot,[data-poki-ad-size]');
+for(var i=0;i<targets.length;i++){
+var t=targets[i];
+if(t.querySelector&&t.querySelector('ins.adsbygoogle'))continue;
+var sizeAttr=t.getAttribute('data-poki-ad-size')||'';
+var size=adSizes.find(function(s){return s.match===sizeAttr});
+if(!size)continue;
+var container=document.createElement('div');
+container.style.cssText='width:'+size.w+'px;height:'+size.h+'px;overflow:hidden;';
 var ins=document.createElement('ins');ins.className='adsbygoogle';
 ins.style.display='inline-block';ins.style.width=size.w+'px';ins.style.height=size.h+'px';
-ins.setAttribute('data-ad-client','ca-pub-7128312414229788');ins.setAttribute('data-ad-slot',size.slot);
-el.innerHTML='';el.appendChild(ins);
-try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}
+ins.setAttribute('data-ad-client',clientId);ins.setAttribute('data-ad-slot',size.slot);
+container.appendChild(ins);
+t.parentNode.replaceChild(container,t);
+try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}
+nukeAndReplace();
 var mo=new MutationObserver(function(ms){
 for(var i=0;i<ms.length;i++){var added=ms[i].addedNodes;
 for(var j=0;j<added.length;j++){var n=added[j];
 if(n.nodeType!==1)continue;
-if(n.classList&&n.classList.contains('poki-ad-slot')){placeAd(n);continue}
-var els=n.querySelectorAll&&n.querySelectorAll('.poki-ad-slot');
-if(els){for(var k=0;k<els.length;k++)placeAd(els[k])}}}});
+if((n.classList&&(n.classList.contains('poki-ad-slot')||n.hasAttribute&&n.hasAttribute('data-poki-ad-size')))||
+(n.querySelectorAll&&(n.querySelectorAll('.poki-ad-slot,[data-poki-ad-size]').length>0))){
+nukeAndReplace();break}}}});
 mo.observe(document.documentElement||document.body,{childList:true,subtree:true});
-var existing=document.querySelectorAll('.poki-ad-slot');
-for(var i=0;i<existing.length;i++)placeAd(existing[i])}
+setInterval(nukeAndReplace,1000)}
 catch(e){}
 var gp="games.poki.com";
 var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com","user-vault.poki.com"];
@@ -238,6 +248,7 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
         html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
       }
       cache.setAsset(cacheKey, { body: Buffer.from(html).toString('base64'), contentType }, 86400);
+      res.set({ 'Content-Security-Policy': "navigate-to 'self'; form-action 'self'" });
       return res.send(html);
     }
 
@@ -373,6 +384,7 @@ router.all('*', async (req, res) => {
       }
 
       cache.setHtml(cacheKey, html);
+      res.set({ 'Content-Security-Policy': "navigate-to 'self'; form-action 'self'" });
       return res.send(html);
     }
 
