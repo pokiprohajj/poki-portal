@@ -55,7 +55,7 @@ var of=window.fetch;window.fetch=function(u,o){
 var url=typeof u==="string"?u:u&&u.url;
 if(url&&url.indexOf("devs-api.poki.com/gameinfo/@sdk")!==-1)
 return Promise.resolve(new Response(
-'{"gameID":"1","cachedContentGameID":"1"}',
+'{"game_id":"temple-run-2","game_name":"Temple Run 2","cached_content_game_id":"temple-run-2","playtest_record":0,"playtest_version":0,"playtest_device_category":"","playtest_new_user":false,"playtest_request_id":"","ad_settings":{"preroll":0,"time_per_try":30,"time_between_ads":60,"start_ads_after":30,"special_conditions":{}}}',
 {status:200,headers:{"Content-Type":"application/json"}}));
 if(url&&url.indexOf("user-vault.poki.com")!==-1)
 return Promise.resolve(new Response(
