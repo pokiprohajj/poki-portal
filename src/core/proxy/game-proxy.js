@@ -7,7 +7,7 @@ const router = express.Router();
 
 const GAME_ORIGIN = 'https://games.poki.com';
 
-// Lightweight interceptor: only rewrites gdn.poki.com URLs via fetch/XHR/MO
+// Lightweight interceptor: rewrites gdn.poki.com URLs via fetch/XHR + element src/href setters
 var GAME_INTERCEPTOR = '<script>(function(){' +
   'var h=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";' +
   'function rw(u){if(!u||typeof u!=="string")return u;' +
@@ -18,6 +18,14 @@ var GAME_INTERCEPTOR = '<script>(function(){' +
   'var ox=XMLHttpRequest.prototype.open;' +
   'XMLHttpRequest.prototype.open=function(m,u,a){' +
   'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
+  'function op(p,pr){var d=Object.getOwnPropertyDescriptor(p,pr);' +
+  'if(d&&d.set){Object.defineProperty(p,pr,{get:d.get,' +
+  'set:function(v){return d.set.call(this,rw(v)||v)},configurable:true})}}' +
+  'op(HTMLScriptElement.prototype,"src");' +
+  'op(HTMLIFrameElement.prototype,"src");' +
+  'op(HTMLImageElement.prototype,"src");' +
+  'op(HTMLSourceElement.prototype,"src");' +
+  'op(HTMLLinkElement.prototype,"href");' +
   '})();</script>';
 
 // Proxy gdn.poki.com / poki-gdn.com assets with correct referrer
