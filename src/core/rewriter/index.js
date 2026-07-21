@@ -152,9 +152,8 @@ function rewriteHtml(html, sourcePath) {
   // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
   rewriteGameInitState($);
 
-  // Pass 9c: On game pages, inject iframe src interceptor to catch API-fetched URLs
-  var isGamePage = sourcePath && (sourcePath.match(/\/[a-z]{2}\/g\//i) || sourcePath.match(/\/g\//));
-  if (isGamePage && $('head').length) {
+  // Pass 9c: On ALL pages, inject iframe src interceptor (persists across SPA navigations)
+  if ($('head').length) {
     $('head').append('<script id="portal-iframe-rw">' +
       '(function(){' +
       'var gp="games.poki.com";var pp="/game-proxy";' +
