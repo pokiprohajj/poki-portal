@@ -44,13 +44,14 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
       'X-Cache': 'MISS',
     });
 
-    // For game HTML from gdn, inject referrer override + parent isolation
+      // For game HTML from gdn, inject referrer override + parent isolation
     if (contentType.includes('text/html')) {
       var html = body.toString('utf-8');
       html = html.replace('</head>',
         '<script>' +
         'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
         'try{Object.defineProperty(document,"domain",{get:function(){return "poki.com"}})}catch(e){}' +
+        'try{document.cookie="poki=1; path=/; domain="+location.hostname}catch(e){}' +
         // Also intercept fetch/XHR/MO for assets within the game HTML
         'var gdnHosts=["gdn.poki.com","poki-gdn.com"];var pp="/game-proxy/gdn-proxy/";' +
         'function rw(u){if(!u)return u;for(var i=0;i<gdnHosts.length;i++){if(u.indexOf(gdnHosts[i])!==-1)return pp+u.replace(/https?:\\\/\\\//,"").replace(/^\\\/\\\//,"")}return u}' +
@@ -145,12 +146,19 @@ router.get('*', async (req, res) => {
       'var gf=document.getElementById("gameframe");' +
       'if(gf){var _src=gf.getAttribute("src");' +
       'Object.defineProperty(gf,"src",{get:function(){return _src},set:function(v){_src=rewriteUrl(v)||v}});}' +
+      // Also override HTMLIFrameElement.prototype.src to catch ALL iframes
+      'try{var _origSrc=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,"src");' +
+      'if(_origSrc&&_origSrc.set){var _origSet=_origSrc.set;' +
+      'Object.defineProperty(HTMLIFrameElement.prototype,"src",{configurable:true,' +
+      'get:_origSrc.get,' +
+      'set:function(v){return _origSet.call(this,rewriteUrl(v)||v)}});}}catch(e){}' +
       // MutationObserver to catch dynamically added elements
       'var mo=new MutationObserver(function(muts){' +
       'for(var i=0;i<muts.length;i++){var m=muts[i];' +
       'if(m.type==="attributes"&&m.attributeName==="src"){' +
-      'var rw=rewriteUrl(m.target.getAttribute("src"));' +
-      'if(rw)m.target.setAttribute("src",rw);' +
+      'var v=m.target.getAttribute("src");' +
+      'var rw=rewriteUrl(v);' +
+      'if(rw&&rw!==v)m.target.setAttribute("src",rw);' +
       '}' +
       'for(var j=0;j<m.addedNodes.length;j++){var n=m.addedNodes[j];' +
       'if(n.nodeType===1){' +
@@ -177,6 +185,8 @@ router.get('*', async (req, res) => {
         '<script>' +
         'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
         'try{Object.defineProperty(document,"domain",{get:function(){return "poki.com"}})}catch(e){}' +
+        // Set poki=1 cookie so embed page passes the cookie check
+        'try{document.cookie="poki=1; path=/; domain="+location.hostname}catch(e){}' +
         '</script>' + interceptor + '</head>');
       cache.setHtml(cacheKey, html);
       return res.send(html);

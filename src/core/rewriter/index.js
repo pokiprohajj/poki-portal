@@ -303,10 +303,9 @@ function replaceGamePageAds($, sourcePath) {
     '}' +
     '});' +
     'var t=document.documentElement;if(t){o.observe(t,{childList:true,subtree:true})}' +
-    // Run after React has a chance to hydrate (timeout to let React settle)
+    // Run after React has a chance to hydrate
     'setTimeout(injectOurAds,500);' +
     'setTimeout(injectOurAds,2000);' +
-    'setInterval(injectOurAds,5000);' +
     '})();' +
     '</script>');
 }
