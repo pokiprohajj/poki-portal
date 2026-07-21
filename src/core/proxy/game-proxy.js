@@ -13,10 +13,13 @@ const GAME_ORIGIN = 'https://games.poki.com';
 var GAME_INTERCEPTOR = `<script>(function(){
 try{var dr=Object.getOwnPropertyDescriptor(Document.prototype,'referrer');
 if(dr&&dr.configurable){Object.defineProperty(Document.prototype,'referrer',
-{get:function(){return'https://poki.com/'}})}}
+{get:function(){return'https://poki.com/'}})};
+var st=document.createElement('style');
+st.textContent='#adInfo,#adProgress,#bottom-ad,#top-ad,.ad-container{display:none!important}';
+document.head.appendChild(st)}
 catch(e){}
 var gp="games.poki.com";
-var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com"];
+var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-api.poki.com","a.poki.com","ay.delivery","poki-auth.poki.com","user-vault.poki.com"];
 var pp="/game-proxy/gdn-proxy/";
 function rw(u){if(!u||typeof u!=="string")return u;
 if(u.indexOf("/game-proxy/")===0)return u;
@@ -132,6 +135,14 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
         return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
       });
 
+      // Also rewrite user-vault.poki.com URLs
+      html = html.replace(/https?:\/\/[^"'\s<>]*user-vault\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
+      });
+      html = html.replace(/\/\/[^"'\s<>]*user-vault\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
+      });
+
       html = html.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
         return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
       });
@@ -239,6 +250,13 @@ router.all('*', async (req, res) => {
         return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
       });
       html = html.replace(/\/\/[^"'\s<>]*poki-gdn\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
+      });
+      // Also rewrite user-vault.poki.com (user profile API)
+      html = html.replace(/https?:\/\/[^"'\s<>]*user-vault\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
+      });
+      html = html.replace(/\/\/[^"'\s<>]*user-vault\.poki\.com[^"'\s<>]*/g, function(match) {
         return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
       });
 
