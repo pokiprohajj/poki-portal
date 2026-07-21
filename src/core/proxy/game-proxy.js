@@ -42,16 +42,16 @@ mo.observe(document.documentElement||document.body,{childList:true,subtree:true}
 
 // Proxy gdn.poki.com / poki-gdn.com assets with correct referrer
 router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
-  const fullPath = req.params.subdomain + (req._parsedUrl.search || '');
-  const cacheKey = `gdn:${fullPath}`;
-
-  const cached = cache.getAsset(cacheKey);
-  if (cached) {
-    res.set({ 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': '*', 'Content-Type': cached.contentType });
-    return res.send(Buffer.from(cached.body, 'base64'));
-  }
-
   try {
+    const fullPath = req.params.subdomain + (req._parsedUrl ? (req._parsedUrl.search || '') : '');
+    const cacheKey = `gdn:${fullPath}`;
+
+    const cached = cache.getAsset(cacheKey);
+    if (cached) {
+      res.set({ 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': '*', 'Content-Type': cached.contentType });
+      return res.send(Buffer.from(cached.body, 'base64'));
+    }
+
     const url = `https://${fullPath}`;
     const response = await fetch(url, {
       headers: {
@@ -77,7 +77,7 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
     res.send(body);
   } catch (err) {
-    console.error(`[GDN PROXY ERROR] ${fullPath}: ${err.message}`);
+    console.error(`[GDN PROXY ERROR] ${req.path}: ${err.message}`);
     res.status(502).send('Asset temporarily unavailable.');
   }
 });
