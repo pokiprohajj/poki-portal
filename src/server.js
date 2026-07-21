@@ -16,6 +16,8 @@ const path = require('path');
 
 const app = express();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 app.use(morgan(config.nodeEnv === 'production' ? 'combined' : 'dev'));
 
