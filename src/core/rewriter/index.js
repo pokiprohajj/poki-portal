@@ -177,6 +177,28 @@ function rewriteHtml(html, sourcePath) {
       'var ox=XMLHttpRequest.prototype.open;' +
       'XMLHttpRequest.prototype.open=function(m,u,a){' +
       'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
+      // Hide Poki house ad slots and replace with Adsense
+      'var clientId=' + JSON.stringify(config.ads.adsenseClientId || '') + ';' +
+      'var slots={"728x90":' + JSON.stringify(config.ads.slotLeaderboard || '') + ',"300x250":' + JSON.stringify(config.ads.slotRectangle || '') + ',"160x600":' + JSON.stringify(config.ads.slotSkyscraper || '') + '};' +
+      'function replacePokiAd(el){' +
+      'if(!clientId)return;' +
+      'var size=el.getAttribute("data-poki-ad-size")||"";' +
+      'var slot=slots[size];if(!slot)return;' +
+      'var ins=document.createElement("ins");ins.className="adsbygoogle";' +
+      'ins.style.display="inline-block";ins.style.width=el.style.width||"300px";ins.style.height=el.style.height||"250px";' +
+      'ins.setAttribute("data-ad-client",clientId);ins.setAttribute("data-ad-slot",slot);' +
+      'el.innerHTML="";el.appendChild(ins);' +
+      'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}' +
+      'var adObs=new MutationObserver(function(muts){' +
+      'for(var i=0;i<muts.length;i++){var added=muts[i].addedNodes;' +
+      'for(var j=0;j<added.length;j++){var n=added[j];' +
+      'if(n.nodeType!==1)continue;' +
+      'if(n.classList&&n.classList.contains("poki-ad-slot")){replacePokiAd(n);continue}' +
+      'var els=n.querySelectorAll&&n.querySelectorAll(".poki-ad-slot");' +
+      'if(els){for(var k=0;k<els.length;k++)replacePokiAd(els[k])}}}});' +
+      'adObs.observe(document.documentElement||document.body,{childList:true,subtree:true});' +
+      'var existing=document.querySelectorAll(".poki-ad-slot");' +
+      'for(var i=0;i<existing.length;i++)replacePokiAd(existing[i]);' +
       '})();</script>');
   }
 

@@ -44,9 +44,11 @@ var gdp=["gdn.poki.com","poki-gdn.com","game-cdn.poki.com","api.poki.com","devs-
 var pp="/game-proxy/gdn-proxy/";
 function rw(u){if(!u||typeof u!=="string")return u;
 if(u.indexOf("/game-proxy/")===0)return u;
+if(u.indexOf("browsergameshq.com")!==-1)return u;
 for(var i=0;i<gdp.length;i++){if(u.indexOf(gdp[i])!==-1)
 return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}
 if(u.indexOf(gp)!==-1)return u.replace(/https?:\\/\\/games\\.poki\\.com/,"/game-proxy");
+if(u.indexOf("poki.com")!==-1)return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"");
 return u}
 var of=window.fetch;window.fetch=function(u,o){
 var url=typeof u==="string"?u:u&&u.url;
