@@ -157,7 +157,7 @@ function rewriteHtml(html, sourcePath) {
     $('head').append('<script id="portal-iframe-rw">' +
       '(function(){' +
       'var gp="games.poki.com";var pp="/game-proxy";' +
-      'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery","user-vault.poki.com"];' +
+      'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery","user-vault.poki.com","ads.poki.com"];' +
       'var ssp="/game-proxy/gdn-proxy/";' +
       'function rw(v){if(typeof v!=="string")return v;' +
       'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
@@ -167,21 +167,37 @@ function rewriteHtml(html, sourcePath) {
       'var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,"src");' +
       'if(d&&d.set){Object.defineProperty(HTMLIFrameElement.prototype,"src",{' +
       'get:d.get,set:function(v){return d.set.call(this,rw(v))},configurable:true})}' +
+      'var ad=Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype,"href");' +
+      'if(ad&&ad.set){Object.defineProperty(HTMLAnchorElement.prototype,"href",{' +
+      'get:ad.get,set:function(v){return ad.set.call(this,rw(v))},configurable:true})}' +
       'var osa=Element.prototype.setAttribute;' +
       'Element.prototype.setAttribute=function(n,v){' +
       'if(n==="src"&&this.tagName==="IFRAME"){v=rw(v)}' +
+      'if(n==="href"&&this.tagName==="A"){v=rw(v)}' +
       'return osa.call(this,n,v)};' +
-      // Also override fetch/XHR on main page to rewrite SDK domain calls
+      'var _og=window.open;window.open=function(u){' +
+      'if(u&&typeof u==="string"){var r=rw(u);if(r!==u)return _og.call(window,r)}' +
+      'return _og.apply(window,arguments)};' +
+      'var _la=Object.getOwnPropertyDescriptor(Location.prototype,"href");' +
+      'if(_la&&_la.set){Object.defineProperty(Location.prototype,"href",{' +
+      'get:_la.get,set:function(v){if(typeof v==="string"){var r=rw(v);if(r!==v)return _la.set.call(this,r)}' +
+      'return _la.set.call(this,v)},configurable:true})}' +
+      'var _lA=Location.prototype.assign;' +
+      'Location.prototype.assign=function(u){if(typeof u==="string"){var r=rw(u);if(r!==u)return _lA.call(this,r)}return _lA.apply(this,arguments)};' +
+      'var _lR=Location.prototype.replace;' +
+      'Location.prototype.replace=function(u){if(typeof u==="string"){var r=rw(u);if(r!==u)return _lR.call(this,r)}return _lR.apply(this,arguments)};' +
       'var of=window.fetch;window.fetch=function(u,o){' +
-      'return of(rw(typeof u==="string"?u:u&&u.url)||u,o)};' +
+      'var _u=typeof u==="string"?u:(u&&u.url);' +
+      'if(_u&&_u.indexOf("ads.poki-cdn.com")!==-1)return Promise.resolve(new Response("",{status:200}));' +
+      'return of(rw(_u)||u,o)};' +
       'var ox=XMLHttpRequest.prototype.open;' +
       'XMLHttpRequest.prototype.open=function(m,u,a){' +
       'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
-      // Hide Poki house ad slots and replace with Adsense
       'var clientId=' + JSON.stringify(config.ads.adsenseClientId || '') + ';' +
       'var slots={"728x90":' + JSON.stringify(config.ads.slotLeaderboard || '') + ',"300x250":' + JSON.stringify(config.ads.slotRectangle || '') + ',"160x600":' + JSON.stringify(config.ads.slotSkyscraper || '') + '};' +
       'function replacePokiAd(el){' +
-      'if(!clientId)return;' +
+      'if(!clientId||!el)return;' +
+      'if(el.querySelector&&el.querySelector("ins.adsbygoogle"))return;' +
       'var size=el.getAttribute("data-poki-ad-size")||"";' +
       'var slot=slots[size];if(!slot)return;' +
       'var ins=document.createElement("ins");ins.className="adsbygoogle";' +
@@ -199,6 +215,8 @@ function rewriteHtml(html, sourcePath) {
       'adObs.observe(document.documentElement||document.body,{childList:true,subtree:true});' +
       'var existing=document.querySelectorAll(".poki-ad-slot");' +
       'for(var i=0;i<existing.length;i++)replacePokiAd(existing[i]);' +
+      'setInterval(function(){var ex=document.querySelectorAll(".poki-ad-slot");' +
+      'for(var i=0;i<ex.length;i++)replacePokiAd(ex[i])},3000);' +
       '})();</script>');
   }
 
@@ -327,7 +345,7 @@ function replaceGamePageAds($, sourcePath) {
     'el.appendChild(ins);' +
     'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}}}}' +
     // Block Poki-specific ad networks
-    'var p=["ads.poki.com","taboola","outbrain","criteo","moatads","adnxs","adsrvr","prebid","amazon-adsystem"];' +
+    'var p=["ads.poki.com","ads.poki-cdn.com","taboola","outbrain","criteo","moatads","adnxs","adsrvr","prebid","amazon-adsystem"];' +
     // Rewrite games.poki.com iframes to go through our proxy (prevents embed fallback)
     'function rewriteGameIframe(el){' +
     'if(el.tagName==="IFRAME"&&el.src&&el.src.indexOf(gp)!==-1){' +

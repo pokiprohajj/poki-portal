@@ -48,8 +48,33 @@ if(u.indexOf("browsergameshq.com")!==-1)return u;
 for(var i=0;i<gdp.length;i++){if(u.indexOf(gdp[i])!==-1)
 return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}
 if(u.indexOf(gp)!==-1)return u.replace(/https?:\\/\\/games\\.poki\\.com/,"/game-proxy");
-if(u.indexOf("poki.com")!==-1)return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"");
+if(u.indexOf("poki.com")!==-1){
+if(u.match(/https?:\\/\\/(?:www\\.)?poki\\.com(?!\\/)/)){
+return u.replace(/https?:\\/\\/(?:www\\.)?poki\\.com/,window.location.origin)}
+return pp+u.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}
 return u}
+window._pokiDomains={};
+for(var i=0;i<gdp.length;i++){window._pokiDomains[gdp[i]]=true}
+window._pokiDomains["poki.com"]=true;window._pokiDomains["www.poki.com"]=true;
+var _og=window.open;window.open=function(u){
+if(u&&typeof u==="string"&&rw(u)!==u)return _og.call(window,rw(u));
+return _og.apply(window,arguments)};
+if(Location.prototype){
+var _la=Object.getOwnPropertyDescriptor(Location.prototype,"href");
+if(_la&&_la.set){Object.defineProperty(Location.prototype,"href",{get:_la.get,
+set:function(v){if(typeof v==="string"){var r=rw(v);if(r!==v){return _la.set.call(this,r)}}return _la.set.call(this,v)},
+configurable:true})}
+if(Location.prototype&&Location.prototype.assign){
+var _lAssign=Location.prototype.assign;
+Location.prototype.assign=function(u){if(typeof u==="string"){var r=rw(u);if(r!==u)return _lAssign.call(this,r)}return _lAssign.apply(this,arguments)}}
+if(Location.prototype&&Location.prototype.replace){
+var _lReplace=Location.prototype.replace;
+Location.prototype.replace=function(u){if(typeof u==="string"){var r=rw(u);if(r!==u)return _lReplace.call(this,r)}return _lReplace.apply(this,arguments)}}
+if(typeof History.prototype!=="undefined"){
+var _ps=History.prototype.pushState;
+if(_ps){History.prototype.pushState=function(s,t,u){if(typeof u==="string"){var r=rw(u);if(r!==u)u=r}return _ps.apply(this,arguments)}}
+var _rs=History.prototype.replaceState;
+if(_rs){History.prototype.replaceState=function(s,t,u){if(typeof u==="string"){var r=rw(u);if(r!==u)u=r}return _rs.apply(this,arguments)}}}
 var of=window.fetch;window.fetch=function(u,o){
 var url=typeof u==="string"?u:u&&u.url;
 if(url&&url.indexOf("devs-api.poki.com/gameinfo/@sdk")!==-1)
@@ -60,6 +85,8 @@ if(url&&url.indexOf("user-vault.poki.com")!==-1)
 return Promise.resolve(new Response(
 '{"id":"","name":""}',
 {status:200,headers:{"Content-Type":"application/json"}}));
+if(url&&url.indexOf("ads.poki-cdn.com")!==-1)
+return Promise.resolve(new Response('',{status:200,headers:{"Content-Type":"text/plain"}}));
 if(url){var rw2=rw(url);if(rw2&&rw2!==url)return of(rw2,o)}
 return of(u,o)};
 var ox=XMLHttpRequest.prototype.open;
@@ -73,9 +100,22 @@ op(HTMLIFrameElement.prototype,"src");
 op(HTMLImageElement.prototype,"src");
 op(HTMLSourceElement.prototype,"src");
 op(HTMLLinkElement.prototype,"href");
+op(HTMLAnchorElement.prototype,"href");
+var _dc=document.createElement;
+document.createElement=function(t){
+var el=_dc.apply(this,arguments);
+if(el&&(t==="IFRAME"||t==="SCRIPT"||t==="IMG"||t==="A")){
+var pd=Object.getOwnPropertyDescriptor(t==="A"?HTMLAnchorElement.prototype:
+t==="SCRIPT"?HTMLScriptElement.prototype:
+t==="IFRAME"?HTMLIFrameElement.prototype:HTMLImageElement.prototype,"src");
+if(pd&&pd.set){Object.defineProperty(el,"src",{get:pd.get,set:function(v){return pd.set.call(this,rw(v))},configurable:true})}
+if(t==="A"){var hpd=Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype,"href");
+if(hpd&&hpd.set){Object.defineProperty(el,"href",{get:hpd.get,set:function(v){return hpd.set.call(this,rw(v))},configurable:true})}}}
+return el};
 var osa=Element.prototype.setAttribute;
 Element.prototype.setAttribute=function(n,v){
 if(n==="src"&&(this.tagName==="IFRAME"||this.tagName==="SCRIPT")){v=rw(v)}
+if(n==="href"&&this.tagName==="A"){v=rw(v)}
 return osa.call(this,n,v)};
 function fixEl(n){if(n.nodeType!==1)return;
 if(n.src){var s=rw(n.src);if(s!==n.src)n.src=s}
@@ -89,6 +129,9 @@ for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;
 for(var j=0;j<ns.length;j++)fixEl(ns[j])}
 });
 mo2.observe(document.documentElement||document.body,{childList:true,subtree:true});
+setInterval(function(){
+var ex=document.querySelectorAll(".poki-ad-slot");
+for(var i=0;i<ex.length;i++)placeAd(ex[i])},3000);
 })();</script>`;
 
 // Proxy gdn.poki.com / poki-gdn.com assets + API calls (including POST/PUT)
@@ -174,6 +217,12 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       html = html.replace(/\/\/[^"'\s<>]*user-vault\.poki\.com[^"'\s<>]*/g, function(match) {
         return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
       });
+      // Rewrite api.poki.com and devs-api.poki.com URLs
+      html = html.replace(/https?:\/\/[^"'\s<>]*api\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
+      });
+      // Rewrite bare www.poki.com and poki.com navigation URLs
+      html = html.replace(/https?:\/\/(?:www\.)?poki\.com/g, 'https://' + (req.get('host') || 'browsergameshq.com'));
 
       html = html.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
         return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
@@ -297,6 +346,15 @@ router.all('*', async (req, res) => {
       html = html.replace(/\/\/[^"'\s<>]*user-vault\.poki\.com[^"'\s<>]*/g, function(match) {
         return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
       });
+      // Rewrite api.poki.com and devs-api.poki.com URLs
+      html = html.replace(/https?:\/\/[^"'\s<>]*api\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/https?:\/\//, '');
+      });
+      html = html.replace(/\/\/[^"'\s<>]*api\.poki\.com[^"'\s<>]*/g, function(match) {
+        return '/game-proxy/gdn-proxy/' + match.replace(/^\/\//, '');
+      });
+      // Rewrite bare www.poki.com and poki.com navigation URLs
+      html = html.replace(/https?:\/\/(?:www\.)?poki\.com/g, 'https://' + (req.get('host') || 'browsergameshq.com'));
 
       // Bypass anti-embedding check: catch all top/self comparisons
       html = html.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
