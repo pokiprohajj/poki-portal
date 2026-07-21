@@ -227,7 +227,14 @@ function replaceGamePageAds($, sourcePath) {
     '}}' +
     '}' +
     'if(s&&s.ads){s.ads.takeover=null}' +
-    // Step 2: Keep gp_* containers empty for React hydration, then inject our ads after React mounts
+    // Step 2a: Rewrite games.poki.com URLs in INITIAL_STATE before React reads them
+    'var gp="games.poki.com";var pp="/game-proxy";' +
+    'function rewriteGameUrls(o){' +
+    'if(typeof o==="string"&&o.indexOf(gp)!==-1){return o.replace("https://"+gp,pp).replace("http://"+gp,pp)}' +
+    'if(o&&typeof o==="object"){for(var k in o){if(o.hasOwnProperty(k)){var v=rewriteGameUrls(o[k]);if(v!==o[k]){o[k]=v}}}' +
+    '}return o}' +
+    'rewriteGameUrls(window.INITIAL_STATE);' +
+    // Step 2b: Keep gp_* containers empty for React hydration, then inject our ads after React mounts
     'var c=["gp_728x90","gp_300x250","gp_160x600"];' +
     'var cc=["okjidGhocmXN7zKxDo6s"];' +
     'function emptyContainers(){' +
@@ -275,13 +282,11 @@ function replaceGamePageAds($, sourcePath) {
     // Block Poki-specific ad networks
     'var p=["ads.poki.com","taboola","outbrain","criteo","moatads","adnxs","adsrvr","prebid","amazon-adsystem"];' +
     // Rewrite games.poki.com iframes to go through our proxy (prevents embed fallback)
-    'var gp="games.poki.com";' +
-    'var proxyPrefix="/game-proxy";' +
     'function rewriteGameIframe(el){' +
     'if(el.tagName==="IFRAME"&&el.src&&el.src.indexOf(gp)!==-1){' +
     'var newSrc=el.src.replace("https://"+gp,"").replace("http://"+gp,"");' +
     'if(newSrc.indexOf("/")!==0)newSrc="/"+newSrc;' +
-    'el.src=proxyPrefix+newSrc;return true}return false}' +
+    'el.src=pp+newSrc;return true}return false}' +
     'function matchUrl(u){if(!u)return false;for(var i=0;i<p.length;i++){if(u.indexOf(p[i])!==-1)return true}return false}' +
     'var o=new MutationObserver(function(m){' +
     'for(var i=0;i<m.length;i++){var mut=m[i];' +
