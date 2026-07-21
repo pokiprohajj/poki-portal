@@ -100,6 +100,9 @@ router.get('*', async (req, res) => {
     if (contentType.includes('text/html')) {
       let html = body.toString('utf-8');
 
+      // Bypass anti-embedding check: if(top===self||...) → if(true||...)
+      html = html.replace(/if\s*\(\s*top\s*===\s*self/g, 'if(true');
+
       var headMatch = html.match(/<head[^>]*>/i);
       if (headMatch) {
         html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
