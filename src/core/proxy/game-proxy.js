@@ -262,7 +262,7 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       if (headMatch) {
         html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
       }
-      cache.setAsset(cacheKey, { body: Buffer.from(html).toString('base64'), contentType }, 86400);
+      try { cache.setAsset(cacheKey, { body: Buffer.from(html).toString('base64'), contentType }, 86400); } catch(e) {}
       res.set({ 'Content-Security-Policy': "navigate-to 'self'; form-action 'self'" });
       return res.send(html);
     }
@@ -279,12 +279,12 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       // Server-side: disable the "Unauthorized Game Hosting" alert in SDK core
       js = js.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\?\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       js = js.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
-      cache.setAsset(cacheKey, { body: Buffer.from(js).toString('base64'), contentType }, 86400);
+      try { cache.setAsset(cacheKey, { body: Buffer.from(js).toString('base64'), contentType }, 86400); } catch(e) {}
       return res.send(js);
     }
 
     if (isGet) {
-      cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
+      try { cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400); } catch(e) {}
     }
     res.send(body);
   } catch (err) {
@@ -398,13 +398,13 @@ router.all('*', async (req, res) => {
         html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
       }
 
-      cache.setHtml(cacheKey, html);
+      try { cache.setHtml(cacheKey, html); } catch(e) {}
       res.set({ 'Content-Security-Policy': "navigate-to 'self'; form-action 'self'" });
       return res.send(html);
     }
 
     if (isGet) {
-      cache.setAsset(cacheKey, { body: body.toString('base64'), contentType: upstreamContentType }, 86400);
+      try { cache.setAsset(cacheKey, { body: body.toString('base64'), contentType: upstreamContentType }, 86400); } catch(e) {}
     }
     res.send(body);
   } catch (err) {

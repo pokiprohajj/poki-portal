@@ -5,14 +5,14 @@ const htmlCache = new NodeCache({
   stdTTL: config.cache.ttl,
   checkperiod: config.cache.checkPeriod,
   useClones: false,
-  maxKeys: 500,
+  maxKeys: 5000,
 });
 
 const assetCache = new NodeCache({
   stdTTL: 86400,
   checkperiod: 3600,
   useClones: false,
-  maxKeys: 2000,
+  maxKeys: 50000,
 });
 
 let currentSizeBytes = 0;
