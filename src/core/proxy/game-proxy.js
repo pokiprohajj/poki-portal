@@ -54,17 +54,6 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
       'X-Cache': 'MISS',
     });
 
-    // For game HTML, inject lightweight asset rewriter only
-    if (contentType.includes('text/html')) {
-      var html = body.toString('utf-8');
-      var headMatch = html.match(/<head[^>]*>/i);
-      if (headMatch) {
-        html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
-      }
-      cache.setAsset(cacheKey, { body: Buffer.from(html), contentType }, 86400);
-      return res.send(html);
-    }
-
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
     res.send(body);
   } catch (err) {
@@ -111,24 +100,9 @@ router.get('*', async (req, res) => {
     if (contentType.includes('text/html')) {
       let html = body.toString('utf-8');
 
-      // Inject at <head> BEFORE any embed page scripts:
-      // 1. Override top === self check (anti-embedding bypass)
-      // 2. Set poki=1 cookie (backup check)
-      // 3. Override document.referrer (backup check)
-      // 4. Lightweight fetch/XHR interceptor for gdn.poki.com asset proxying
       var headMatch = html.match(/<head[^>]*>/i);
       if (headMatch) {
-        html = html.replace(headMatch[0],
-          headMatch[0] +
-          '<script>' +
-          // Make top === self pass so the embed page thinks it's not in an iframe
-          'try{Object.defineProperty(window,"top",{get:function(){return window},configurable:true})}catch(e){}' +
-          'try{window.top=window}catch(e){}' +
-          // Cookie check backup
-          'try{document.cookie="poki=1; path=/"}catch(e){}' +
-          // Referrer check backup
-          'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
-          '</script>' + GAME_INTERCEPTOR);
+        html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
       }
 
       cache.setHtml(cacheKey, html);

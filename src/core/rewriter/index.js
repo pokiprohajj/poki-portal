@@ -146,13 +146,10 @@ function rewriteHtml(html, sourcePath) {
   rewriteMetaTags($, sourceDomain, targetDomain);
   rewriteOpenGraph($, sourceDomain, targetDomain);
 
-  // Pass 9: Replace Poki ad containers with size-labeled placeholders
-  replaceGamePageAds($, sourcePath);
-
-  // Pass 9b: Replace Poki logo with custom logo (responsive for all devices)
+  // Pass 9: Replace Poki logo with custom logo (responsive for all devices)
   replacePokiLogo($);
 
-  // Pass 9c: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
+  // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
   rewriteGameInitState($);
 
   return $.html();
