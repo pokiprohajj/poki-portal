@@ -6,12 +6,11 @@ const cache = require('../cache');
 const router = express.Router();
 
 const GAME_ORIGIN = 'https://games.poki.com';
-const GDN_ORIGIN = 'https://gdn.poki.com';
 
-// Proxy gdn.poki.com subdomain assets
+// Proxy all gdn.poki.com / poki-gdn.com requests with correct referrer
 router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
-  const subdomainPath = req.params.subdomain;
-  const cacheKey = `gdn:${subdomainPath}`;
+  const fullPath = req.params.subdomain;
+  const cacheKey = `gdn:${fullPath}`;
 
   const cached = cache.getAsset(cacheKey);
   if (cached) {
@@ -22,7 +21,7 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
   }
 
   try {
-    const url = `https://${subdomainPath}`;
+    const url = `https://${fullPath}`;
     const response = await fetch(url, {
       headers: {
         'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -48,7 +47,7 @@ router.get('/gdn-proxy/:subdomain(*)', async (req, res) => {
     cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400);
     res.send(body);
   } catch (err) {
-    console.error(`[GDN PROXY ERROR] ${subdomainPath}: ${err.message}`);
+    console.error(`[GDN PROXY ERROR] ${fullPath}: ${err.message}`);
     res.status(502).send('Asset temporarily unavailable.');
   }
 });
@@ -99,17 +98,60 @@ router.get('*', async (req, res) => {
 
     if (contentType.includes('text/html')) {
       let html = body.toString('utf-8');
-      // Rewrite gdn.poki.com and poki-gdn.com URLs to go through our proxy
-      html = html.replace(/https?:\/\/([a-zA-Z0-9.-]+\.(?:gdn\.poki\.com|poki-gdn\.com)(\/[^\s"'<>&]*)?)/g,
-        '/game-proxy/gdn-proxy/$1');
-      html = html.replace(/\/\/([a-zA-Z0-9.-]+\.(?:gdn\.poki\.com|poki-gdn\.com)(\/[^\s"'<>&]*)?)/g,
-        '/game-proxy/gdn-proxy/$1');
-      // Inject referrer override
+      // Inject comprehensive API interceptor that rewrites ALL gdn.poki.com URLs
+      var interceptor = '<script>' +
+      '(function(){' +
+      'var gdnHosts=["gdn.poki.com","poki-gdn.com"];' +
+      'var proxyPrefix="/game-proxy/gdn-proxy/";' +
+      'function rewriteUrl(u){' +
+      'if(!u)return u;' +
+      'for(var i=0;i<gdnHosts.length;i++){' +
+      'if(u.indexOf(gdnHosts[i])!==-1){' +
+      'return proxyPrefix+u.replace(/https?:\\\/\\\//,"").replace(/^\\\/\\\//,"");' +
+      '}' +
+      '}' +
+      'return u;' +
+      '}' +
+      'var origFetch=window.fetch;' +
+      'window.fetch=function(u,o){' +
+      'var rw=rewriteUrl(typeof u==="string"?u:u&&u.url);' +
+      'return origFetch(rw||u,o);' +
+      '};' +
+      'var origXhr=window.XMLHttpRequest.prototype.open;' +
+      'window.XMLHttpRequest.prototype.open=function(m,u,a){' +
+      'arguments[1]=rewriteUrl(u)||u;' +
+      'return origXhr.apply(this,arguments);' +
+      '};' +
+      // MutationObserver to catch dynamically added elements with gdn URLs
+      'var mo=new MutationObserver(function(muts){' +
+      'for(var i=0;i<muts.length;i++){var m=muts[i];' +
+      'for(var j=0;j<m.addedNodes.length;j++){var n=m.addedNodes[j];' +
+      'if(n.nodeType===1){' +
+      '["src","href"].forEach(function(a){' +
+      'var v=n.getAttribute(a);' +
+      'if(v){var rw=rewriteUrl(v);if(rw!==v)n.setAttribute(a,rw);}' +
+      '});' +
+      'var q=n.querySelectorAll("[src],[href]");' +
+      'for(var l=0;l<q.length;l++){var el=q[l];' +
+      '["src","href"].forEach(function(a){' +
+      'var v=el.getAttribute(a);' +
+      'if(v){var rw=rewriteUrl(v);if(rw!==v)el.setAttribute(a,rw);}' +
+      '});' +
+      '}' +
+      '}' +
+      '}' +
+      '}' +
+      '});' +
+      'mo.observe(document.documentElement,{childList:true,subtree:true});' +
+      '})();' +
+      '</script>';
+      // Inject gdn interceptor before </head> along with referrer override
       html = html.replace('</head>',
         '<script>' +
         'try{Object.defineProperty(document,"referrer",{get:function(){return "https://poki.com/"}})}catch(e){}' +
         'try{Object.defineProperty(document,"domain",{get:function(){return "poki.com"}})}catch(e){}' +
-        '</script></head>');
+        'try{window.top=window;window.parent=window}catch(e){}' +
+        '</script>' + interceptor + '</head>');
       cache.setHtml(cacheKey, html);
       return res.send(html);
     }
