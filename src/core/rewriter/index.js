@@ -1,17 +1,5 @@
 const config = require('../../config');
-const { shouldRemoveElement } = require('../ads/filter');
 const cheerio = require('cheerio');
-
-const POKI_HOSTS = [
-  'poki.com', 'poki.io', 'poki-cdn.com',
-  'img.poki.com', 'a.poki-cdn.com', 't.poki.io',
-  'v.poki-cdn.com',
-];
-
-function isPokiUrl(url) {
-  if (!url) return false;
-  return POKI_HOSTS.some(host => url.includes(host));
-}
 
 function rewriteHtml(html, sourcePath, gameMirrors) {
   gameMirrors = gameMirrors || {};
@@ -26,39 +14,11 @@ function rewriteHtml(html, sourcePath, gameMirrors) {
   const targetDomain = config.domain;
   const sourceOrigin = config.sourceOrigin;
 
-  // Pass 1: Strip ad content but KEEP element structure for React hydration
-  $('div, section, aside, span').each(function () {
-    const el = $(this)[0];
-    if (shouldRemoveElement(el)) {
-      $(this).empty().removeAttr('class').removeAttr('style').removeAttr('id');
-    }
-  });
+  // Pass 1: Remove only ad-related scripts by src URL pattern (scripts aren't tracked by React hydration)
+  // NOTE: Skip DOM element stripping — Poki's React SPA requires the full server HTML for hydration.
+  // Client-side portal-ad-blocker script handles ad element removal + Adsense injection after mount.
 
-  // Remove ad scripts entirely (React doesn't track script elements in hydration)
-  $('script').each(function () {
-    const el = $(this)[0];
-    if (shouldRemoveElement(el)) {
-      $(this).remove();
-    }
-  });
-
-  // Remove ad iframes entirely (React tracks these but iframes are external)
-  $('iframe').each(function () {
-    const el = $(this)[0];
-    if (shouldRemoveElement(el)) {
-      $(this).remove();
-    }
-  });
-
-  // Remove ad links entirely (React tracks these but ad links are separate)
-  $('a').each(function () {
-    const el = $(this)[0];
-    if (shouldRemoveElement(el)) {
-      $(this).remove();
-    }
-  });
-
-  // Pass 1b: Remove additional ad scripts by URL pattern
+  // Remove ad scripts by URL pattern
   $('script').each(function () {
     const src = $(this).attr('src') || '';
     if (src.includes('pagead') || src.includes('adsbygoogle') || src.includes('googletag') ||
