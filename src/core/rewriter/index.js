@@ -1,6 +1,7 @@
 const config = require('../../config');
 const cheerio = require('cheerio');
 
+// Map of game slugs to their mirror replacement URLs
 const MIRRORS = {
   'subway-surfers': 'https://g.igroutka.ru/games/164/OUNWHVSFldaeghn4/1/subway_surfers_hong_kong/?mp_assets=https%3A%2F%2Fs2.minijuegosgratis.com%2F&mp_embed=0&mp_game_id=223783&mp_game_uid=subway-surfers&mp_game_url=https%3A%2F%2Fwww.miniplay.com%2Fgame%2Fsubway-surfers&mp_int=1&mp_locale=en_US&mp_player_type=IFRAME&mp_site_https_url=https%3A%2F%2Fwww.miniplay.com%2F&mp_site_name=miniplay.com&mp_site_url=https%3A%2F%2Fwww.miniplay.com%2F&mp_timezone=Africa%2FCasablanca&mp_view_type=',
   'temple-run-2': 'https://gogamego.io/wp-content/uploads/games/html5/T/temple%20run%202/index.html',
