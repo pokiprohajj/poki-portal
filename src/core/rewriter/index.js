@@ -11,6 +11,7 @@ const MIRRORS = {
   'temple-run-2-spooky-summit': 'https://f.igry.pro/games/164/VJYtd6ApThscCS5u/2/temple_run_2_spooky_summit/',
   'murder': 'https://html5.gamedistribution.com/rvvASMiM/5e7acf55e50b4723afef834449b82bce/index.html',
   'apple-worm': 'https://apple-worm.com/appleworm/index.html',
+  'drive-mad': 'https://play.fancade.com/5F084A0BCE06B710?max_w=999999&max_h=9999999&istart=1',
 };
 
 function rewriteHtml(html, sourcePath) {
