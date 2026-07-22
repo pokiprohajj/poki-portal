@@ -213,6 +213,13 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       return res.send(JSON.stringify({ id: 'mock-user-id', name: 'Player', is_new: true, version: 1, ttl: 15552000 }));
     }
 
+    // Block iframe attempts to load poki.com bare domain — return empty safe page
+    if (url.hostname === 'poki.com' || url.hostname === 'www.poki.com') {
+      res.removeHeader('Content-Security-Policy');
+      res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
+      return res.send('<!DOCTYPE html><html><head></head><body></body></html>');
+    }
+
     // Spoof domain in href/url_referrer params for devs-api.poki.com and api.poki.com calls
     // This prevents the SDK from detecting unauthorized hosting via query params
     if (url.hostname.includes('poki.com') || url.hostname.includes('ay.delivery')) {
