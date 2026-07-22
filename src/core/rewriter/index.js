@@ -13,7 +13,8 @@ function isPokiUrl(url) {
   return POKI_HOSTS.some(host => url.includes(host));
 }
 
-function rewriteHtml(html, sourcePath) {
+function rewriteHtml(html, sourcePath, gameMirrors) {
+  gameMirrors = gameMirrors || {};
   const $ = cheerio.load(html, {
     decodeEntities: false,
     xmlMode: false,
@@ -159,7 +160,12 @@ function rewriteHtml(html, sourcePath) {
       'var gp="games.poki.com";var pp="/game-proxy";' +
       'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery","user-vault.poki.com","ads.poki.com","gdn.poki.com","poki-gdn.com","game-cdn.poki.com","ads.poki-cdn.com"];' +
       'var ssp="/game-proxy/gdn-proxy/";' +
+      'var gm=' + JSON.stringify(gameMirrors) + ';' +
+      'function mirrorUrl(v){' +
+      'var m=window.location.pathname.match(/\\/([a-z]{2}\\/g\\/)?([^/]+?)(?:\\/\\d+)?$/);' +
+      'if(m&&gm[m[2]]){return gm[m[2]]}return null}' +
       'function rw(v){if(typeof v!=="string")return v;' +
+      'var mr=mirrorUrl(v);if(mr)return mr;' +
       'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
       'for(var i=0;i<sdp.length;i++){if(v.indexOf(sdp[i])!==-1){return ssp+v.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}}' +
       'if(v.indexOf("poki.com")!==-1||v.indexOf("poki.io")!==-1||v.indexOf("poki-cdn.com")!==-1){return v.replace(/https?:\\/\\/(?:[^\\/]+\\.)*poki\\.(com|io|cdn\\.com)/,window.location.origin)}' +

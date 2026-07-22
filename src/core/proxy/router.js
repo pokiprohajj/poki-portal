@@ -117,16 +117,6 @@ function detectDevice(ua) {
 
 async function handlePageRequest(req, res) {
   const sourcePath = req.path;
-
-  // Game mirrors: serve custom embed page for mapped games
-  var slugMatch = sourcePath.match(/\/([^/]+?)(?:\/\d+)?$/);
-  var slug = slugMatch ? slugMatch[1] : null;
-  if (slug && GAME_MIRRORS[slug]) {
-    var mirrorPage = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Loading...</title><style>body{margin:0;padding:0;overflow:hidden;background:#0f0f23}iframe{width:100vw;height:100vh;border:none;display:block}</style></head><body><iframe src="' + GAME_MIRRORS[slug] + '" allowfullscreen allow="autoplay;fullscreen;gamepad"></iframe></body></html>';
-    res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300' });
-    return res.send(mirrorPage);
-  }
-
   const deviceType = detectDevice(req.headers['user-agent']);
 
   const cacheKey = `html:${deviceType}:${sourcePath}`;
@@ -149,7 +139,7 @@ async function handlePageRequest(req, res) {
 
     html = cleanPokiBranding(html);
 
-    html = rewriteHtml(html, sourcePath);
+    html = rewriteHtml(html, sourcePath, GAME_MIRRORS);
 
     html = injectAds(html);
 

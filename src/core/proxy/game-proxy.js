@@ -7,12 +7,6 @@ const router = express.Router();
 
 const GAME_ORIGIN = 'https://games.poki.com';
 
-// Game URL mapping: replace broken Poki embeds with working mirrors
-// Key is the game slug (matched from URL path), value is the mirror URL
-const GAME_MIRRORS = {
-  'subway-surfers': 'https://web.archive.org/web/20260410095301if_/https://ubg77.github.io/updatefaqs/subway-surfers-winter-holiday/',
-};
-
 var GAME_INTERCEPTOR = `<script>(function(){
 try{var dr=Object.getOwnPropertyDescriptor(Document.prototype,'referrer');
 if(dr&&dr.configurable){Object.defineProperty(Document.prototype,'referrer',
@@ -376,15 +370,6 @@ router.all('*', async (req, res) => {
       res.set({ 'Content-Type': 'text/html; charset=utf-8', 'X-Cache': 'HIT', 'Cache-Control': 'public, max-age=600' });
       return res.send(cachedHtml);
     }
-  }
-
-  // Game mirrors: if this game has a working mirror URL, serve it directly
-  var slugMatch = gamePath.match(/\/([^/]+?)(?:\/\d+)?$/);
-  var slug = slugMatch ? slugMatch[1] : null;
-  if (slug && GAME_MIRRORS[slug]) {
-    var mirrorPage = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{margin:0;padding:0;overflow:hidden;background:#000}iframe{width:100vw;height:100vh;border:none;display:block}</style></head><body><iframe src="' + GAME_MIRRORS[slug] + '" allowfullscreen allow="autoplay;fullscreen;gamepad"></iframe></body></html>';
-    res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300' });
-    return res.send(mirrorPage);
   }
 
   try {
