@@ -1,8 +1,9 @@
 const config = require('../../config');
 const cheerio = require('cheerio');
 
-function rewriteHtml(html, sourcePath, gameMirrors) {
-  gameMirrors = gameMirrors || {};
+const SUBWAY_MIRROR = 'https://web.archive.org/web/20260410095301if_/https://ubg77.github.io/updatefaqs/subway-surfers-winter-holiday/';
+
+function rewriteHtml(html, sourcePath) {
   const $ = cheerio.load(html, {
     decodeEntities: false,
     xmlMode: false,
@@ -111,7 +112,7 @@ function rewriteHtml(html, sourcePath, gameMirrors) {
   replacePokiLogo($);
 
   // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
-  rewriteGameInitState($, sourcePath, gameMirrors);
+  rewriteGameInitState($, sourcePath);
 
   // Pass 9c: On ALL pages, inject iframe src interceptor (persists across SPA navigations)
   if ($('head').length) {
@@ -120,12 +121,12 @@ function rewriteHtml(html, sourcePath, gameMirrors) {
       'var gp="games.poki.com";var pp="/game-proxy";' +
       'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery","user-vault.poki.com","ads.poki.com","gdn.poki.com","poki-gdn.com","game-cdn.poki.com","ads.poki-cdn.com"];' +
       'var ssp="/game-proxy/gdn-proxy/";' +
-      'var gm=' + JSON.stringify(gameMirrors) + ';' +
+      'var sm="' + SUBWAY_MIRROR + '";' +
       'function mirrorUrl(v){' +
       'if(typeof v!=="string")return null;' +
       'var m=window.location.pathname.match(/\\/([a-z]{2}\\/g\\/)?([^/]+?)(?:\\/\\d+)?$/);' +
-      'if(!m||!gm[m[2]])return null;' +
-      'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1){return gm[m[2]]}' +
+      'if(!m||m[2]!=="subway-surfers")return null;' +
+      'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1){return sm}' +
       'return null}' +
       // Rewrite existing iframes on the page (server-rendered ones before React takes over)
       'try{var ifs=document.querySelectorAll("iframe");' +
@@ -403,8 +404,7 @@ function replacePokiLogo($) {
   }
 }
 
-function rewriteGameInitState($, sourcePath, gameMirrors) {
-  gameMirrors = gameMirrors || {};
+function rewriteGameInitState($, sourcePath) {
   var slug = null;
   var slugMatch = sourcePath ? sourcePath.match(/\/([^/]+?)(?:\/\d+)?$/) : null;
   if (slugMatch) slug = slugMatch[1];
@@ -434,11 +434,11 @@ function rewriteGameInitState($, sourcePath, gameMirrors) {
       var jsonStr = text.substring(start, end);
       // Replace \u002F with / for proper parsing
       var cleanJson = jsonStr.replace(/\\u002F/g, '/');
-      // Replace gdn embed URLs with mirror URLs for mapped games (server-side)
-      if (slug && gameMirrors[slug]) {
-        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, gameMirrors[slug]);
-        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*poki-gdn\.com[^"'\s]*/g, gameMirrors[slug]);
-        cleanJson = cleanJson.replace(/\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, gameMirrors[slug]);
+      // Replace gdn embed URLs with mirror URL for subway-surfers (server-side)
+      if (slug === 'subway-surfers') {
+        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, SUBWAY_MIRROR);
+        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*poki-gdn\.com[^"'\s]*/g, SUBWAY_MIRROR);
+        cleanJson = cleanJson.replace(/\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, SUBWAY_MIRROR);
       }
       var data = JSON.parse(cleanJson);
       var modified = rewriteGameUrls(data);

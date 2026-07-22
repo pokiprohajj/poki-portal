@@ -7,11 +7,6 @@ const { injectAds } = require('../ads/injector');
 
 const router = express.Router();
 
-// Game URL mapping: replace broken Poki game embeds with working mirrors
-const GAME_MIRRORS = {
-  'subway-surfers': 'https://web.archive.org/web/20260410095301if_/https://ubg77.github.io/updatefaqs/subway-surfers-winter-holiday/',
-};
-
 function getRandomUA() {
   return config.userAgents[Math.floor(Math.random() * config.userAgents.length)];
 }
@@ -139,7 +134,7 @@ async function handlePageRequest(req, res) {
 
     html = cleanPokiBranding(html);
 
-    html = rewriteHtml(html, sourcePath, GAME_MIRRORS);
+    html = rewriteHtml(html, sourcePath);
 
     html = injectAds(html);
 
