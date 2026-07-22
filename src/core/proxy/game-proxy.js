@@ -156,18 +156,32 @@ for(var j=0;j<ns.length;j++)fixEl(ns[j])}
 mo2.observe(document.documentElement||document.body,{childList:true,subtree:true});
 // Override document.write/writeln to rewrite poki URLs inline
 var _dw=document.write;document.write=function(){
-for(var i=0;i<arguments.length;i++){if(typeof arguments[i]==="string"&&arguments[i].indexOf("poki.")!==-1){arguments[i]=arguments[i].replace(_pokiUrlRe,function(m){return pp+m.replace(/https?:\\/\\//,"")})}}
+for(var i=0;i<arguments.length;i++){if(typeof arguments[i]==="string"&&arguments[i].indexOf("poki.")!==-1){arguments[i]=arguments[i].replace(_pokiUrlRe,function(m){return pp+m.replace(/https?:\/\//,"")})}}
 return _dw.apply(document,arguments)};
 var _dwl=document.writeln;document.writeln=function(){
-for(var i=0;i<arguments.length;i++){if(typeof arguments[i]==="string"&&arguments[i].indexOf("poki.")!==-1){arguments[i]=arguments[i].replace(_pokiUrlRe,function(m){return pp+m.replace(/https?:\\/\\//,"")})}}
+for(var i=0;i<arguments.length;i++){if(typeof arguments[i]==="string"&&arguments[i].indexOf("poki.")!==-1){arguments[i]=arguments[i].replace(_pokiUrlRe,function(m){return pp+m.replace(/https?:\/\//,"")})}}
 return _dwl.apply(document,arguments)};
 // Override innerHTML setter to catch poki URLs injected dynamically
 var _ih=Object.getOwnPropertyDescriptor(Element.prototype,"innerHTML");
 if(_ih&&_ih.set){Object.defineProperty(Element.prototype,"innerHTML",{get:_ih.get,
 set:function(v){if(typeof v==="string"&&v.indexOf("poki.")!==-1){
-v=v.replace(_pokiUrlRe,function(m){if(m.indexOf("/game-proxy/")!==-1)return m;return pp+m.replace(/https?:\\/\\//,"")});
-v=v.replace(_pokiUrlReProto,function(m){if(m.indexOf("/game-proxy/")!==-1||m.indexOf("browsergameshq")!==-1)return m;return pp+m.replace(/^\\/\\//,"")})}
+v=v.replace(_pokiUrlRe,function(m){if(m.indexOf("/game-proxy/")!==-1)return m;return pp+m.replace(/https?:\/\//,"")});
+v=v.replace(_pokiUrlReProto,function(m){if(m.indexOf("/game-proxy/")!==-1||m.indexOf("browsergameshq")!==-1)return m;return pp+m.replace(/^\/\//,"")})}
 return _ih.set.call(this,v)},configurable:true})}
+// Override outerHTML setter
+var _oh=Object.getOwnPropertyDescriptor(Element.prototype,"outerHTML");
+if(_oh&&_oh.set){Object.defineProperty(Element.prototype,"outerHTML",{get:_oh.get,
+set:function(v){if(typeof v==="string"&&v.indexOf("poki.")!==-1){
+v=v.replace(_pokiUrlRe,function(m){if(m.indexOf("/game-proxy/")!==-1)return m;return pp+m.replace(/https?:\/\//,"")});
+v=v.replace(_pokiUrlReProto,function(m){if(m.indexOf("/game-proxy/")!==-1||m.indexOf("browsergameshq")!==-1)return m;return pp+m.replace(/^\/\//,"")})}
+return _oh.set.call(this,v)},configurable:true})}
+// Override insertAdjacentHTML
+var _iah=Element.prototype.insertAdjacentHTML;
+Element.prototype.insertAdjacentHTML=function(p,v){
+if(typeof v==="string"&&v.indexOf("poki.")!==-1){
+v=v.replace(_pokiUrlRe,function(m){if(m.indexOf("/game-proxy/")!==-1)return m;return pp+m.replace(/https?:\/\//,"")});
+v=v.replace(_pokiUrlReProto,function(m){if(m.indexOf("/game-proxy/")!==-1||m.indexOf("browsergameshq")!==-1)return m;return pp+m.replace(/^\/\//,"")})}
+return _iah.call(this,p,v)};
 // Block form submissions to poki domains
 document.addEventListener("submit",function(e){try{var a=e.target.action;if(a&&a.indexOf("poki.")!==-1){e.preventDefault();e.stopPropagation()}}catch(ex){}},true);
 var _fs=HTMLFormElement.prototype.submit;
@@ -192,6 +206,12 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
     }
 
     const url = new URL(`https://${fullPath}`);
+
+    // user-vault.poki.com: return mock user profile instead of proxying
+    if (url.hostname === 'user-vault.poki.com') {
+      res.set({ 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.send(JSON.stringify({ id: 'mock-user-id', name: 'Player', is_new: true, version: 1, ttl: 15552000 }));
+    }
 
     // Spoof domain in href/url_referrer params for devs-api.poki.com and api.poki.com calls
     // This prevents the SDK from detecting unauthorized hosting via query params
@@ -241,6 +261,9 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
     if (isGet && contentType.includes('text/html')) {
       let html = body.toString('utf-8');
 
+      // Strip Content-Security-Policy from upstream to prevent frame-ancestors blocking
+      res.removeHeader('Content-Security-Policy');
+
       // Strip meta refresh tags that redirect to poki.com before JS runs
       html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');
       html = html.replace(/<meta[^>]*content\s*=\s*["'][^"']*url\s*=[^"']*poki\.[^"']*["'][^>]*>/gi, '');
@@ -288,6 +311,7 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       });
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\?\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
+      html = html.replace(/console\.error\(["']%cALERT["'][^;]*;/g, '');
       var headMatch = html.match(/<head[^>]*>/i);
       if (headMatch) {
         html = html.replace(headMatch[0], headMatch[0] + GAME_INTERCEPTOR);
@@ -309,6 +333,8 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       // Server-side: disable the "Unauthorized Game Hosting" alert in SDK core
       js = js.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\?\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       js = js.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
+      // Remove console.error ALERT call entirely (belt-and-suspenders)
+      js = js.replace(/console\.error\(["']%cALERT["'][^;]*;/g, '');
       try { cache.setAsset(cacheKey, { body: Buffer.from(js).toString('base64'), contentType }, 86400); } catch(e) {}
       return res.send(js);
     }
@@ -436,6 +462,7 @@ router.all('*', async (req, res) => {
       });
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\?\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
+      html = html.replace(/console\.error\(["']%cALERT["'][^;]*;/g, '');
 
       var headMatch = html.match(/<head[^>]*>/i);
       if (headMatch) {
