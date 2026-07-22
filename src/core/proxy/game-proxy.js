@@ -172,8 +172,6 @@ return _ih.set.call(this,v)},configurable:true})}
 document.addEventListener("submit",function(e){try{var a=e.target.action;if(a&&a.indexOf("poki.")!==-1){e.preventDefault();e.stopPropagation()}}catch(ex){}},true);
 var _fs=HTMLFormElement.prototype.submit;
 HTMLFormElement.prototype.submit=function(){try{if(this.action&&this.action.indexOf("poki.")!==-1)return}catch(ex){}return _fs.apply(this,arguments)};
-// Prevent navigation away from page
-window.addEventListener("beforeunload",function(e){e.preventDefault();e.returnValue=""});
 })();</script>`;
 
 // Proxy gdn.poki.com / poki-gdn.com assets + API calls (including POST/PUT)
