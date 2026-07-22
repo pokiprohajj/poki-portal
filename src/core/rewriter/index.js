@@ -10,6 +10,7 @@ const MIRRORS = {
   'temple-run-2-holi-festival': 'https://sda.4399.com/4399swf//upload_swf/ftp36/liuxinyu/20210628/jjjj1/index.html',
   'temple-run-2-spooky-summit': 'https://f.igry.pro/games/164/VJYtd6ApThscCS5u/2/temple_run_2_spooky_summit/',
   'murder': 'https://html5.gamedistribution.com/rvvASMiM/5e7acf55e50b4723afef834449b82bce/index.html',
+  'apple-worm': 'https://apple-worm.com/appleworm/index.html',
 };
 
 function rewriteHtml(html, sourcePath) {
