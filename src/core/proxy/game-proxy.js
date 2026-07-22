@@ -378,6 +378,15 @@ router.all('*', async (req, res) => {
     }
   }
 
+  // Game mirrors: if this game has a working mirror URL, serve it directly
+  var slugMatch = gamePath.match(/\/([^/]+?)(?:\/\d+)?$/);
+  var slug = slugMatch ? slugMatch[1] : null;
+  if (slug && GAME_MIRRORS[slug]) {
+    var mirrorPage = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><style>body{margin:0;padding:0;overflow:hidden;background:#000}iframe{width:100vw;height:100vh;border:none;display:block}</style></head><body><iframe src="' + GAME_MIRRORS[slug] + '" allowfullscreen allow="autoplay;fullscreen;gamepad"></iframe></body></html>';
+    res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300' });
+    return res.send(mirrorPage);
+  }
+
   try {
     const url = `${GAME_ORIGIN}${gamePath}`;
     const fetchOpts = {
@@ -478,13 +487,6 @@ router.all('*', async (req, res) => {
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\?\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       html = html.replace(/console\.error\(["']%cALERT["'][^;]*;/g, '');
-
-      // Game mirrors: replace gdn-proxy iframe src with working mirror URL
-      var slugMatch = gamePath.match(/\/([^/]+?)(?:\/\d+)?$/);
-      var slug = slugMatch ? slugMatch[1] : null;
-      if (slug && GAME_MIRRORS[slug]) {
-        html = html.replace(/(<iframe[^>]*src\s*=\s*["'])\/game-proxy\/gdn-proxy\/[^"']*(["'][^>]*>)/ig, '$1' + GAME_MIRRORS[slug] + '$2');
-      }
 
       var headMatch = html.match(/<head[^>]*>/i);
       if (headMatch) {
