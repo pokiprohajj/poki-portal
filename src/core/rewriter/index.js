@@ -8,6 +8,7 @@ const MIRRORS = {
   'temple-run-2-frozen-shadows': 'https://html5.gamemonetize.co/z8ud3po55n6uhr9d86moe2ur7rzlffs0/',
   'temple-run-2-jungle-fall': 'https://html5.gamemonetize.co/pkrsuit51ypgzm64h6ohkjnqvwv1zabz/',
   'temple-run-2-holi-festival': 'https://sda.4399.com/4399swf//upload_swf/ftp36/liuxinyu/20210628/jjjj1/index.html',
+  'temple-run-2-spooky-summit': 'https://f.igry.pro/games/164/VJYtd6ApThscCS5u/2/temple_run_2_spooky_summit/',
 };
 
 function rewriteHtml(html, sourcePath) {
