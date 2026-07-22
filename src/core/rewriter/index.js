@@ -151,7 +151,7 @@ function rewriteHtml(html, sourcePath, gameMirrors) {
   replacePokiLogo($);
 
   // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
-  rewriteGameInitState($);
+  rewriteGameInitState($, sourcePath, gameMirrors);
 
   // Pass 9c: On ALL pages, inject iframe src interceptor (persists across SPA navigations)
   if ($('head').length) {
@@ -167,6 +167,19 @@ function rewriteHtml(html, sourcePath, gameMirrors) {
       'if(!m||!gm[m[2]])return null;' +
       'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1){return gm[m[2]]}' +
       'return null}' +
+      // Rewrite existing iframes on the page (server-rendered ones before React takes over)
+      'try{var ifs=document.querySelectorAll("iframe");' +
+      'for(var i=0;i<ifs.length;i++){' +
+      'var s=ifs[i].getAttribute("src");var mr=mirrorUrl(s);' +
+      'if(mr){ifs[i].setAttribute("src",mr)}}}catch(e){}' +
+      // Watch for any new iframes added to the DOM
+      'var mo=new MutationObserver(function(ms){' +
+      'for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
+      'for(var j=0;j<ns.length;j++){var n=ns[j];' +
+      'if(n.tagName==="IFRAME"){var s=n.getAttribute("src");var mr=mirrorUrl(s);if(mr)n.setAttribute("src",mr)}' +
+      'if(n.nodeType===1){var a=n.querySelectorAll&&n.querySelectorAll("iframe");' +
+      'if(a){for(var k=0;k<a.length;k++){var s2=a[k].getAttribute("src");var mr2=mirrorUrl(s2);if(mr2)a[k].setAttribute("src",mr2)}}}}}});' +
+      'try{mo.observe(document.documentElement||document.body,{childList:true,subtree:true})}catch(e){}' +
       'function rw(v){if(typeof v!=="string")return v;' +
       'var mr=mirrorUrl(v);if(mr)return mr;' +
       'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
@@ -430,7 +443,11 @@ function replacePokiLogo($) {
   }
 }
 
-function rewriteGameInitState($) {
+function rewriteGameInitState($, sourcePath, gameMirrors) {
+  gameMirrors = gameMirrors || {};
+  var slug = null;
+  var slugMatch = sourcePath ? sourcePath.match(/\/([^/]+?)(?:\/\d+)?$/) : null;
+  if (slugMatch) slug = slugMatch[1];
   $('script').each(function () {
     var text = $(this).html() || '';
     var idx = text.indexOf('window.INITIAL_STATE=');
@@ -457,6 +474,12 @@ function rewriteGameInitState($) {
       var jsonStr = text.substring(start, end);
       // Replace \u002F with / for proper parsing
       var cleanJson = jsonStr.replace(/\\u002F/g, '/');
+      // Replace gdn embed URLs with mirror URLs for mapped games (server-side)
+      if (slug && gameMirrors[slug]) {
+        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, gameMirrors[slug]);
+        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*poki-gdn\.com[^"'\s]*/g, gameMirrors[slug]);
+        cleanJson = cleanJson.replace(/\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, gameMirrors[slug]);
+      }
       var data = JSON.parse(cleanJson);
       var modified = rewriteGameUrls(data);
       if (!modified) return;
