@@ -7,6 +7,7 @@ const MIRRORS = {
   'temple-run-2': 'https://gogamego.io/wp-content/uploads/games/html5/T/temple%20run%202/index.html',
   'temple-run-2-frozen-shadows': 'https://html5.gamemonetize.co/z8ud3po55n6uhr9d86moe2ur7rzlffs0/',
   'temple-run-2-jungle-fall': 'https://html5.gamemonetize.co/pkrsuit51ypgzm64h6ohkjnqvwv1zabz/',
+  'temple-run-2-holi-festival': 'https://sda.4399.com/4399swf//upload_swf/ftp36/liuxinyu/20210628/jjjj1/index.html',
 };
 
 function rewriteHtml(html, sourcePath) {
