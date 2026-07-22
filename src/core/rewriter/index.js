@@ -162,8 +162,11 @@ function rewriteHtml(html, sourcePath, gameMirrors) {
       'var ssp="/game-proxy/gdn-proxy/";' +
       'var gm=' + JSON.stringify(gameMirrors) + ';' +
       'function mirrorUrl(v){' +
+      'if(typeof v!=="string")return null;' +
       'var m=window.location.pathname.match(/\\/([a-z]{2}\\/g\\/)?([^/]+?)(?:\\/\\d+)?$/);' +
-      'if(m&&gm[m[2]]){return gm[m[2]]}return null}' +
+      'if(!m||!gm[m[2]])return null;' +
+      'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1){return gm[m[2]]}' +
+      'return null}' +
       'function rw(v){if(typeof v!=="string")return v;' +
       'var mr=mirrorUrl(v);if(mr)return mr;' +
       'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
