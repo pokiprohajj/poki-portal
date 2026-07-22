@@ -7,6 +7,12 @@ const router = express.Router();
 
 const GAME_ORIGIN = 'https://games.poki.com';
 
+// Game URL mapping: replace broken Poki embeds with working mirrors
+// Key is the game slug (matched from URL path), value is the mirror URL
+const GAME_MIRRORS = {
+  'subway-surfers': 'https://web.archive.org/web/20260410095301if_/https://ubg77.github.io/updatefaqs/subway-surfers-winter-holiday/',
+};
+
 var GAME_INTERCEPTOR = `<script>(function(){
 try{var dr=Object.getOwnPropertyDescriptor(Document.prototype,'referrer');
 if(dr&&dr.configurable){Object.defineProperty(Document.prototype,'referrer',
@@ -346,6 +352,8 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       return res.send(js);
     }
 
+    // Strip CSP from ALL proxied responses (belt-and-suspenders)
+    res.removeHeader('Content-Security-Policy');
     if (isGet) {
       try { cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400); } catch(e) {}
     }
@@ -470,6 +478,13 @@ router.all('*', async (req, res) => {
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\?\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       html = html.replace(/\(!e\|\|!e\.gameID\)&&!V\.debug&&!window\.isPokiPlayground&&!H\.isPokiExternal/g, 'false');
       html = html.replace(/console\.error\(["']%cALERT["'][^;]*;/g, '');
+
+      // Game mirrors: replace gdn-proxy iframe src with working mirror URL
+      var slugMatch = gamePath.match(/\/([^/]+?)(?:\/\d+)?$/);
+      var slug = slugMatch ? slugMatch[1] : null;
+      if (slug && GAME_MIRRORS[slug]) {
+        html = html.replace(/(<iframe[^>]*src\s*=\s*["'])\/game-proxy\/gdn-proxy\/[^"']*(["'][^>]*>)/ig, '$1' + GAME_MIRRORS[slug] + '$2');
+      }
 
       var headMatch = html.match(/<head[^>]*>/i);
       if (headMatch) {
