@@ -1,7 +1,10 @@
 const config = require('../../config');
 const cheerio = require('cheerio');
 
-const SUBWAY_MIRROR = 'https://g.igroutka.ru/games/164/OUNWHVSFldaeghn4/1/subway_surfers_hong_kong/?mp_assets=https%3A%2F%2Fs2.minijuegosgratis.com%2F&mp_embed=0&mp_game_id=223783&mp_game_uid=subway-surfers&mp_game_url=https%3A%2F%2Fwww.miniplay.com%2Fgame%2Fsubway-surfers&mp_int=1&mp_locale=en_US&mp_player_type=IFRAME&mp_site_https_url=https%3A%2F%2Fwww.miniplay.com%2F&mp_site_name=miniplay.com&mp_site_url=https%3A%2F%2Fwww.miniplay.com%2F&mp_timezone=Africa%2FCasablanca&mp_view_type=';
+const MIRRORS = {
+  'subway-surfers': 'https://g.igroutka.ru/games/164/OUNWHVSFldaeghn4/1/subway_surfers_hong_kong/?mp_assets=https%3A%2F%2Fs2.minijuegosgratis.com%2F&mp_embed=0&mp_game_id=223783&mp_game_uid=subway-surfers&mp_game_url=https%3A%2F%2Fwww.miniplay.com%2Fgame%2Fsubway-surfers&mp_int=1&mp_locale=en_US&mp_player_type=IFRAME&mp_site_https_url=https%3A%2F%2Fwww.miniplay.com%2F&mp_site_name=miniplay.com&mp_site_url=https%3A%2F%2Fwww.miniplay.com%2F&mp_timezone=Africa%2FCasablanca&mp_view_type=',
+  'temple-run-2': 'https://gogamego.io/wp-content/uploads/games/html5/T/temple%20run%202/index.html',
+};
 
 function rewriteHtml(html, sourcePath) {
   const $ = cheerio.load(html, {
@@ -121,12 +124,12 @@ function rewriteHtml(html, sourcePath) {
       'var gp="games.poki.com";var pp="/game-proxy";' +
       'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery","user-vault.poki.com","ads.poki.com","gdn.poki.com","poki-gdn.com","game-cdn.poki.com","ads.poki-cdn.com"];' +
       'var ssp="/game-proxy/gdn-proxy/";' +
-      'var sm="' + SUBWAY_MIRROR + '";' +
+      'var sm=' + JSON.stringify(MIRRORS) + ';' +
       'function mirrorUrl(v){' +
       'if(typeof v!=="string")return null;' +
       'var m=window.location.pathname.match(/\\/([a-z]{2}\\/g\\/)?([^/]+?)(?:\\/\\d+)?$/);' +
-      'if(!m||m[2]!=="subway-surfers")return null;' +
-      'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1||v.indexOf(gp)!==-1||v.indexOf(pp)!==-1){return sm}' +
+      'if(!m||!sm[m[2]])return null;' +
+      'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1||v.indexOf(gp)!==-1||v.indexOf(pp)!==-1){return sm[m[2]]}' +
       'return null}' +
       // Rewrite existing iframes on the page (server-rendered ones before React takes over)
       'try{var ifs=document.querySelectorAll("iframe");' +
@@ -434,17 +437,19 @@ function rewriteGameInitState($, sourcePath) {
       var jsonStr = text.substring(start, end);
       // Replace \u002F with / for proper parsing
       var cleanJson = jsonStr.replace(/\\u002F/g, '/');
-      // Replace gdn embed URLs with mirror URL for subway-surfers (server-side)
-      if (slug === 'subway-surfers') {
-        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, SUBWAY_MIRROR);
-        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*poki-gdn\.com[^"'\s]*/g, SUBWAY_MIRROR);
-        cleanJson = cleanJson.replace(/\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, SUBWAY_MIRROR);
+      // Replace gdn embed URLs with mirror URL for mapped games (server-side)
+      if (MIRRORS[slug]) {
+        var mirrorUrl = MIRRORS[slug];
+        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, mirrorUrl);
+        cleanJson = cleanJson.replace(/https?:\/\/[^"'\s]*poki-gdn\.com[^"'\s]*/g, mirrorUrl);
+        cleanJson = cleanJson.replace(/\/\/[^"'\s]*gdn\.poki\.com[^"'\s]*/g, mirrorUrl);
       }
       var data = JSON.parse(cleanJson);
       var modified = rewriteGameUrls(data);
-      // For subway-surfers, also replace any /game-proxy/ URLs with the mirror
-      if (slug === 'subway-surfers') {
-        var mirrorWalk = function(obj, visited) {
+      // For mapped games, also replace any /game-proxy/ URLs with the mirror
+      if (MIRRORS[slug]) {
+        var mirrorUrl = MIRRORS[slug];
+        function mirrorWalk(obj, visited) {
           if (!obj || typeof obj !== 'object') return false;
           if (!visited) visited = new WeakSet();
           if (visited.has(obj)) return false;
@@ -454,7 +459,7 @@ function rewriteGameInitState($, sourcePath) {
             if (Object.prototype.hasOwnProperty.call(obj, k)) {
               var v = obj[k];
               if (typeof v === 'string' && (v.indexOf('/game-proxy/') !== -1 || v.indexOf('games.poki.com') !== -1)) {
-                obj[k] = SUBWAY_MIRROR;
+                obj[k] = mirrorUrl;
                 changed = true;
               } else if (typeof v === 'object' && v !== null) {
                 if (mirrorWalk(v, visited)) changed = true;
@@ -462,7 +467,7 @@ function rewriteGameInitState($, sourcePath) {
             }
           }
           return changed;
-        };
+        }
         if (mirrorWalk(data)) modified = true;
       }
       if (!modified) return;
