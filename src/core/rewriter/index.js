@@ -126,7 +126,7 @@ function rewriteHtml(html, sourcePath) {
       'if(typeof v!=="string")return null;' +
       'var m=window.location.pathname.match(/\\/([a-z]{2}\\/g\\/)?([^/]+?)(?:\\/\\d+)?$/);' +
       'if(!m||m[2]!=="subway-surfers")return null;' +
-      'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1){return sm}' +
+      'if(v.indexOf("gdn.poki.com")!==-1||v.indexOf("poki-gdn.com")!==-1||v.indexOf(ssp)!==-1||v.indexOf(gp)!==-1||v.indexOf(pp)!==-1){return sm}' +
       'return null}' +
       // Rewrite existing iframes on the page (server-rendered ones before React takes over)
       'try{var ifs=document.querySelectorAll("iframe");' +
@@ -442,6 +442,29 @@ function rewriteGameInitState($, sourcePath) {
       }
       var data = JSON.parse(cleanJson);
       var modified = rewriteGameUrls(data);
+      // For subway-surfers, also replace any /game-proxy/ URLs with the mirror
+      if (slug === 'subway-surfers') {
+        var mirrorWalk = function(obj, visited) {
+          if (!obj || typeof obj !== 'object') return false;
+          if (!visited) visited = new WeakSet();
+          if (visited.has(obj)) return false;
+          visited.add(obj);
+          var changed = false;
+          for (var k in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, k)) {
+              var v = obj[k];
+              if (typeof v === 'string' && (v.indexOf('/game-proxy/') !== -1 || v.indexOf('games.poki.com') !== -1)) {
+                obj[k] = SUBWAY_MIRROR;
+                changed = true;
+              } else if (typeof v === 'object' && v !== null) {
+                if (mirrorWalk(v, visited)) changed = true;
+              }
+            }
+          }
+          return changed;
+        };
+        if (mirrorWalk(data)) modified = true;
+      }
       if (!modified) return;
       var newJson = JSON.stringify(data).replace(/\//g, '\\u002F');
       var newText = text.substring(0, start) + newJson + text.substring(end);
