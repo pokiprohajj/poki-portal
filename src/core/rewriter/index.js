@@ -157,12 +157,12 @@ function rewriteHtml(html, sourcePath) {
     $('head').append('<script id="portal-iframe-rw">' +
       '(function(){' +
       'var gp="games.poki.com";var pp="/game-proxy";' +
-      'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery","user-vault.poki.com","ads.poki.com"];' +
+      'var sdp=["api.poki.com","devs-api.poki.com","a.poki.com","poki-auth.poki.com","ay.delivery","user-vault.poki.com","ads.poki.com","gdn.poki.com","poki-gdn.com","game-cdn.poki.com","ads.poki-cdn.com"];' +
       'var ssp="/game-proxy/gdn-proxy/";' +
       'function rw(v){if(typeof v!=="string")return v;' +
       'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
       'for(var i=0;i<sdp.length;i++){if(v.indexOf(sdp[i])!==-1){return ssp+v.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}}' +
-      'if(v.indexOf("poki.com")!==-1){return v.replace(/https?:\\/\\/(?:[^\\/]+\\.)*poki\\.com/,window.location.origin)}' +
+      'if(v.indexOf("poki.com")!==-1||v.indexOf("poki.io")!==-1||v.indexOf("poki-cdn.com")!==-1){return v.replace(/https?:\\/\\/(?:[^\\/]+\\.)*poki\\.(com|io|cdn\\.com)/,window.location.origin)}' +
       'return v}' +
       'var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,"src");' +
       'if(d&&d.set){Object.defineProperty(HTMLIFrameElement.prototype,"src",{' +

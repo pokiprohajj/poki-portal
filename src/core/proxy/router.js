@@ -128,6 +128,10 @@ async function handlePageRequest(req, res) {
   try {
     let html = await fetchSource(sourcePath, req.headers['user-agent']);
 
+    // Strip meta refresh tags that redirect to poki.com before JS runs
+    html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');
+    html = html.replace(/<meta[^>]*content\s*=\s*["'][^"']*url\s*=[^"']*poki\.[^"']*["'][^>]*>/gi, '');
+
     html = cleanPokiBranding(html);
 
     html = rewriteHtml(html, sourcePath);
