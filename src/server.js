@@ -6,6 +6,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 const config = require('./config');
+const blogRouter = require('./blog');
 const proxyRouter = require('./core/proxy/router');
 const express = require('express');
 const compression = require('compression');
@@ -87,12 +88,21 @@ app.get('/sitemap.xml', (req, res) => {
     `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n</urlset>`);
+  const posts = require('./blog/posts');
+  const blogUrls = posts.map(p =>
+    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+  ).join('\n');
+
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${blogUrls}\n</urlset>`);
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
 app.use('/game-proxy', require('./core/proxy/game-proxy'));
 
+app.use('/', (req, res, next) => {
+  if (blogRouter(req, res)) return;
+  next();
+});
 app.use('/', proxyRouter);
 
 app.use((err, req, res, _next) => {
