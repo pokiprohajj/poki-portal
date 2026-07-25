@@ -495,7 +495,7 @@ function replaceGamePageAds($, sourcePath) {
 }
 
 function replacePokiLogo($) {
-  var logoUrl = '/static/img/logo.svg';
+  var logoUrl = '/static/img/logo.png';
   // 1. Set customLogo in INITIAL_STATE so the Logo React component uses our image
   $('script').each(function () {
     var text = $(this).html() || '';
@@ -504,6 +504,11 @@ function replacePokiLogo($) {
     text = text.replace('"customLogo":null', '"customLogo":{"url":"' + logoUrl + '"}');
     // Also update "customFavicon":null
     text = text.replace('"customFavicon":null', '"customFavicon":{"url":"' + logoUrl + '"}');
+    // Replace site name in INITIAL_STATE so React renders correct alt text on logo
+    text = text.replace(/"site":\{"name":"Poki"/, '"site":{"name":"BrowserGamesHQ"');
+    // Also replace any top-level "name":"Poki" that controls branding
+    text = text.replace(/"name":"Poki"/g, '"name":"BrowserGamesHQ"');
+    text = text.replace(/"title":"Poki"/g, '"title":"BrowserGamesHQ"');
     $(this).html(text);
   });
   // 2. Update visible branding on parent elements (not reverted by React since they're attributes)
@@ -523,10 +528,10 @@ function replacePokiLogo($) {
   // 3. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)
   if ($('head').length && !$('#portal-logo-style').length) {
     $('head').append('<style id="portal-logo-style">' +
-      'img[src*="/static/img/logo.svg"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block}' +
-      'img[src*="/static/img/logo.svg"]+span{display:none!important}' +
-      '@media(max-width:1024px){img[src*="/static/img/logo.svg"]{height:28px}}' +
-      '@media(max-width:640px){img[src*="/static/img/logo.svg"]{height:24px}}' +
+      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block;aspect-ratio:1713/918}' +
+      'img[src*="/static/img/logo.png"]+span{display:none!important}' +
+      '@media(max-width:1024px){img[src*="/static/img/logo.png"]{height:28px}}' +
+      '@media(max-width:640px){img[src*="/static/img/logo.png"]{height:24px}}' +
       '</style>');
   }
 }

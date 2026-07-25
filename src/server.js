@@ -56,6 +56,10 @@ app.use('/static', express.static(path.join(__dirname, 'frontend/public'), {
   lastModified: true,
 }));
 
+app.get('/logo.png', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/public/img/logo.png'));
+});
+
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
@@ -127,7 +131,7 @@ app.use('/proxy-media', require('./core/proxy/media'));
 app.use('/game-proxy', require('./core/proxy/game-proxy'));
 
 // Suppress known tracking/telemetry endpoints that return 404 from the proxy
-app.get('/t', (req, res) => res.status(204).end());
+app.all('/t', (req, res) => res.status(204).end());
 
 app.use('/', (req, res, next) => {
   if (blogRouter(req, res)) return;
