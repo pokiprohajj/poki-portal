@@ -4,6 +4,12 @@ const CAT_CLASS = { Guides: 'guides', Lists: 'lists', Comparisons: 'comparisons'
 const CAT_EMOJI = { Guides: '🎮', Lists: '📋', Comparisons: '⚖️', Articles: '📝' };
 const CAT_COLORS = { guides: '#5f3dc4', lists: '#c62828', comparisons: '#1565c0', articles: '#2e7d32' };
 
+function cardImgUrl(slug) {
+  const h = slug.split('').reduce((a,c)=>a*31+c.charCodeAt(0),0);
+  const colors = { guides: '5f3dc4,ede9fe', lists: 'c62828,fce4ec', comparisons: '1565c0,e3f2fd', articles: '2e7d32,e8f5e9' };
+  return `https://placehold.co/600x400/${colors.guides}?text=${encodeURIComponent(slug.split('-').slice(0,2).join(' '))}`;
+}
+
 function catBadge(cat) {
   const cls = CAT_CLASS[cat] || 'guides';
   return `<span class="cat-badge ${cls}">${CAT_EMOJI[cat]||'🎮'} ${cat}</span>`;
@@ -13,7 +19,7 @@ function cardHtml(post) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const emoji = CAT_EMOJI[post.category] || '🎮';
   return `<article class="post-card" data-category="${post.category}">
-<div class="card-img cat-bg-${cls}"><div class="gradient"></div><span class="card-emoji">${emoji}</span><span class="card-emoji-sm">${emoji}</span></div>
+<div class="card-img"><img src="${cardImgUrl(post.slug)}" alt="${post.title}" loading="lazy"><div class="card-img-overlay"><span class="card-emoji">${emoji}</span></div></div>
 <div class="card-body">
 ${catBadge(post.category)}
 <h3><a href="/blog/${post.slug}">${post.title}</a></h3>
@@ -27,7 +33,7 @@ function featuredCard(post) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const emoji = CAT_EMOJI[post.category] || '🎮';
   return `<div class="post-featured">
-<div class="featured-img cat-bg-${cls}"><div class="gradient"></div><span class="featured-emoji">${emoji}</span></div>
+<div class="featured-img"><img src="${cardImgUrl(post.slug)}" alt="${post.title}"><div class="featured-img-overlay"><span class="featured-emoji">${emoji}</span></div></div>
 <div class="featured-body">
 <div class="featured-label">Featured Article</div>
 ${catBadge(post.category)}
@@ -92,7 +98,13 @@ function loadMore(btn){
     .then(r=>r.json())
     .then(d=>{
       const list = document.getElementById('post-list');
-      d.html.forEach(h=>{const t=document.createElement('template');t.innerHTML=h.trim();list.appendChild(t.content.firstChild)});
+      let grid = list.querySelector('.post-grid');
+      if(!grid){
+        grid = document.createElement('div');
+        grid.className = 'post-grid';
+        list.appendChild(grid);
+      }
+      d.html.forEach(h=>{const t=document.createElement('template');t.innerHTML=h.trim();grid.appendChild(t.content.firstChild)});
       if(d.hasMore){
         btn.dataset.page = page + 1;
         btn.classList.remove('loading');
