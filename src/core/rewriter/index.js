@@ -163,6 +163,8 @@ function rewriteHtml(html, sourcePath) {
     // Resource hints for Core Web Vitals optimization
     $('head').append('<link rel="dns-prefetch" href="//pagead2.googlesyndication.com">');
     $('head').append('<link rel="dns-prefetch" href="//www.googletagmanager.com">');
+    $('head').append('<link rel="dns-prefetch" href="//i.imgur.com">');
+    $('head').append('<link rel="preconnect" href="https://i.imgur.com" crossorigin>');
     // Add | BrowserGamesHQ suffix to title
     var $title = $('title');
     if ($title.length && $title.text().indexOf('BrowserGamesHQ') === -1) {
@@ -493,7 +495,7 @@ function replaceGamePageAds($, sourcePath) {
 }
 
 function replacePokiLogo($) {
-  var logoUrl = 'https://i.imgur.com/YRRj3Hw.png';
+  var logoUrl = '/static/img/logo.svg';
   // 1. Set customLogo in INITIAL_STATE so the Logo React component uses our image
   $('script').each(function () {
     var text = $(this).html() || '';
@@ -521,9 +523,10 @@ function replacePokiLogo($) {
   // 3. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)
   if ($('head').length && !$('#portal-logo-style').length) {
     $('head').append('<style id="portal-logo-style">' +
-      'img[src*="YRRj3Hw"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block}' +
-      '@media(max-width:1024px){img[src*="YRRj3Hw"]{height:28px}}' +
-      '@media(max-width:640px){img[src*="YRRj3Hw"]{height:24px}}' +
+      'img[src*="/static/img/logo.svg"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block}' +
+      'img[src*="/static/img/logo.svg"]+span{display:none!important}' +
+      '@media(max-width:1024px){img[src*="/static/img/logo.svg"]{height:28px}}' +
+      '@media(max-width:640px){img[src*="/static/img/logo.svg"]{height:24px}}' +
       '</style>');
   }
 }
