@@ -45,7 +45,7 @@ ${catBadge(post.category)}
 }
 
 function ctaSection() {
-  return `<div class="blog-cta"><div class="cta-inner"><h3>Ready to Play?</h3><p>Jump into hundreds of free browser games — no download, no sign-up, just click and play.</p><a href="/" class="cta-btn">Play Games Now</a></div></div>`;
+  return `<div class="blog-cta"><div class="cta-inner"><h3>Ready to Play?</h3><p>Jump into hundreds of free browser games — no download, no sign-up, just click and play.</p><a href="/" class="cta-btn">Play Games Now →</a></div></div>`;
 }
 
 function pageHtml(listHtml, hasMore, page) {
@@ -69,7 +69,7 @@ function pageHtml(listHtml, hasMore, page) {
 BrowserGamesHQ
 </a>
 <nav>
-<a href="/" class="nav-cta">Play Games</a>
+<a href="/" class="nav-cta">▶ Play Games</a>
 <a href="/blog" class="active">Blog</a>
 </nav>
 </div>
@@ -182,7 +182,7 @@ function renderPostPage(post, allPosts) {
 BrowserGamesHQ
 </a>
 <nav>
-<a href="/" class="nav-cta">Play Games</a>
+<a href="/" class="nav-cta">▶ Play Games</a>
 <a href="/blog">Blog</a>
 </nav>
 </div>
