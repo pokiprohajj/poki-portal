@@ -152,6 +152,20 @@ function renderPostJson(pagePosts, page, total) {
   };
 }
 
+function faqSchema(post) {
+  const qas = [];
+  const parts = post.content.split(/(?=<h2>)/);
+  for (const part of parts) {
+    const qm = part.match(/<h2>(.+?)<\/h2>/);
+    const am = part.match(/<p>(.+?)<\/p>/);
+    if (qm && am) {
+      qas.push({ question: qm[1].replace(/<[^>]+>/g, ''), answer: am[1].replace(/<[^>]+>/g, '') });
+    }
+  }
+  if (!qas.length) return '';
+  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[${qas.map(q => `{"@type":"Question","name":${JSON.stringify(q.question)},"acceptedAnswer":{"@type":"Answer","text":${JSON.stringify(q.answer)}}}`).join(',')}]}</script>`;
+}
+
 function renderPostPage(post, allPosts) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const sameCat = allPosts.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 4);
@@ -173,6 +187,7 @@ function renderPostPage(post, allPosts) {
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
+${faqSchema(post)}
 </head>
 <body>
 <header class="blog-header">
