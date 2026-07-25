@@ -112,7 +112,7 @@ function rewriteHtml(html, sourcePath) {
   $('title').each(function () {
     const text = $(this).text() || '';
     if (text.includes('Poki') || text.includes('poki')) {
-      $(this).text(text.replace(/Poki/gi, 'GameZone').replace(/poki/gi, 'GameZone'));
+      $(this).text(text.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
     }
   });
 
@@ -131,6 +131,36 @@ function rewriteHtml(html, sourcePath) {
     $('head').append('<script>' +
       '!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};ttq.load("D9H295BC77UA1IJTIG30");ttq.page()}(window,document,"ttq");' +
     '</script>');
+  }
+
+  // Pass 9e: Inject GSC verification + title suffix + JSON-LD schema
+  if ($('head').length) {
+    // Google Search Console verification
+    $('head').append('<meta name="google-site-verification" content="JdrC1oUAbTyddJDIO7HfqQuEtVcl_pxdiYpCmIU29Ws">');
+    // Add | BrowserGamesHQ suffix to title
+    var $title = $('title');
+    if ($title.length && $title.text().indexOf('BrowserGamesHQ') === -1) {
+      $title.text($title.text() + ' | BrowserGamesHQ');
+    }
+    // Inject JSON-LD Game schema on game pages
+    var isGame = typeof sourcePath === 'string' && (sourcePath.indexOf('/g/') !== -1);
+    if (isGame) {
+      var gameTitle = $title.length ? $title.text().replace(' | BrowserGamesHQ', '') : '';
+      var gameDesc = $('meta[name="description"]').attr('content') || '';
+      var gameUrl = 'https://' + config.domain + sourcePath;
+      var schema = {
+        '@context': 'https://schema.org',
+        '@type': 'VideoGame',
+        'name': gameTitle,
+        'description': gameDesc,
+        'url': gameUrl,
+        'applicationCategory': 'Game',
+        'operatingSystem': 'Any',
+        'author': { '@type': 'Organization', 'name': 'BrowserGamesHQ' },
+        'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD', 'availability': 'https://schema.org/InStock' },
+      };
+      $('head').append('<script type="application/ld+json">' + JSON.stringify(schema) + '</script>');
+    }
   }
 
   // Pass 9d: On ALL pages, inject iframe src interceptor (persists across SPA navigations)
@@ -252,10 +282,17 @@ function rewriteMetaTags($, sourceDomain, targetDomain) {
     const href = $(this).attr('href') || '';
     $(this).attr('href', href.replace(new RegExp(escapedSource, 'g'), targetDomain));
   });
+  // Rewrite hreflang alternates from poki.com to our domain
+  $('link[rel="alternate"]').each(function () {
+    const href = $(this).attr('href') || '';
+    if (href.indexOf(sourceDomain) !== -1) {
+      $(this).attr('href', href.replace(new RegExp(escapedSource, 'g'), targetDomain));
+    }
+  });
   $('meta[name="description"]').each(function () {
     const content = $(this).attr('content') || '';
     if (content.includes('Poki') || content.includes('poki')) {
-      $(this).attr('content', content.replace(/Poki/gi, 'GameZone').replace(/poki/gi, 'GameZone'));
+      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
     }
   });
 }
@@ -268,7 +305,7 @@ function rewriteOpenGraph($, sourceDomain, targetDomain) {
       $(this).attr('content', content.replace(new RegExp(escapedSource, 'g'), targetDomain));
     }
     if (content.includes('Poki') || content.includes('poki')) {
-      $(this).attr('content', content.replace(/Poki/gi, 'GameZone').replace(/poki/gi, 'GameZone'));
+      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
     }
   });
 }
@@ -405,12 +442,12 @@ function replacePokiLogo($) {
     if (style.indexOf('poki.svg') === -1) return;
     var parentLink = $(this).closest('a');
     if (parentLink.length) {
-      parentLink.attr('aria-label', 'GameZone');
-      parentLink.attr('title', 'GameZone');
+      parentLink.attr('aria-label', 'BrowserGamesHQ');
+      parentLink.attr('title', 'BrowserGamesHQ');
     }
     var parentButton = $(this).closest('button');
     if (parentButton.length) {
-      parentButton.attr('aria-label', 'GameZone');
+      parentButton.attr('aria-label', 'BrowserGamesHQ');
     }
   });
   // 3. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)

@@ -8,10 +8,10 @@ const render = (req, res) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-site-verification" content="${config.searchConsoleVerification || ''}">
-  <title>GameZone - Play Free Online Games</title>
-  <meta name="description" content="Play thousands of free online games on GameZone. No downloads needed. Play instantly on your browser.">
+  <title>BrowserGamesHQ - Play Free Online Games</title>
+  <meta name="description" content="Play thousands of free online games on BrowserGamesHQ. No downloads needed. Play instantly on your browser.">
   <meta name="keywords" content="free games, online games, browser games, play games, free online games">
-  <meta property="og:title" content="GameZone - Play Free Online Games">
+  <meta property="og:title" content="BrowserGamesHQ - Play Free Online Games">
   <meta property="og:description" content="Play thousands of free online games instantly in your browser.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://${config.domain}">
@@ -36,7 +36,7 @@ const render = (req, res) => {
           <rect width="32" height="32" rx="8" fill="#6c5ce7"/>
           <text x="16" y="22" text-anchor="middle" fill="white" font-size="18" font-weight="bold" font-family="Inter">G</text>
         </svg>
-        <span>GameZone</span>
+        <span>BrowserGamesHQ</span>
       </a>
       <div class="search-bar">
         <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -105,7 +105,7 @@ const render = (req, res) => {
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
-        <span class="footer-logo">GameZone</span>
+        <span class="footer-logo">BrowserGamesHQ</span>
         <p>Your destination for free browser games.</p>
       </div>
       <div class="footer-links">
@@ -124,7 +124,7 @@ const render = (req, res) => {
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 GameZone. All rights reserved.</p>
+      <p>&copy; 2026 BrowserGamesHQ. All rights reserved.</p>
     </div>
   </footer>
 

@@ -65,29 +65,29 @@ function cleanPokiBranding(html) {
 
   // Replace in <title> tags only
   result = result.replace(/<title[^>]*>[^<]*<\/title>/gi, (match) => {
-    return match.replace(/Poki/gi, 'GameZone').replace(/poki/gi, 'GameZone');
+    return match.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ');
   });
 
   // Replace in meta tags (content attributes) — visible to search engines / social
-  result = result.replace(/(<meta[^>]*content="[^"]*?)Poki\.com([^"]*?"[^>]*>)/gi, '$1GameZone$2');
-  result = result.replace(/(<meta[^>]*content="[^"]*?)Poki([^"]*?"[^>]*>)/gi, '$1GameZone$2');
-  result = result.replace(/(<meta[^>]*content="[^"]*?)poki([^"]*?"[^>]*>)/gi, '$1gamezone$2');
+  result = result.replace(/(<meta[^>]*content="[^"]*?)Poki\.com([^"]*?"[^>]*>)/gi, '$1BrowserGamesHQ$2');
+  result = result.replace(/(<meta[^>]*content="[^"]*?)Poki([^"]*?"[^>]*>)/gi, '$1BrowserGamesHQ$2');
+  result = result.replace(/(<meta[^>]*content="[^"]*?)poki([^"]*?"[^>]*>)/gi, '$1browsergameshq$2');
 
   // Replace in <link rel="canonical"> — visible to search engines
   result = result.replace(/(<link[^>]*rel="canonical"[^>]*href="[^"]*?)poki\.com([^"]*?"[^>]*>)/gi, '$1' + 'poki.com' + '$2');
 
   // Replace PokiKids in visible text attributes only (NOT in src/href URLs)
   result = result.replace(/(title|aria-label|alt)="([^"]*?)PokiKids([^"]*?)"/gi, (m, attr, before, after) => {
-    return attr + '="' + before + 'PortalKids' + after + '"';
+    return attr + '="' + before + 'BrowserGamesHQKids' + after + '"';
   });
 
   // Replace in visible text attributes
-  result = result.replace(/title="Poki"/gi, 'title="GameZone"');
-  result = result.replace(/title="Poki\.com"/gi, 'title="GameZone"');
-  result = result.replace(/aria-label="Poki"/gi, 'aria-label="GameZone"');
-  result = result.replace(/aria-label="Poki\.com"/gi, 'aria-label="GameZone"');
-  result = result.replace(/alt="Poki"/gi, 'alt="GameZone"');
-  result = result.replace(/alt="Poki\.com"/gi, 'alt="GameZone"');
+  result = result.replace(/title="Poki"/gi, 'title="BrowserGamesHQ"');
+  result = result.replace(/title="Poki\.com"/gi, 'title="BrowserGamesHQ"');
+  result = result.replace(/aria-label="Poki"/gi, 'aria-label="BrowserGamesHQ"');
+  result = result.replace(/aria-label="Poki\.com"/gi, 'aria-label="BrowserGamesHQ"');
+  result = result.replace(/alt="Poki"/gi, 'alt="BrowserGamesHQ"');
+  result = result.replace(/alt="Poki\.com"/gi, 'alt="BrowserGamesHQ"');
 
   // Replace in inline <script> that contains visible brand text (NOT window.context)
   // Only target script tags that have visible text, skip window.context entirely
@@ -95,8 +95,8 @@ function cleanPokiBranding(html) {
     // Skip if this is the window.context script
     if (content.includes('window.context')) return match;
     return match
-      .replace(/Poki\.com/gi, 'GameZone')
-      .replace(/Poki\.io/gi, 'GameZone');
+      .replace(/Poki\.com/gi, 'BrowserGamesHQ')
+      .replace(/Poki\.io/gi, 'BrowserGamesHQ');
   });
 
   return result;
@@ -164,7 +164,7 @@ function generate404Page() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Not Found - GameZone</title>
+  <title>Page Not Found - BrowserGamesHQ</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f23; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -191,7 +191,7 @@ function generateErrorPage(errorMsg) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Service Temporarily Unavailable - GameZone</title>
+  <title>Service Temporarily Unavailable - BrowserGamesHQ</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f23; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -218,6 +218,25 @@ router.get('/ads.txt', function (req, res) {
     'Cache-Control': 'public, max-age=86400',
   });
   res.send('google.com, pub-7128312414229788, DIRECT, f08c47fec0942fa0\n');
+});
+
+router.get('/sitemap.xml', async function (req, res) {
+  try {
+    const response = await fetch('https://poki.com/sitemap.xml', {
+      headers: { 'User-Agent': getRandomUA() },
+      timeout: 15000,
+    });
+    let xml = await response.text();
+    xml = xml.replace(/https:\/\/poki\.com\//g, 'https://browsergameshq.com/');
+    xml = xml.replace(/https:\/\/poki\.com/g, 'https://browsergameshq.com');
+    res.set({
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+    });
+    res.send(xml);
+  } catch (e) {
+    res.status(502).type('text/plain').send('Sitemap unavailable');
+  }
 });
 
 router.get('*', handlePageRequest);

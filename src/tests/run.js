@@ -40,7 +40,7 @@ const r = rewriteHtml(pokiHtml, '/en/subway-surfers');
 
 console.log('1. Rewriter - Safe Branding');
 assert('Returns string', typeof r === 'string');
-assert('Title: Poki -> GameZone', r.includes('GameZone'));
+assert('Title: Poki -> BrowserGamesHQ', r.includes('BrowserGamesHQ'));
 assert('og:url rewritten', !r.includes('poki.com/en/subway-surfers'));
 assert('canonical rewritten', !r.includes('poki.com/en/subway-surfers'));
 
@@ -102,7 +102,7 @@ const full = '<html><head><title>Poki</title></head><body>' +
   '<div class="poki-ads">ad</div>' +
   '</body></html>';
 const p = injectAds(rewriteHtml(full, '/'));
-assert('Pipeline: Title replaced', p.includes('GameZone'));
+assert('Pipeline: Title replaced', p.includes('BrowserGamesHQ'));
 assert('Pipeline: img absolute', p.includes('https://img.poki-cdn.com/game.png'));
 assert('Pipeline: video absolute', p.includes('https://v.poki-cdn.com/abc/video.mp4'));
 assert('Pipeline: data-video-url absolute', p.includes('https://v.poki-cdn.com/abc/preview.mp4'));
