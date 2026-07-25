@@ -1,50 +1,47 @@
 const posts = require('./posts');
 
-const CAT_EMOJI = { Guides: '🎮', Lists: '📋', Comparisons: '⚖️', Articles: '📝' };
 const CAT_CLASS = { Guides: 'guides', Lists: 'lists', Comparisons: 'comparisons', Articles: 'articles' };
+const CAT_EMOJI = { Guides: '🎮', Lists: '📋', Comparisons: '⚖️', Articles: '📝' };
+const CAT_COLORS = { guides: '#5f3dc4', lists: '#c62828', comparisons: '#1565c0', articles: '#2e7d32' };
 
 function catBadge(cat) {
   const cls = CAT_CLASS[cat] || 'guides';
-  return `<span class="category-badge ${cls}">${cat}</span>`;
+  return `<span class="cat-badge ${cls}">${CAT_EMOJI[cat]||'🎮'} ${cat}</span>`;
 }
 
-function featuredHtml(post, small) {
+function cardHtml(post) {
+  const cls = CAT_CLASS[post.category] || 'guides';
   const emoji = CAT_EMOJI[post.category] || '🎮';
-  return `<div class="post-featured cat-${post.category}"><div class="overlay"></div><span class="emoji">${emoji}</span></div>`;
-}
-
-function postCard(post) {
-  return `<article class="post-card">
-${featuredHtml(post)}
+  return `<article class="post-card" data-category="${post.category}">
+<div class="card-img cat-bg-${cls}"><div class="gradient"></div><span class="card-emoji">${emoji}</span><span class="card-emoji-sm">${emoji}</span></div>
 <div class="card-body">
 ${catBadge(post.category)}
-<h2><a href="/blog/${post.slug}">${post.title}</a></h2>
-<div class="post-meta"><span>${post.date}</span><span class="dot"></span><span>${post.readingTime || 3} min read</span></div>
+<h3><a href="/blog/${post.slug}">${post.title}</a></h3>
+<div class="meta"><span>${post.date}</span><span class="dot"></span><span>${post.readingTime || 3} min read</span></div>
 <div class="excerpt">${post.excerpt}</div>
 </div>
 </article>`;
 }
 
-function renderPagination(page, totalPages) {
-  let html = '<div class="pagination">';
-  if (page > 1) html += `<a href="/blog?page=${page-1}">&laquo; Prev</a>`;
-  for (let i = 1; i <= totalPages; i++) {
-    if (i === page) html += `<span class="active">${i}</span>`;
-    else if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) html += `<a href="/blog?page=${i}">${i}</a>`;
-    else if (Math.abs(i - page) === 3) html += `<span>...</span>`;
-  }
-  if (page < totalPages) html += `<a href="/blog?page=${page+1}">Next &raquo;</a>`;
-  html += '</div>';
-  return html;
+function featuredCard(post) {
+  const cls = CAT_CLASS[post.category] || 'guides';
+  const emoji = CAT_EMOJI[post.category] || '🎮';
+  return `<div class="post-featured">
+<div class="featured-img cat-bg-${cls}"><div class="gradient"></div><span class="featured-emoji">${emoji}</span></div>
+<div class="featured-body">
+<div class="featured-label">Featured Article</div>
+${catBadge(post.category)}
+<h2><a href="/blog/${post.slug}">${post.title}</a></h2>
+<div class="meta"><span>${post.date}</span><span class="dot"></span><span>${post.readingTime || 3} min read</span></div>
+<div class="excerpt">${post.excerpt}</div>
+</div>
+</div>`;
 }
 
-function renderPostList(posts, page) {
-  const perPage = 12;
-  const totalPages = Math.ceil(posts.length / perPage);
-  const start = (page - 1) * perPage;
-  const pagePosts = posts.slice(start, start + perPage);
-  const cards = pagePosts.map(postCard).join('');
-  const pagination = totalPages > 1 ? renderPagination(page, totalPages) : '';
+function pageHtml(listHtml, hasMore, page) {
+  const loadMoreHtml = hasMore
+    ? `<div class="load-more-wrap"><button class="load-more-btn" data-page="${page}" onclick="loadMore(this)"><span class="spinner"></span><span class="btn-text">Load More Articles</span></button></div>`
+    : '';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,40 +54,96 @@ function renderPostList(posts, page) {
 <body>
 <header class="blog-header">
 <div class="inner">
-<a href="/" class="logo">BrowserGamesHQ</a>
+<a href="/" class="logo">
+<svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#6c5ce7"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+BrowserGamesHQ
+</a>
 <nav>
 <a href="/">Home</a>
-<a href="/blog">Blog</a>
+<a href="/blog" class="active">Blog</a>
 </nav>
 </div>
 </header>
 <section class="blog-hero">
+<div class="inner">
+<div class="badge">Free Browser Gaming</div>
 <h1>BrowserGamesHQ Blog</h1>
-<p>Game guides, hidden gems, and pro tips to level up your browser gaming</p>
+<p>Game guides, pro tips, hidden gems, and expert strategies to level up your browser gaming experience</p>
+</div>
 </section>
 <div class="blog-container">
-<div class="search-bar">
-<input type="text" placeholder="Search articles..." aria-label="Search blog posts">
-<button>Search</button>
-</div>
-<div class="post-grid">${cards}</div>
-${pagination}
+<div id="post-list">${listHtml}</div>
+${loadMoreHtml}
 </div>
 <footer class="blog-footer">
-<p>&copy; 2026 BrowserGamesHQ &mdash; Free browser games for everyone &middot; <a href="/">Home</a> &middot; <a href="/blog">Blog</a></p>
+<div class="footer-inner">
+<div class="footer-links">
+<a href="/">Home</a>
+<a href="/blog">Blog</a>
+</div>
+<div class="footer-copy">&copy; 2026 BrowserGamesHQ — Free browser games for everyone</div>
+</div>
 </footer>
+<script>
+function loadMore(btn){
+  const page = parseInt(btn.dataset.page);
+  btn.classList.add('loading');
+  fetch('/blog?page='+page+'&format=json')
+    .then(r=>r.json())
+    .then(d=>{
+      const list = document.getElementById('post-list');
+      d.html.forEach(h=>{const t=document.createElement('template');t.innerHTML=h.trim();list.appendChild(t.content.firstChild)});
+      if(d.hasMore){
+        btn.dataset.page = page + 1;
+        btn.classList.remove('loading');
+      } else {
+        btn.remove();
+      }
+    })
+    .catch(()=>{btn.classList.remove('loading');alert('Failed to load more articles.');});
+}
+</script>
 </body>
 </html>`;
 }
 
-function renderRelated(post, allPosts) {
-  const sameCat = allPosts.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 4);
-  if (!sameCat.length) return '';
-  const cards = sameCat.map(p => `<div class="related-card"><div class="cat">${p.category}</div><h4><a href="/blog/${p.slug}">${p.title}</a></h4></div>`).join('');
-  return `<div class="related-posts"><h3>More ${post.category}</h3><div class="related-grid">${cards}</div></div>`;
+function renderPostList(pagePosts, page, total) {
+  const perPage = 12;
+  const totalPages = Math.ceil(total / perPage);
+  const hasMore = page < totalPages;
+  const cards = pagePosts.map(cardHtml).join('');
+
+  let listHtml;
+  if (page === 1) {
+    const featured = pagePosts[0] ? featuredCard(pagePosts[0]) : '';
+    const rest = pagePosts.slice(1).map(cardHtml).join('');
+    listHtml = featured + (rest ? `<div class="post-grid">${rest}</div>` : '');
+  } else {
+    listHtml = `<div class="post-grid">${cards}</div>`;
+  }
+
+  return pageHtml(listHtml, hasMore, page + 1);
 }
 
-function renderPost(post, allPosts) {
+function renderPostJson(pagePosts, page, total) {
+  const perPage = 12;
+  const totalPages = Math.ceil(total / perPage);
+  return {
+    html: pagePosts.map(cardHtml),
+    hasMore: page < totalPages,
+    page: page + 1,
+  };
+}
+
+function renderPostPage(post, allPosts) {
+  const cls = CAT_CLASS[post.category] || 'guides';
+  const sameCat = allPosts.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 4);
+  const relatedHtml = sameCat.length
+    ? `<div class="related-posts"><h3>More ${post.category}</h3><div class="related-grid">${sameCat.map(p =>
+        `<div class="related-card"><div class="rc-cat ${cls}">${post.category}</div><h4><a href="/blog/${p.slug}">${p.title}</a></h4><div class="rc-meta">${p.date} · ${p.readingTime || 3} min</div></div>`
+      ).join('')}</div></div>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,7 +160,10 @@ function renderPost(post, allPosts) {
 <body>
 <header class="blog-header">
 <div class="inner">
-<a href="/" class="logo">BrowserGamesHQ</a>
+<a href="/" class="logo">
+<svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#6c5ce7"/><path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+BrowserGamesHQ
+</a>
 <nav>
 <a href="/">Home</a>
 <a href="/blog">Blog</a>
@@ -115,20 +171,36 @@ function renderPost(post, allPosts) {
 </div>
 </header>
 <div class="blog-container">
-<div class="breadcrumbs"><a href="/blog">Blog</a> <span>/</span> ${catBadge(post.category)} <span>/</span> <span>${post.title}</span></div>
+<div class="breadcrumbs">
+<a href="/blog">Blog</a>
+<span class="sep">/</span>
+<span class="current">${post.category}</span>
+<span class="sep">/</span>
+<span class="current">${post.title.substring(0, 60)}${post.title.length > 60 ? '...' : ''}</span>
+</div>
 <a href="/blog" class="back-link">&larr; Back to Blog</a>
 <article class="post-article">
 <div class="article-header">
-${catBadge(post.category)}
+<div class="article-label ${cls}">${post.category}</div>
 <h1>${post.title}</h1>
-<div class="article-meta"><span>${post.date}</span><span class="dot"></span><span>${post.readingTime || 3} min read</span></div>
+<div class="article-meta">
+<span>${post.date}</span>
+<span class="dot"></span>
+<span>${post.readingTime || 3} min read</span>
 </div>
-${post.content}
-${renderRelated(post, allPosts)}
+</div>
+<div class="article-body">${post.content}</div>
+${relatedHtml}
 </article>
 </div>
 <footer class="blog-footer">
-<p>&copy; 2026 BrowserGamesHQ &mdash; Free browser games for everyone &middot; <a href="/">Home</a> &middot; <a href="/blog">Blog</a></p>
+<div class="footer-inner">
+<div class="footer-links">
+<a href="/">Home</a>
+<a href="/blog">Blog</a>
+</div>
+<div class="footer-copy">&copy; 2026 BrowserGamesHQ — Free browser games for everyone</div>
+</div>
 </footer>
 </body>
 </html>`;
@@ -138,10 +210,22 @@ function blogRouter(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const path = url.pathname;
   const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
+  const format = url.searchParams.get('format') || 'html';
 
-  if (path === '/blog') {
+  if (path === '/blog' || path === '/blog/') {
+    const perPage = 12;
+    const totalPages = Math.ceil(posts.length / perPage);
+    const start = (page - 1) * perPage;
+    const pagePosts = posts.slice(start, start + perPage);
+
+    if (format === 'json') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(renderPostJson(pagePosts, page, posts.length)));
+      return true;
+    }
+
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPostList(posts, page));
+    res.end(renderPostList(pagePosts, page, posts.length));
     return true;
   }
 
@@ -151,11 +235,11 @@ function blogRouter(req, res) {
     const post = posts.find(p => p.slug === slug);
     if (!post) {
       res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end('<!DOCTYPE html><html><head><title>404 - BrowserGamesHQ</title><link rel="stylesheet" href="/css/blog.css"></head><body><div class="blog-container" style="text-align:center;padding:4rem 1.5rem"><h1>404</h1><p>Article not found.</p><a href="/blog" class="back-link">&larr; Back to Blog</a></div></body></html>');
+      res.end(`<!DOCTYPE html><html><head><title>404 - BrowserGamesHQ</title><link rel="stylesheet" href="/css/blog.css"></head><body><div class="not-found"><h1>404</h1><p>Article not found. It may have been moved or deleted.</p><a href="/blog" class="back-link" style="margin:0 auto">&larr; Back to Blog</a></div></body></html>`);
       return true;
     }
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPost(post, posts));
+    res.end(renderPostPage(post, posts));
     return true;
   }
 

@@ -52,7 +52,7 @@ const themed = [
   { n:'Monster Tracks', s:'monster-tracks', items: 'monster trucks', topic: 'best trucks', extra: 'Each monster truck has unique stats for different track conditions.' },
 ];
 themed.forEach(t => {
-  out.push(post(`${t.s}-${t.topic}`, `${t.n}: ${t.topic.replace(/\b\w/g, c=>c.toUpperCase())} Ranked`, rd(), 'Lists',
+  out.push(post(`${t.s}-${t.topic.toLowerCase().replace(/\s+/g, '-')}`, `${t.n}: ${t.topic.replace(/\b\w/g, c=>c.toUpperCase())} Ranked`, rd(), 'Lists',
     `The ${t.items} in ${t.n} ranked from best to worst. Find the optimal choice for your play style.`,
     `<p>Choosing the right ${t.items} in ${t.n} can make a big difference in your gameplay experience. Here are our top recommendations.</p>
 <h2>How to Choose</h2>
