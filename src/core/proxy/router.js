@@ -74,7 +74,7 @@ function cleanPokiBranding(html) {
   result = result.replace(/(<meta[^>]*content="[^"]*?)poki([^"]*?"[^>]*>)/gi, '$1browsergameshq$2');
 
   // Replace in <link rel="canonical"> — visible to search engines
-  result = result.replace(/(<link[^>]*rel="canonical"[^>]*href="[^"]*?)poki\.com([^"]*?"[^>]*>)/gi, '$1' + 'poki.com' + '$2');
+  result = result.replace(/(<link[^>]*rel="canonical"[^>]*href="[^"]*?)poki\.com([^"]*?"[^>]*>)/gi, '$1' + config.domain + '$2');
 
   // Replace PokiKids in visible text attributes only (NOT in src/href URLs)
   result = result.replace(/(title|aria-label|alt)="([^"]*?)PokiKids([^"]*?)"/gi, (m, attr, before, after) => {

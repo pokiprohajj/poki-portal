@@ -116,9 +116,29 @@ function rewriteHtml(html, sourcePath) {
     }
   });
 
+  // Pass 7b: Rewrite visible body text — replace Poki brand in all text nodes (body only, skip scripts/style)
+  if ($('body').length) {
+    var textWalker = function (el) {
+      if (!el || !el.tagName) return;
+      var tag = el.tagName.toLowerCase();
+      if (tag === 'script' || tag === 'style' || tag === 'textarea') return;
+      $(el).contents().each(function () {
+        if (this.type === 'text') {
+          if (this.data && (this.data.indexOf('Poki') !== -1 || this.data.indexOf('poki') !== -1)) {
+            this.data = this.data.replace(/Poki/gi, 'BrowserGamesHQ');
+          }
+        } else if (this.type === 'tag') {
+          textWalker(this);
+        }
+      });
+    };
+    textWalker($('body')[0]);
+  }
+
   // Pass 8: Rewrite meta tags
   rewriteMetaTags($, sourceDomain, targetDomain);
   rewriteOpenGraph($, sourceDomain, targetDomain);
+  rewriteTwitterCards($, sourceDomain, targetDomain);
 
   // Pass 9: Replace Poki logo with custom logo (responsive for all devices)
   replacePokiLogo($);
@@ -138,29 +158,63 @@ function rewriteHtml(html, sourcePath) {
     // Google Search Console + Bing verification
     $('head').append('<meta name="google-site-verification" content="JdrC1oUAbTyddJDIO7HfqQuEtVcl_pxdiYpCmIU29Ws">');
     $('head').append('<meta name="msvalidate.01" content="9D9ADF6BB82D31433C1A9AC6236F7F66">');
+    // Meta robots tag for defense-in-depth indexing directive
+    $('head').append('<meta name="robots" content="index, follow">');
+    // Resource hints for Core Web Vitals optimization
+    $('head').append('<link rel="dns-prefetch" href="//pagead2.googlesyndication.com">');
+    $('head').append('<link rel="dns-prefetch" href="//www.googletagmanager.com">');
     // Add | BrowserGamesHQ suffix to title
     var $title = $('title');
     if ($title.length && $title.text().indexOf('BrowserGamesHQ') === -1) {
       $title.text($title.text() + ' | BrowserGamesHQ');
     }
-    // Inject JSON-LD Game schema on game pages
+    // Inject JSON-LD schemas
+    var siteUrl = 'https://' + config.domain;
+    // WebSite schema (enables Sitelinks Search Box in SERPs) — on ALL pages
+    var websiteSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      'name': 'BrowserGamesHQ',
+      'url': siteUrl,
+      'potentialAction': {
+        '@type': 'SearchAction',
+        'target': { '@type': 'EntryPoint', 'urlTemplate': siteUrl + '/search?q={search_term_string}' },
+        'query-input': 'required name=search_term_string',
+      },
+    };
+    $('head').append('<script type="application/ld+json">' + JSON.stringify(websiteSchema) + '</script>');
+    // Organization schema (brand knowledge panel) — on ALL pages
+    var orgSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      'name': 'BrowserGamesHQ',
+      'url': siteUrl,
+      'logo': 'https://i.imgur.com/YRRj3Hw.png',
+    };
+    $('head').append('<script type="application/ld+json">' + JSON.stringify(orgSchema) + '</script>');
+    // VideoGame schema — only on game pages
     var isGame = typeof sourcePath === 'string' && (sourcePath.indexOf('/g/') !== -1);
     if (isGame) {
       var gameTitle = $title.length ? $title.text().replace(' | BrowserGamesHQ', '') : '';
       var gameDesc = $('meta[name="description"]').attr('content') || '';
-      var gameUrl = 'https://' + config.domain + sourcePath;
-      var schema = {
+      var ogImage = $('meta[property="og:image"]').attr('content') || '';
+      var gameUrl = siteUrl + sourcePath;
+      var gameSchema = {
         '@context': 'https://schema.org',
         '@type': 'VideoGame',
         'name': gameTitle,
         'description': gameDesc,
         'url': gameUrl,
+        'image': ogImage,
         'applicationCategory': 'Game',
         'operatingSystem': 'Any',
         'author': { '@type': 'Organization', 'name': 'BrowserGamesHQ' },
+        'publisher': { '@type': 'Organization', 'name': 'BrowserGamesHQ' },
         'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD', 'availability': 'https://schema.org/InStock' },
+        'gamePlatform': ['Web Browser'],
+        'playMode': 'SinglePlayer',
       };
-      $('head').append('<script type="application/ld+json">' + JSON.stringify(schema) + '</script>');
+      $('head').append('<script type="application/ld+json">' + JSON.stringify(gameSchema) + '</script>');
     }
   }
 
@@ -301,6 +355,19 @@ function rewriteMetaTags($, sourceDomain, targetDomain) {
 function rewriteOpenGraph($, sourceDomain, targetDomain) {
   const escapedSource = sourceDomain.replace('.', '\\.');
   $('meta[property^="og:"]').each(function () {
+    const content = $(this).attr('content') || '';
+    if (content.includes(sourceDomain)) {
+      $(this).attr('content', content.replace(new RegExp(escapedSource, 'g'), targetDomain));
+    }
+    if (content.includes('Poki') || content.includes('poki')) {
+      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
+    }
+  });
+}
+
+function rewriteTwitterCards($, sourceDomain, targetDomain) {
+  const escapedSource = sourceDomain.replace('.', '\\.');
+  $('meta[name^="twitter:"]').each(function () {
     const content = $(this).attr('content') || '';
     if (content.includes(sourceDomain)) {
       $(this).attr('content', content.replace(new RegExp(escapedSource, 'g'), targetDomain));
