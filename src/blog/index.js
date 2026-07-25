@@ -59,7 +59,7 @@ function pageHtml(listHtml, hasMore, page) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Blog - BrowserGamesHQ</title>
 <meta name="description" content="Game guides, tips, and lists at BrowserGamesHQ. Learn how to master your favorite browser games.">
-<link rel="stylesheet" href="/static/css/blog.css">
+<link rel="stylesheet" href="/static/css/blog.css?v=20260725">
 </head>
 <body>
 <header class="blog-header">
@@ -172,7 +172,7 @@ function renderPostPage(post, allPosts) {
 <meta property="og:description" content="${post.excerpt}">
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="/static/css/blog.css">
+<link rel="stylesheet" href="/static/css/blog.css?v=20260725">
 </head>
 <body>
 <header class="blog-header">
@@ -253,7 +253,7 @@ function blogRouter(req, res) {
     const post = posts.find(p => p.slug === slug);
     if (!post) {
       res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(`<!DOCTYPE html><html><head><title>404 - BrowserGamesHQ</title><link rel="stylesheet" href="/static/css/blog.css"></head><body><div class="not-found"><h1>404</h1><p>Article not found. It may have been moved or deleted.</p><a href="/blog" class="back-link" style="margin:0 auto">&larr; Back to Blog</a></div></body></html>`);
+      res.end(`<!DOCTYPE html><html><head><title>404 - BrowserGamesHQ</title><link rel="stylesheet" href="/static/css/blog.css?v=20260725"></head><body><div class="not-found"><h1>404</h1><p>Article not found. It may have been moved or deleted.</p><a href="/blog" class="back-link" style="margin:0 auto">&larr; Back to Blog</a></div></body></html>`);
       return true;
     }
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
