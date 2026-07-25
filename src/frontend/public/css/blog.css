@@ -160,6 +160,20 @@ a:hover{color:var(--accent-dark);text-decoration:underline}
 .related-card h4 a:hover{color:var(--accent);text-decoration:none}
 .related-card .rc-meta{font-size:.75rem;color:var(--text-tertiary);margin-top:.4rem}
 
+/* === NAV CTA === */
+.blog-header nav a.nav-cta{background:var(--accent);color:#fff!important;border-radius:var(--radius-sm);padding:.5rem 1rem;font-weight:700}
+.blog-header nav a.nav-cta:hover{background:var(--accent-dark)!important;color:#fff!important;text-decoration:none}
+
+/* === CTA SECTION === */
+.blog-cta{background:linear-gradient(135deg,#0f0f1a 0%,#1a1040 50%,#2d1b69 100%);border-radius:var(--radius-lg);padding:3rem 2.5rem;text-align:center;margin:2.5rem 0;position:relative;overflow:hidden}
+.blog-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(108,92,231,.15) 0%,transparent 60%);pointer-events:none}
+.blog-cta .cta-inner{position:relative;z-index:1}
+.blog-cta h3{color:#fff;font-size:1.6rem;font-weight:800;margin-bottom:.5rem;letter-spacing:-.3px}
+.blog-cta p{color:rgba(255,255,255,.7);font-size:1rem;margin-bottom:1.5rem;max-width:480px;margin-left:auto;margin-right:auto}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:.9rem 2.5rem;background:var(--accent);color:#fff;border-radius:var(--radius-sm);font-size:1.05rem;font-weight:700;transition:all var(--transition);border:none;cursor:pointer;font-family:var(--font)}
+.cta-btn:hover{background:var(--accent-dark);color:#fff;box-shadow:var(--shadow-glow);transform:translateY(-2px);text-decoration:none}
+.post-article .blog-cta{margin:2.5rem 0 0}
+
 /* === BACK LINK === */
 .back-link{display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1.2rem;color:var(--accent);font-size:.88rem;font-weight:600;padding:.5rem 1rem;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--border);transition:all var(--transition);width:fit-content}
 .back-link:hover{background:var(--accent);color:#fff;text-decoration:none;border-color:var(--accent);box-shadow:var(--shadow-glow)}

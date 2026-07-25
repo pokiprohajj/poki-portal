@@ -44,6 +44,10 @@ ${catBadge(post.category)}
 </div>`;
 }
 
+function ctaSection() {
+  return `<div class="blog-cta"><div class="cta-inner"><h3>Ready to Play?</h3><p>Jump into hundreds of free browser games — no download, no sign-up, just click and play.</p><a href="/" class="cta-btn">Play Games Now</a></div></div>`;
+}
+
 function pageHtml(listHtml, hasMore, page) {
   const loadMoreHtml = hasMore
     ? `<div class="load-more-wrap"><button class="load-more-btn" data-page="${page}" onclick="loadMore(this)"><span class="spinner"></span><span class="btn-text">Load More Articles</span></button></div>`
@@ -65,7 +69,7 @@ function pageHtml(listHtml, hasMore, page) {
 BrowserGamesHQ
 </a>
 <nav>
-<a href="/">Home</a>
+<a href="/" class="nav-cta">Play Games</a>
 <a href="/blog" class="active">Blog</a>
 </nav>
 </div>
@@ -80,6 +84,7 @@ BrowserGamesHQ
 <div class="blog-container">
 <div id="post-list">${listHtml}</div>
 ${loadMoreHtml}
+${ctaSection()}
 </div>
 <footer class="blog-footer">
 <div class="footer-inner">
@@ -177,7 +182,7 @@ function renderPostPage(post, allPosts) {
 BrowserGamesHQ
 </a>
 <nav>
-<a href="/">Home</a>
+<a href="/" class="nav-cta">Play Games</a>
 <a href="/blog">Blog</a>
 </nav>
 </div>
@@ -203,6 +208,7 @@ BrowserGamesHQ
 </div>
 <div class="article-body">${post.content}</div>
 ${relatedHtml}
+${ctaSection()}
 </article>
 </div>
 <footer class="blog-footer">
