@@ -346,12 +346,17 @@ function rewriteMetaTags($, sourceDomain, targetDomain) {
       $(this).attr('href', href.replace(new RegExp(escapedSource, 'g'), targetDomain));
     }
   });
-  $('meta[name="description"]').each(function () {
-    const content = $(this).attr('content') || '';
-    if (content.includes('Poki') || content.includes('poki')) {
-      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
+  var $desc = $('meta[name="description"]');
+  if ($desc.length) {
+    var content = $desc.attr('content') || '';
+    if (!content.trim()) {
+      $desc.attr('content', 'Play free online games instantly in your browser. No downloads, no hassle — just fun at BrowserGamesHQ.');
+    } else if (content.includes('Poki') || content.includes('poki')) {
+      $desc.attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
     }
-  });
+  } else if ($('head').length) {
+    $('head').append('<meta name="description" content="Play free online games instantly in your browser. No downloads, no hassle — just fun at BrowserGamesHQ.">');
+  }
 }
 
 function rewriteOpenGraph($, sourceDomain, targetDomain) {
@@ -511,7 +516,13 @@ function replacePokiLogo($) {
     text = text.replace(/"title":"Poki"/g, '"title":"BrowserGamesHQ"');
     $(this).html(text);
   });
-  // 2. Update visible branding on parent elements (not reverted by React since they're attributes)
+  // 2. Directly fix alt text on the logo img element (server-rendered HTML)
+  $('img[src*="/static/img/logo.png"]').each(function () {
+    if ($(this).attr('alt') && $(this).attr('alt').indexOf('Poki') !== -1) {
+      $(this).attr('alt', 'BrowserGamesHQ');
+    }
+  });
+  // 3. Update visible branding on parent elements (not reverted by React since they're attributes)
   $('span[role="img"]').each(function () {
     var style = $(this).attr('style') || '';
     if (style.indexOf('poki.svg') === -1) return;
@@ -525,10 +536,10 @@ function replacePokiLogo($) {
       parentButton.attr('aria-label', 'BrowserGamesHQ');
     }
   });
-  // 3. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)
+  // 4. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)
   if ($('head').length && !$('#portal-logo-style').length) {
     $('head').append('<style id="portal-logo-style">' +
-      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block;aspect-ratio:114/61}' +
+      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block;aspect-ratio:90/48}' +
       'img[src*="/static/img/logo.png"]+span{display:none!important}' +
       '@media(max-width:1024px){img[src*="/static/img/logo.png"]{height:28px}}' +
       '@media(max-width:640px){img[src*="/static/img/logo.png"]{height:24px}}' +

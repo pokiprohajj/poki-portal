@@ -66,7 +66,7 @@ ${webSiteSchema()}
 <header class="blog-header">
 <div class="inner">
 <a href="/" class="logo">
-<img src="/static/img/logo.png" alt="BrowserGamesHQ" width="114" height="61" style="height:32px;width:auto;vertical-align:middle;display:inline-block">
+<img src="/static/img/logo.png" alt="BrowserGamesHQ" width="90" height="48" style="height:32px;width:auto;vertical-align:middle;display:inline-block">
 </a>
 <nav>
 <a href="/" class="nav-cta">▶ Play Games</a>
@@ -223,7 +223,7 @@ ${breadcrumbSchema(post)}
 <header class="blog-header">
 <div class="inner">
 <a href="/" class="logo">
-<img src="/static/img/logo.png" alt="BrowserGamesHQ" width="114" height="61" style="height:32px;width:auto;vertical-align:middle;display:inline-block">
+<img src="/static/img/logo.png" alt="BrowserGamesHQ" width="90" height="48" style="height:32px;width:auto;vertical-align:middle;display:inline-block">
 </a>
 <nav>
 <a href="/" class="nav-cta">▶ Play Games</a>
