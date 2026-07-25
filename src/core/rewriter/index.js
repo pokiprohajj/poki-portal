@@ -528,7 +528,7 @@ function replacePokiLogo($) {
   // 3. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)
   if ($('head').length && !$('#portal-logo-style').length) {
     $('head').append('<style id="portal-logo-style">' +
-      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block;aspect-ratio:1713/918}' +
+      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block;aspect-ratio:114/61}' +
       'img[src*="/static/img/logo.png"]+span{display:none!important}' +
       '@media(max-width:1024px){img[src*="/static/img/logo.png"]{height:28px}}' +
       '@media(max-width:640px){img[src*="/static/img/logo.png"]{height:24px}}' +
