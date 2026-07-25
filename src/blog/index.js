@@ -60,6 +60,7 @@ function pageHtml(listHtml, hasMore, page) {
 <title>Blog - BrowserGamesHQ</title>
 <meta name="description" content="Game guides, tips, and lists at BrowserGamesHQ. Learn how to master your favorite browser games.">
 <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
+${webSiteSchema()}
 </head>
 <body>
 <header class="blog-header">
@@ -166,6 +167,34 @@ function faqSchema(post) {
   return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[${qas.map(q => `{"@type":"Question","name":${JSON.stringify(q.question)},"acceptedAnswer":{"@type":"Answer","text":${JSON.stringify(q.answer)}}}`).join(',')}]}</script>`;
 }
 
+function articleSchema(post) {
+  const img = cardImgUrl(post.slug, post.category);
+  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":${JSON.stringify(post.title)},"description":${JSON.stringify(post.excerpt)},"image":${JSON.stringify(img)},"datePublished":"${post.date}","dateModified":"${post.date}","author":{"@type":"Organization","name":"BrowserGamesHQ"},"publisher":{"@type":"Organization","name":"BrowserGamesHQ","logo":{"@type":"ImageObject","url":"https://browsergameshq.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://browsergameshq.com/blog/${post.slug}"}}</script>`;
+}
+
+function breadcrumbSchema(post) {
+  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Blog","item":"https://browsergameshq.com/blog"},{"@type":"ListItem","position":2,"name":"${post.category}","item":"https://browsergameshq.com/blog"},{"@type":"ListItem","position":3,"name":${JSON.stringify(post.title)},"item":"https://browsergameshq.com/blog/${post.slug}"}]}</script>`;
+}
+
+function webSiteSchema() {
+  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"BrowserGamesHQ","url":"https://browsergameshq.com","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://browsergameshq.com/search?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>`;
+}
+
+function peopleAlsoAsk(post) {
+  const qas = [];
+  const parts = post.content.split(/(?=<h2>)/);
+  for (const part of parts) {
+    const qm = part.match(/<h2>(.+?)<\/h2>/);
+    const am = part.match(/<p>(.+?)<\/p>/);
+    if (qm && am) {
+      qas.push({ q: qm[1].replace(/<[^>]+>/g, ''), a: am[1].replace(/<[^>]+>/g, '') });
+    }
+  }
+  if (!qas.length) return '';
+  const items = qas.slice(0, 4).map(qa => `<div class="paq-item"><details><summary>${qa.q}</summary><p>${qa.a}</p></details></div>`).join('');
+  return `<div class="paq-section"><h3>People Also Ask</h3>${items}</div>`;
+}
+
 function renderPostPage(post, allPosts) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const sameCat = allPosts.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 4);
@@ -188,6 +217,8 @@ function renderPostPage(post, allPosts) {
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
 ${faqSchema(post)}
+${articleSchema(post)}
+${breadcrumbSchema(post)}
 </head>
 <body>
 <header class="blog-header">
@@ -222,6 +253,7 @@ BrowserGamesHQ
 </div>
 </div>
 <div class="article-body">${post.content}</div>
+${peopleAlsoAsk(post)}
 ${relatedHtml}
 ${ctaSection()}
 </article>

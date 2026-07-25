@@ -148,6 +148,16 @@ a:hover{color:var(--accent-dark);text-decoration:underline}
 .related-posts{margin-top:3rem;padding-top:2rem;border-top:2px solid var(--border)}
 .related-posts h3{font-size:1.2rem;font-weight:700;margin-bottom:1.2rem;color:var(--text-primary)}
 .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+/* === PEOPLE ALSO ASK === */
+.paq-section{margin:2.5rem 0;padding:1.5rem 0;border-top:2px solid var(--border)}
+.paq-section h3{font-size:1.2rem;font-weight:700;margin-bottom:1rem;color:var(--text-primary)}
+.paq-item{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.5rem;overflow:hidden;background:var(--bg)}
+.paq-item details summary{cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:.95rem;color:var(--text-primary);list-style:none;display:flex;align-items:center;justify-content:space-between;transition:background var(--transition)}
+.paq-item details summary::-webkit-details-marker{display:none}
+.paq-item details summary::after{content:'+';font-size:1.2rem;font-weight:700;color:var(--accent);transition:transform var(--transition)}
+.paq-item details[open] summary::after{content:'−'}
+.paq-item details[open] summary{background:var(--bg-card);border-bottom:1px solid var(--border)}
+.paq-item details p{padding:.5rem 1.2rem 1rem;margin:0;font-size:.9rem;color:var(--text-secondary);line-height:1.7}
 .related-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:all var(--transition);cursor:pointer}
 .related-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--accent-light)}
 .related-card .rc-cat{font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:.3rem}
