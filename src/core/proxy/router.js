@@ -212,6 +212,14 @@ function generateErrorPage(errorMsg) {
 </html>`;
 }
 
+router.get('/ads.txt', function (req, res) {
+  res.set({
+    'Content-Type': 'text/plain',
+    'Cache-Control': 'public, max-age=86400',
+  });
+  res.send('google.com, pub-7128312414229788, DIRECT, f08c47fec0942fa0\n');
+});
+
 router.get('*', handlePageRequest);
 
 module.exports = router;
