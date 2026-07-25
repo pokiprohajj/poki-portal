@@ -163,8 +163,6 @@ function rewriteHtml(html, sourcePath) {
     // Resource hints for Core Web Vitals optimization
     $('head').append('<link rel="dns-prefetch" href="//pagead2.googlesyndication.com">');
     $('head').append('<link rel="dns-prefetch" href="//www.googletagmanager.com">');
-    $('head').append('<link rel="dns-prefetch" href="//i.imgur.com">');
-    $('head').append('<link rel="preconnect" href="https://i.imgur.com" crossorigin>');
     // Add | BrowserGamesHQ suffix to title
     var $title = $('title');
     if ($title.length && $title.text().indexOf('BrowserGamesHQ') === -1) {
@@ -346,17 +344,12 @@ function rewriteMetaTags($, sourceDomain, targetDomain) {
       $(this).attr('href', href.replace(new RegExp(escapedSource, 'g'), targetDomain));
     }
   });
-  var $desc = $('meta[name="description"]');
-  if ($desc.length) {
-    var content = $desc.attr('content') || '';
-    if (!content.trim()) {
-      $desc.attr('content', 'Play free online games instantly in your browser. No downloads, no hassle — just fun at BrowserGamesHQ.');
-    } else if (content.includes('Poki') || content.includes('poki')) {
-      $desc.attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
+  $('meta[name="description"]').each(function () {
+    const content = $(this).attr('content') || '';
+    if (content.includes('Poki') || content.includes('poki')) {
+      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
     }
-  } else if ($('head').length) {
-    $('head').append('<meta name="description" content="Play free online games instantly in your browser. No downloads, no hassle — just fun at BrowserGamesHQ.">');
-  }
+  });
 }
 
 function rewriteOpenGraph($, sourceDomain, targetDomain) {
@@ -509,20 +502,9 @@ function replacePokiLogo($) {
     text = text.replace('"customLogo":null', '"customLogo":{"url":"' + logoUrl + '"}');
     // Also update "customFavicon":null
     text = text.replace('"customFavicon":null', '"customFavicon":{"url":"' + logoUrl + '"}');
-    // Replace site name in INITIAL_STATE so React renders correct alt text on logo
-    text = text.replace(/"site":\{"name":"Poki"/, '"site":{"name":"BrowserGamesHQ"');
-    // Also replace any top-level "name":"Poki" that controls branding
-    text = text.replace(/"name":"Poki"/g, '"name":"BrowserGamesHQ"');
-    text = text.replace(/"title":"Poki"/g, '"title":"BrowserGamesHQ"');
     $(this).html(text);
   });
-  // 2. Directly fix alt text on the logo img element (server-rendered HTML)
-  $('img[src*="/static/img/logo.png"]').each(function () {
-    if ($(this).attr('alt') && $(this).attr('alt').indexOf('Poki') !== -1) {
-      $(this).attr('alt', 'BrowserGamesHQ');
-    }
-  });
-  // 3. Update visible branding on parent elements (not reverted by React since they're attributes)
+  // 2. Update visible branding on parent elements (not reverted by React since they're attributes)
   $('span[role="img"]').each(function () {
     var style = $(this).attr('style') || '';
     if (style.indexOf('poki.svg') === -1) return;
@@ -536,11 +518,16 @@ function replacePokiLogo($) {
       parentButton.attr('aria-label', 'BrowserGamesHQ');
     }
   });
+  // 3. Fix alt text on the logo img (server-rendered HTML)
+  $('img[src*="/static/img/logo.png"]').each(function () {
+    if ($(this).attr('alt') && $(this).attr('alt').indexOf('Poki') !== -1) {
+      $(this).attr('alt', 'BrowserGamesHQ');
+    }
+  });
   // 4. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)
   if ($('head').length && !$('#portal-logo-style').length) {
     $('head').append('<style id="portal-logo-style">' +
-      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block;aspect-ratio:90/48}' +
-      'img[src*="/static/img/logo.png"]+span{display:none!important}' +
+      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block}' +
       '@media(max-width:1024px){img[src*="/static/img/logo.png"]{height:28px}}' +
       '@media(max-width:640px){img[src*="/static/img/logo.png"]{height:24px}}' +
       '</style>');

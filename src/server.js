@@ -56,10 +56,6 @@ app.use('/static', express.static(path.join(__dirname, 'frontend/public'), {
   lastModified: true,
 }));
 
-app.get('/logo.png', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/public/img/logo.png'));
-});
-
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
@@ -72,33 +68,6 @@ app.get('/ads.txt', (req, res) => {
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send(`User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: https://${config.domain}/sitemap.xml\n`);
-});
-
-app.get('/llms.txt', (req, res) => {
-  res.type('text/markdown');
-  res.send(`# BrowserGamesHQ
-
-> Play free online games instantly in your browser. No downloads, no hassle — just fun.
-
-## About
-BrowserGamesHQ is a free online gaming platform featuring thousands of games across every genre including action, puzzle, racing, sports, strategy, dress-up, multiplayer, and more.
-
-## Content Overview
-- **Homepage**: https://browsergameshq.com/ — Browse featured games, categories, and new releases
-- **Game Pages**: https://browsergameshq.com/en/g/[game-slug] — Play games directly in your browser
-- **Blog**: https://browsergameshq.com/blog — Game guides, tips, reviews, and industry articles
-- **Categories**: Action, Puzzle, Racing, Sports, Multiplayer, Dress Up, io Games, 2 Player, Car Games, and more
-
-## Key Links
-- [Homepage](https://browsergameshq.com/)
-- [Blog](https://browsergameshq.com/blog)
-- [New Games](https://browsergameshq.com/en/new-games)
-- [Multiplayer Games](https://browsergameshq.com/en/multiplayer)
-- [Action Games](https://browsergameshq.com/en/action-games)
-- [Puzzle Games](https://browsergameshq.com/en/puzzle-games)
-- [Racing Games](https://browsergameshq.com/en/racing-games)
-- [Sitemap](https://browsergameshq.com/sitemap.xml)
-`);
 });
 
 app.get('/sitemap.xml', (req, res) => {
@@ -129,9 +98,6 @@ app.get('/sitemap.xml', (req, res) => {
 
 app.use('/proxy-media', require('./core/proxy/media'));
 app.use('/game-proxy', require('./core/proxy/game-proxy'));
-
-// Suppress known tracking/telemetry endpoints that return 404 from the proxy
-app.all('/t', (req, res) => res.status(204).end());
 
 app.use('/', (req, res, next) => {
   if (blogRouter(req, res)) return;
