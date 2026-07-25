@@ -135,8 +135,9 @@ function rewriteHtml(html, sourcePath) {
 
   // Pass 9e: Inject GSC verification + title suffix + JSON-LD schema
   if ($('head').length) {
-    // Google Search Console verification
+    // Google Search Console + Bing verification
     $('head').append('<meta name="google-site-verification" content="JdrC1oUAbTyddJDIO7HfqQuEtVcl_pxdiYpCmIU29Ws">');
+    $('head').append('<meta name="msvalidate.01" content="9D9ADF6BB82D31433C1A9AC6236F7F66">');
     // Add | BrowserGamesHQ suffix to title
     var $title = $('title');
     if ($title.length && $title.text().indexOf('BrowserGamesHQ') === -1) {
