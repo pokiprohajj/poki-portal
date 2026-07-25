@@ -4,10 +4,10 @@ const CAT_CLASS = { Guides: 'guides', Lists: 'lists', Comparisons: 'comparisons'
 const CAT_EMOJI = { Guides: '🎮', Lists: '📋', Comparisons: '⚖️', Articles: '📝' };
 const CAT_COLORS = { guides: '#5f3dc4', lists: '#c62828', comparisons: '#1565c0', articles: '#2e7d32' };
 
-function cardImgUrl(slug) {
-  const h = slug.split('').reduce((a,c)=>a*31+c.charCodeAt(0),0);
-  const colors = { guides: '5f3dc4,ede9fe', lists: 'c62828,fce4ec', comparisons: '1565c0,e3f2fd', articles: '2e7d32,e8f5e9' };
-  return `https://placehold.co/600x400/${colors.guides}?text=${encodeURIComponent(slug.split('-').slice(0,2).join(' '))}`;
+function cardImgUrl(slug, cat) {
+  const cls = CAT_CLASS[cat] || 'guides';
+  const colors = { guides: '5f3dc4/ede9fe', lists: 'c62828/fce4ec', comparisons: '1565c0/e3f2fd', articles: '2e7d32/e8f5e9' };
+  return `https://placehold.co/600x400/${colors[cls]}?text=${encodeURIComponent(slug.split('-').slice(0,2).join(' '))}`;
 }
 
 function catBadge(cat) {
@@ -19,7 +19,7 @@ function cardHtml(post) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const emoji = CAT_EMOJI[post.category] || '🎮';
   return `<article class="post-card" data-category="${post.category}">
-<div class="card-img"><img src="${cardImgUrl(post.slug)}" alt="${post.title}" loading="lazy"><div class="card-img-overlay"><span class="card-emoji">${emoji}</span></div></div>
+<div class="card-img cat-bg-${cls}"><img src="${cardImgUrl(post.slug, post.category)}" alt="${post.title}" loading="lazy"><div class="card-img-overlay"><span class="card-emoji">${emoji}</span></div></div>
 <div class="card-body">
 ${catBadge(post.category)}
 <h3><a href="/blog/${post.slug}">${post.title}</a></h3>
@@ -33,7 +33,7 @@ function featuredCard(post) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const emoji = CAT_EMOJI[post.category] || '🎮';
   return `<div class="post-featured">
-<div class="featured-img"><img src="${cardImgUrl(post.slug)}" alt="${post.title}"><div class="featured-img-overlay"><span class="featured-emoji">${emoji}</span></div></div>
+<div class="featured-img cat-bg-${cls}"><img src="${cardImgUrl(post.slug, post.category)}" alt="${post.title}"><div class="featured-img-overlay"><span class="featured-emoji">${emoji}</span></div></div>
 <div class="featured-body">
 <div class="featured-label">Featured Article</div>
 ${catBadge(post.category)}
