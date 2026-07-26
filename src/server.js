@@ -48,12 +48,13 @@ function handleBeacon(id, page, disconnect, req, res) {
   if (disconnect) {
     if (id) analyticsTracker.untrack(id);
   } else if (id && page) {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || null;
     const country = req.headers['cf-ipcountry'] || req.headers['x-geo-country'] || null;
     const ua = req.headers['user-agent'] || '';
     const device = analyticsTracker._detectDevice(ua);
     const bot = analyticsTracker.detectBot(ua);
     const referrer = req.headers['referer'] || null;
-    analyticsTracker.trackPage(id, page, country, device, bot, referrer);
+    analyticsTracker.trackPage(id, page, country, device, bot, referrer, ip);
   }
   res.status(204).end();
 }

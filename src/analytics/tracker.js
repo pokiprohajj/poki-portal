@@ -91,15 +91,25 @@ class LiveTracker {
     }
   }
 
-  trackPage(id, page, country, device, bot, referrer) {
+  trackPage(id, page, country, device, bot, referrer, ip) {
+    // If this is a new beacon session and there's an IP-keyed session, merge it to avoid duplicates
     const existing = this.sessions.get(id);
-    if (existing) {
-      existing.page = page;
-      if (country && existing.country === 'Unknown') existing.country = country;
-      if (device && existing.device === 'Unknown') existing.device = device;
-      existing.visited.add(page);
-      existing.views++;
-      existing.lastSeen = Date.now();
+    if (!existing && ip && this.sessions.has(ip)) {
+      const ipSession = this.sessions.get(ip);
+      country = country || ipSession.country;
+      device = device || ipSession.device;
+      bot = bot || ipSession.bot;
+      referrer = referrer || ipSession.referrer;
+      this.sessions.delete(ip);
+    }
+    const session = this.sessions.get(id);
+    if (session) {
+      session.page = page;
+      if (country && session.country === 'Unknown') session.country = country;
+      if (device && session.device === 'Unknown') session.device = device;
+      session.visited.add(page);
+      session.views++;
+      session.lastSeen = Date.now();
     } else {
       this.sessions.set(id, {
         ip: id,
