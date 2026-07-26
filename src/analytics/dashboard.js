@@ -1,34 +1,58 @@
 const tracker = require('./tracker');
 
 const AUTH_TOKEN = process.env.ANALYTICS_TOKEN || 'admin123';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@browsergameshq.com';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'Poki.Pro2026';
 
-function dashboardRouter(req, res) {
-  try {
-    const url = new URL(req.url, 'http://localhost');
-    const path = url.pathname;
-    const token = url.searchParams.get('token');
+function isAuthenticated(req) {
+  if (req.session && req.session.adminAuthed) return true;
+  const token = req.url && new URL(req.url, 'http://localhost').searchParams.get('token');
+  return token === AUTH_TOKEN;
+}
 
-    if (token !== AUTH_TOKEN) {
-      res.writeHead(401, { 'Content-Type': 'text/plain' });
-      res.end('Unauthorized');
-      return true;
-    }
+function loginPage(error) {
+  const errHtml = error ? `<div class="error">${error}</div>` : '';
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Login — BrowserGamesHQ</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{background:#0a0a1a;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center}
+.container{width:100%;max-width:380px;padding:24px}
+h1{font-size:22px;color:#6c5ce7;margin-bottom:4px;text-align:center}
+.sub{color:#666;font-size:13px;margin-bottom:28px;text-align:center}
+.form{display:flex;flex-direction:column;gap:14px}
+.form label{font-size:13px;color:#aaa}
+.form input{background:#15152e;border:1px solid #2a2a5e;border-radius:8px;padding:12px 14px;color:#fff;font-size:14px;outline:none;transition:border-color .2s}
+.form input:focus{border-color:#6c5ce7}
+.form button{background:#6c5ce7;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:6px}
+.form button:hover{background:#5a4bd1}
+.error{background:#3b0a0a;color:#f87171;border:1px solid #7f1d1d;border-radius:8px;padding:10px 14px;font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Admin</h1>
+<div class="sub">Sign in to the dashboard</div>
+<form class="form" method="post" action="/admin/login">
+${errHtml}
+<label for="email">Email</label>
+<input type="email" id="email" name="email" placeholder="you@example.com" required autofocus>
+<label for="pass">Password</label>
+<input type="password" id="pass" name="pass" placeholder="Enter your password" required>
+<button type="submit">Sign In</button>
+</form>
+</div>
+</body>
+</html>`;
+}
 
-    const noCache = { 'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0' };
-
-    if (path === '/live/stats' || path === '/admin/live/stats') {
-      const visitors = tracker.getActive();
-      const count = tracker.getCount();
-      res.writeHead(200, { 'Content-Type': 'application/json', ...noCache });
-      res.end(JSON.stringify({ count, visitors }));
-      return true;
-    }
-
-    if (path === '/live' || path === '/admin/live') {
-      const visitors = tracker.getActive();
-      const count = tracker.getCount();
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
-      res.end(`<!DOCTYPE html>
+function dashboardPage(req, count, visitorsHtml) {
+  const jsonToken = AUTH_TOKEN;
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -64,19 +88,22 @@ h1{font-size:22px;color:#6c5ce7;margin-bottom:6px}
 .empty .big{font-size:48px;margin-bottom:12px}
 .removing{animation:fadeOut .3s forwards}
 @keyframes fadeOut{to{opacity:0;transform:translateY(8px)}}
+.logout{text-align:right;margin-bottom:12px}
+.logout a{color:#666;font-size:12px;text-decoration:none}
+.logout a:hover{color:#f87171}
 </style>
 </head>
 <body>
 <div class="container">
+<div class="logout"><a href="/admin/logout">Logout</a></div>
 <h1>Live View</h1>
 <div class="sub">People on your site right now</div>
 <div class="count"><span id="count">${count}</span></div>
-<div class="list" id="list">${count === 0 ? '<div class="empty"><div class="big">👀</div>Waiting for visitors...</div>' : visitors.map(v => personHtml(v)).join('')}</div>
+<div class="list" id="list">${visitorsHtml}</div>
 </div>
 <script>
-const TOKEN=${JSON.stringify(token)};
+const TOKEN=${JSON.stringify(jsonToken)};
 const BASE=location.pathname.replace(/\\/+$/,'');
-let currentIds=new Set();
 function f(c){if(!c||c==='Unknown'||c==='XX')return '';return[...c.toUpperCase()].map(l=>String.fromCodePoint(0x1F1E6+l.charCodeAt(0)-65)).join('')}
 function poll(){fetch(BASE+'/stats?token='+TOKEN,{cache:'no-store'}).then(r=>r.json()).then(d=>{render(d)}).catch(()=>{})}
 function pLink(p){return'&nbsp;<a href="https://browsergameshq.com'+p+'" target="_blank" rel="noopener">'+p+'</a>'}
@@ -85,7 +112,68 @@ function render(d){const list=document.getElementById('list');const countEl=docu
 poll();setInterval(poll,2000)
 </script>
 </body>
-</html>`);
+</html>`;
+}
+
+function dashboardRouter(req, res) {
+  try {
+    const url = new URL(req.url, 'http://localhost');
+    const path = url.pathname;
+    const noCache = { 'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0' };
+
+    if (path === '/login' || path === '/admin/login') {
+      if (req.method === 'POST') {
+        let body = '';
+        req.on('data', c => body += c);
+        req.on('end', () => {
+          const params = new URLSearchParams(body);
+          const email = params.get('email');
+          const pass = params.get('pass');
+          if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+            req.session.adminAuthed = true;
+            res.writeHead(302, { Location: '/admin/live' });
+            res.end();
+          } else {
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
+            res.end(loginPage('Invalid email or password.'));
+          }
+        });
+        return true;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
+      res.end(loginPage());
+      return true;
+    }
+
+    if (path === '/logout' || path === '/admin/logout') {
+      req.session.destroy();
+      res.writeHead(302, { Location: '/admin/login' });
+      res.end();
+      return true;
+    }
+
+    if (!isAuthenticated(req)) {
+      res.writeHead(302, { Location: '/admin/login' });
+      res.end();
+      return true;
+    }
+
+    if (path === '/live/stats' || path === '/admin/live/stats') {
+      const visitors = tracker.getActive();
+      const count = tracker.getCount();
+      res.writeHead(200, { 'Content-Type': 'application/json', ...noCache });
+      res.end(JSON.stringify({ count, visitors }));
+      return true;
+    }
+
+    if (path === '/live' || path === '/admin/live') {
+      const visitors = tracker.getActive();
+      const count = tracker.getCount();
+      const visitorsHtml = count === 0
+        ? '<div class="empty"><div class="big">👀</div>Waiting for visitors...</div>'
+        : visitors.map(v => personHtml(v)).join('');
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
+      res.end(dashboardPage(req, count, visitorsHtml));
       return true;
     }
   } catch (e) {
