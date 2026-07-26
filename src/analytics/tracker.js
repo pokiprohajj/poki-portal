@@ -57,6 +57,7 @@ class LiveTracker {
       const ua = req.headers['user-agent'] || '';
       const device = this._detectDevice(ua);
       const bot = detectBot(ua);
+      const referrer = req.headers['referer'] || null;
 
       const existing = this.sessions.get(ip);
 
@@ -80,6 +81,7 @@ class LiveTracker {
         country,
         device,
         bot,
+        referrer,
         visited,
         views,
         lastSeen: Date.now(),
@@ -89,10 +91,12 @@ class LiveTracker {
     }
   }
 
-  trackPage(id, page) {
+  trackPage(id, page, country, device, bot, referrer) {
     const existing = this.sessions.get(id);
     if (existing) {
       existing.page = page;
+      if (country && existing.country === 'Unknown') existing.country = country;
+      if (device && existing.device === 'Unknown') existing.device = device;
       existing.visited.add(page);
       existing.views++;
       existing.lastSeen = Date.now();
@@ -100,9 +104,10 @@ class LiveTracker {
       this.sessions.set(id, {
         ip: id,
         page,
-        country: 'Unknown',
-        device: 'Unknown',
-        bot: null,
+        country: country || 'Unknown',
+        device: device || 'Unknown',
+        bot: bot || null,
+        referrer: referrer || null,
         visited: new Set([page]),
         views: 1,
         lastSeen: Date.now(),
@@ -139,6 +144,7 @@ class LiveTracker {
       page: s.page,
       device: s.device,
       bot: s.bot,
+      referrer: s.referrer,
       views: s.views,
       pages: s.visited.size,
       lastSeen: s.lastSeen,
@@ -151,4 +157,4 @@ class LiveTracker {
   }
 }
 
-module.exports = new LiveTracker();
+module.exports = Object.assign(new LiveTracker(), { detectBot });

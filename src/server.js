@@ -44,24 +44,21 @@ app.use((req, res, next) => {
 });
 
 // Client-side page beacon (SPA navigation tracking + tab-close disconnect)
-app.post('/t', (req, res) => {
-  const id = req.body?.id;
-  if (req.body?.disconnect) {
+function handleBeacon(id, page, disconnect, req, res) {
+  if (disconnect) {
     if (id) analyticsTracker.untrack(id);
-  } else if (id && req.body?.page) {
-    analyticsTracker.trackPage(id, req.body.page);
+  } else if (id && page) {
+    const country = req.headers['cf-ipcountry'] || req.headers['x-geo-country'] || null;
+    const ua = req.headers['user-agent'] || '';
+    const device = analyticsTracker._detectDevice(ua);
+    const bot = analyticsTracker.detectBot(ua);
+    const referrer = req.headers['referer'] || null;
+    analyticsTracker.trackPage(id, page, country, device, bot, referrer);
   }
   res.status(204).end();
-});
-app.get('/t', (req, res) => {
-  const id = req.query?.id;
-  if (req.query?.disconnect) {
-    if (id) analyticsTracker.untrack(id);
-  } else if (id && req.query?.page) {
-    analyticsTracker.trackPage(id, req.query.page);
-  }
-  res.status(204).end();
-});
+}
+app.post('/t', (req, res) => handleBeacon(req.body?.id, req.body?.page, req.body?.disconnect, req, res));
+app.get('/t', (req, res) => handleBeacon(req.query?.id, req.query?.page, req.query?.disconnect, req, res));
 
 // Passive analytics — never blocks, never throws
 app.use((req, res, next) => {

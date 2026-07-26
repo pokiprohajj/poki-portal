@@ -50,6 +50,8 @@ h1{font-size:22px;color:#6c5ce7;margin-bottom:6px}
 .person .page a{color:#6c5ce7;text-decoration:none}
 .person .page a:hover{text-decoration:underline;color:#8b7cf7}
 .person .views{font-size:11px;color:#8888aa;min-width:50px;text-align:center;white-space:nowrap}
+.person .ref{font-size:11px;padding:2px 8px;border-radius:12px;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis}
+.ref-search{background:#1e3a1e;color:#7ddc7d}.ref-social{background:#3a1e3a;color:#dc7ddc}.ref-direct{background:#1e1e3a;color:#7d7ddc}.ref-other{background:#2a2a1e;color:#dcdc7d}
 .person .device{font-size:11px;padding:2px 10px;border-radius:12px;min-width:50px;text-align:center}
 .d{background:#1e293b;color:#94a3b8}
 .m{background:#064e3b;color:#6ee7b7}
@@ -78,7 +80,8 @@ let currentIds=new Set();
 function f(c){if(!c||c==='Unknown'||c==='XX')return '';return[...c.toUpperCase()].map(l=>String.fromCodePoint(0x1F1E6+l.charCodeAt(0)-65)).join('')}
 function poll(){fetch(BASE+'/stats?token='+TOKEN,{cache:'no-store'}).then(r=>r.json()).then(d=>{render(d)}).catch(()=>{})}
 function pLink(p){return'&nbsp;<a href="https://browsergameshq.com'+p+'" target="_blank" rel="noopener">'+p+'</a>'}
-function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const empty=list.querySelector('.empty');if(empty&&d.count>0)empty.remove();const lookup={};list.querySelectorAll('.person').forEach(el=>{lookup[el.dataset.id]=el});const seen=new Set();d.visitors.forEach(v=>{seen.add(v.id);const el=lookup[v.id];if(el){const oldPage=el.querySelector('.page a')||el.querySelector('.page');if(oldPage&&oldPage.innerHTML!==pLink(v.page)){el.querySelector('.page').innerHTML=pLink(v.page);el.querySelector('.page').title=v.page}const oldViews=el.querySelector('.views');if(oldViews)oldViews.textContent=(v.views||1)+' pg'}else{const div=document.createElement('div');div.className='person';div.dataset.id=v.id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">'+pLink(v.page)+'</span><span class="views">'+(v.views||1)+' pg</span><span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span><span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';list.appendChild(div)}});Object.keys(lookup).forEach(id=>{if(!seen.has(id)){const el=lookup[id];el.classList.add('removing');setTimeout(()=>{if(el.parentNode)el.remove()},300)}})}
+function s(r){if(!r)return'<span class="ref ref-direct">Direct</span>';var l=r.toLowerCase();if(l.includes('google'))return'<span class="ref ref-search">Google</span>';if(l.includes('bing'))return'<span class="ref ref-search">Bing</span>';if(l.includes('yahoo'))return'<span class="ref ref-search">Yahoo</span>';if(l.includes('duckduckgo'))return'<span class="ref ref-search">DuckDuckGo</span>';if(l.includes('yandex'))return'<span class="ref ref-search">Yandex</span>';if(l.includes('baidu'))return'<span class="ref ref-search">Baidu</span>';if(l.includes('facebook')||l.includes('fb.com'))return'<span class="ref ref-social">Facebook</span>';if(l.includes('instagram'))return'<span class="ref ref-social">Instagram</span>';if(l.includes('twitter')||l.includes('x.com'))return'<span class="ref ref-social">Twitter</span>';if(l.includes('linkedin'))return'<span class="ref ref-social">LinkedIn</span>';if(l.includes('pinterest'))return'<span class="ref ref-social">Pinterest</span>';if(l.includes('reddit'))return'<span class="ref ref-social">Reddit</span>';if(l.includes('discord'))return'<span class="ref ref-social">Discord</span>';if(l.includes('telegram'))return'<span class="ref ref-social">Telegram</span>';if(l.includes('whatsapp'))return'<span class="ref ref-social">WhatsApp</span>';if(l.includes('tiktok'))return'<span class="ref ref-social">TikTok</span>';if(l.includes('youtube'))return'<span class="ref ref-social">YouTube</span>';if(l.includes('browsergameshq.com'))return'';try{var h=new URL(r).hostname.replace(/^www\./,'').slice(0,12);return'<span class="ref ref-other" title="'+r.replace(/"/g,'&quot;')+'">'+h+'</span>'}catch(e){return''}}
+function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const empty=list.querySelector('.empty');if(empty&&d.count>0)empty.remove();const lookup={};list.querySelectorAll('.person').forEach(el=>{lookup[el.dataset.id]=el});const seen=new Set();d.visitors.forEach(v=>{seen.add(v.id);const el=lookup[v.id];if(el){const oldPage=el.querySelector('.page a')||el.querySelector('.page');if(oldPage&&oldPage.innerHTML!==pLink(v.page)){el.querySelector('.page').innerHTML=pLink(v.page);el.querySelector('.page').title=v.page}const oldViews=el.querySelector('.views');if(oldViews)oldViews.textContent=(v.views||1)+' pg'}else{const div=document.createElement('div');div.className='person';div.dataset.id=v.id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">'+pLink(v.page)+'</span><span class="views">'+(v.views||1)+' pg</span><span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span>'+s(v.referrer)+'<span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';list.appendChild(div)}});Object.keys(lookup).forEach(id=>{if(!seen.has(id)){const el=lookup[id];el.classList.add('removing');setTimeout(()=>{if(el.parentNode)el.remove()},300)}})}
 poll();setInterval(poll,2000)
 </script>
 </body>
@@ -102,10 +105,34 @@ function pageHtml(path) {
   return '&nbsp;<a href="https://browsergameshq.com' + path + '" target="_blank" rel="noopener">' + path + '</a>';
 }
 
+function sourceLabel(r) {
+  if (!r) return '<span class="ref ref-direct">Direct</span>';
+  const l = r.toLowerCase();
+  if (l.includes('google')) return '<span class="ref ref-search">Google</span>';
+  if (l.includes('bing')) return '<span class="ref ref-search">Bing</span>';
+  if (l.includes('yahoo')) return '<span class="ref ref-search">Yahoo</span>';
+  if (l.includes('duckduckgo')) return '<span class="ref ref-search">DuckDuckGo</span>';
+  if (l.includes('yandex')) return '<span class="ref ref-search">Yandex</span>';
+  if (l.includes('baidu')) return '<span class="ref ref-search">Baidu</span>';
+  if (l.includes('facebook') || l.includes('fb.com')) return '<span class="ref ref-social">Facebook</span>';
+  if (l.includes('instagram')) return '<span class="ref ref-social">Instagram</span>';
+  if (l.includes('twitter') || l.includes('x.com')) return '<span class="ref ref-social">Twitter</span>';
+  if (l.includes('linkedin')) return '<span class="ref ref-social">LinkedIn</span>';
+  if (l.includes('pinterest')) return '<span class="ref ref-social">Pinterest</span>';
+  if (l.includes('reddit')) return '<span class="ref ref-social">Reddit</span>';
+  if (l.includes('discord')) return '<span class="ref ref-social">Discord</span>';
+  if (l.includes('telegram')) return '<span class="ref ref-social">Telegram</span>';
+  if (l.includes('whatsapp')) return '<span class="ref ref-social">WhatsApp</span>';
+  if (l.includes('tiktok')) return '<span class="ref ref-social">TikTok</span>';
+  if (l.includes('youtube')) return '<span class="ref ref-social">YouTube</span>';
+  if (l.includes('browsergameshq.com')) return '';
+  return '<span class="ref ref-other" title="' + r.replace(/"/g,'&quot;') + '">' + new URL(r).hostname.replace(/^www\./, '').slice(0, 12) + '</span>';
+}
+
 function personHtml(v) {
   const d = (v.device || 'u').toLowerCase().charAt(0);
   const bot = v.bot;
-  return '<div class="person" data-id="' + v.id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">' + pageHtml(v.page) + '</span><span class="views">' + (v.views || 1) + ' pg</span><span class="device ' + d + '">' + (v.device || '?') + '</span><span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
+  return '<div class="person" data-id="' + v.id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">' + pageHtml(v.page) + '</span><span class="views">' + (v.views || 1) + ' pg</span><span class="device ' + d + '">' + (v.device || '?') + '</span>' + sourceLabel(v.referrer) + '<span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
 }
 
 module.exports = dashboardRouter;
