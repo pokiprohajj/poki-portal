@@ -43,6 +43,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// Client-side page beacon (SPA navigation tracking + tab-close disconnect)
+app.post('/t', (req, res) => {
+  const id = req.body?.id;
+  if (req.body?.disconnect) {
+    if (id) analyticsTracker.untrack(id);
+  } else if (id && req.body?.page) {
+    analyticsTracker.trackPage(id, req.body.page);
+  }
+  res.status(204).end();
+});
+app.get('/t', (req, res) => {
+  const id = req.query?.id;
+  if (req.query?.disconnect) {
+    if (id) analyticsTracker.untrack(id);
+  } else if (id && req.query?.page) {
+    analyticsTracker.trackPage(id, req.query.page);
+  }
+  res.status(204).end();
+});
+
 // Passive analytics — never blocks, never throws
 app.use((req, res, next) => {
   analyticsTracker.track(req);

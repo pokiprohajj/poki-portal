@@ -45,6 +45,12 @@ function buildSearchConsoleMeta() {
   return `\n    <meta name="google-site-verification" content="${config.searchConsoleVerification}">`;
 }
 
+function buildTrackerScript() {
+  return `<script>
+(function(){var k='_bghtid',id=sessionStorage.getItem(k)||(Date.now().toString(36)+Math.random().toString(36).slice(2,6));sessionStorage.setItem(k,id);var b=function(p){try{navigator.sendBeacon('/t','id='+encodeURIComponent(id)+'&page='+encodeURIComponent(p))}catch(e){}};b(location.pathname);var ph=history.pushState,rh=history.replaceState;history.pushState=function(){ph.apply(history,arguments);b(location.pathname)};history.replaceState=function(){rh.apply(history,arguments);b(location.pathname)};window.addEventListener('popstate',function(){b(location.pathname)});window.addEventListener('beforeunload',function(){try{navigator.sendBeacon('/t','id='+encodeURIComponent(id)+'&disconnect=1')}catch(e){}})})();
+</script>`;
+}
+
 function buildAdUnit(slotId, width, height) {
   if (!config.ads.adsenseClientId || !slotId) return '';
   return `
@@ -61,7 +67,8 @@ function injectAds(html) {
   const ga4Script = buildGA4Script();
   const scMeta = buildSearchConsoleMeta();
   const fbPixel = buildFacebookPixel();
-  const allHeadInjection = [adScript, ga4Script, scMeta, fbPixel].filter(Boolean).join('\n');
+  const trackerScript = buildTrackerScript();
+  const allHeadInjection = [adScript, ga4Script, scMeta, fbPixel, trackerScript].filter(Boolean).join('\n');
 
   let result = html;
 

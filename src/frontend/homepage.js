@@ -44,6 +44,9 @@ const render = (req, res) => {
   src="https://www.facebook.com/tr?id=2002475273742428&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Meta Pixel Code -->
+  <script>
+  (function(){var k='_bghtid',id=sessionStorage.getItem(k)||(Date.now().toString(36)+Math.random().toString(36).slice(2,6));sessionStorage.setItem(k,id);var b=function(p){try{navigator.sendBeacon('/t','id='+encodeURIComponent(id)+'&page='+encodeURIComponent(p))}catch(e){}};b(location.pathname);var ph=history.pushState,rh=history.replaceState;history.pushState=function(){ph.apply(history,arguments);b(location.pathname)};history.replaceState=function(){rh.apply(history,arguments);b(location.pathname)};window.addEventListener('popstate',function(){b(location.pathname)});window.addEventListener('beforeunload',function(){try{navigator.sendBeacon('/t','id='+encodeURIComponent(id)+'&disconnect=1')}catch(e){}})})();
+  </script>
 </head>
 <body>
   <header class="site-header">

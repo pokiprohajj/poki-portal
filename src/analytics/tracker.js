@@ -35,8 +35,8 @@ function detectBot(ua) {
 class LiveTracker {
   constructor() {
     this.sessions = new Map();
-    this.TIMEOUT_MS = 30000;
-    this._pruneInterval = setInterval(() => this._prune(), 3000);
+    this.TIMEOUT_MS = 300000;
+    this._pruneInterval = setInterval(() => this._prune(), 15000);
   }
 
   _isPagePath(path) {
@@ -51,19 +51,25 @@ class LiveTracker {
 
   track(req) {
     try {
-      // Only track requests that expect HTML (page navigations, not XHR/fetch)
-      if (!req.accepts('html')) return;
-
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
       const page = req.path || '/';
-      if (!this._isPagePath(page)) return;
-
       const country = req.headers['cf-ipcountry'] || req.headers['x-geo-country'] || 'Unknown';
       const ua = req.headers['user-agent'] || '';
       const device = this._detectDevice(ua);
       const bot = detectBot(ua);
 
       const existing = this.sessions.get(ip);
+
+      // Always update lastSeen for active sessions
+      if (existing) {
+        existing.country = country;
+        existing.device = device;
+        existing.bot = bot;
+        existing.lastSeen = Date.now();
+      }
+
+      if (!this._isPagePath(page)) return;
+
       const visited = existing ? existing.visited : new Set();
       const views = existing ? existing.views + 1 : 1;
       visited.add(page);
@@ -83,6 +89,31 @@ class LiveTracker {
     }
   }
 
+  trackPage(id, page) {
+    const existing = this.sessions.get(id);
+    if (existing) {
+      existing.page = page;
+      existing.visited.add(page);
+      existing.views++;
+      existing.lastSeen = Date.now();
+    } else {
+      this.sessions.set(id, {
+        ip: id,
+        page,
+        country: 'Unknown',
+        device: 'Unknown',
+        bot: null,
+        visited: new Set([page]),
+        views: 1,
+        lastSeen: Date.now(),
+      });
+    }
+  }
+
+  untrack(id) {
+    this.sessions.delete(id);
+  }
+
   _detectDevice(ua) {
     if (!ua) return 'Unknown';
     const l = ua.toLowerCase();
@@ -93,9 +124,9 @@ class LiveTracker {
 
   _prune() {
     const cutoff = Date.now() - this.TIMEOUT_MS;
-    for (const [ip, session] of this.sessions) {
+    for (const [id, session] of this.sessions) {
       if (session.lastSeen < cutoff) {
-        this.sessions.delete(ip);
+        this.sessions.delete(id);
       }
     }
   }
