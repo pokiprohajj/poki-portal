@@ -47,7 +47,7 @@ function buildSearchConsoleMeta() {
 
 function buildTrackerScript() {
   return `<script>
-(function(){var k='_bghtid',id=sessionStorage.getItem(k)||(Date.now().toString(36)+Math.random().toString(36).slice(2,6));sessionStorage.setItem(k,id);var b=function(p){try{navigator.sendBeacon('/t','id='+encodeURIComponent(id)+'&page='+encodeURIComponent(p))}catch(e){}};b(location.pathname);var ph=history.pushState,rh=history.replaceState;history.pushState=function(){ph.apply(history,arguments);b(location.pathname)};history.replaceState=function(){rh.apply(history,arguments);b(location.pathname)};window.addEventListener('popstate',function(){b(location.pathname)});window.addEventListener('beforeunload',function(){try{navigator.sendBeacon('/t','id='+encodeURIComponent(id)+'&disconnect=1')}catch(e){}})})();
+(function(){var k='_bghtid',id=sessionStorage.getItem(k)||(Date.now().toString(36)+Math.random().toString(36).slice(2,6));sessionStorage.setItem(k,id);var b=function(p,u){try{var d=new Blob([(u?'id='+encodeURIComponent(id)+'&page='+encodeURIComponent(p):'id='+encodeURIComponent(id)+'&disconnect=1')],{type:'application/x-www-form-urlencoded'});navigator.sendBeacon('/t',d)}catch(e){}};b(location.pathname,1);var ph=history.pushState,rh=history.replaceState;history.pushState=function(){ph.apply(history,arguments);b(location.pathname,1)};history.replaceState=function(){rh.apply(history,arguments);b(location.pathname,1)};window.addEventListener('popstate',function(){b(location.pathname,1)});window.addEventListener('beforeunload',function(){b('',0)})})();
 </script>`;
 }
 
