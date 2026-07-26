@@ -76,7 +76,8 @@ const BASE=location.pathname.replace(/\\/+$/,'');
 let currentIds=new Set();
 function f(c){if(!c||c==='Unknown'||c==='XX')return '';return[...c.toUpperCase()].map(l=>String.fromCodePoint(0x1F1E6+l.charCodeAt(0)-65)).join('')}
 function poll(){fetch(BASE+'/stats?token='+TOKEN,{cache:'no-store'}).then(r=>r.json()).then(d=>{render(d)}).catch(()=>{})}
-function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const newIds=new Set();const incoming=new Map();d.visitors.forEach(v=>{const id=v.country+':'+v.page+':'+v.device+':'+(v.bot||'');newIds.add(id);incoming.set(id,v)});const existing=new Map();list.querySelectorAll('.person').forEach(el=>{const id=el.dataset.id;if(!newIds.has(id)){el.classList.add('removing');setTimeout(()=>el.remove(),300)}else{existing.set(id,el)}});incoming.forEach((v,id)=>{if(!existing.has(id)){const div=document.createElement('div');div.className='person';div.dataset.id=id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">&nbsp;<a href="https://browsergameshq.com'+v.page+'" target="_blank" rel="noopener">'+v.page+'</a></span><span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span><span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';const empty=list.querySelector('.empty');if(empty)empty.remove();list.appendChild(div)}});currentIds=newIds}
+function pLink(p){if(p==='/'||p.startsWith('/en/g/')||p.startsWith('/blog/')||p.startsWith('/en/')){return'&nbsp;<a href="https://browsergameshq.com'+p+'" target="_blank" rel="noopener">'+p+'</a>'}return'&nbsp;'+p}
+function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const newIds=new Set();const incoming=new Map();d.visitors.forEach(v=>{const id=v.country+':'+v.page+':'+v.device+':'+(v.bot||'');newIds.add(id);incoming.set(id,v)});const existing=new Map();list.querySelectorAll('.person').forEach(el=>{const id=el.dataset.id;if(!newIds.has(id)){el.classList.add('removing');setTimeout(()=>el.remove(),300)}else{existing.set(id,el)}});incoming.forEach((v,id)=>{if(!existing.has(id)){const div=document.createElement('div');div.className='person';div.dataset.id=id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">'+pLink(v.page)+'</span><span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span><span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';const empty=list.querySelector('.empty');if(empty)empty.remove();list.appendChild(div)}});currentIds=newIds}
 poll();setInterval(poll,2000)
 </script>
 </body>
@@ -96,11 +97,22 @@ function flagEmoji(code) {
   return [...code.toUpperCase()].map(l => String.fromCodePoint(0x1F1E6 + l.charCodeAt(0) - 65)).join('');
 }
 
+function isLinkablePage(path) {
+  return path === '/' || path.startsWith('/en/g/') || path.startsWith('/blog/') || path.startsWith('/en/');
+}
+
+function pageHtml(path) {
+  if (isLinkablePage(path)) {
+    return '&nbsp;<a href="https://browsergameshq.com' + path + '" target="_blank" rel="noopener">' + path + '</a>';
+  }
+  return '&nbsp;' + path;
+}
+
 function personHtml(v) {
   const d = (v.device || 'u').toLowerCase().charAt(0);
   const bot = v.bot;
   const id = v.country + ':' + v.page + ':' + v.device + ':' + (bot || '');
-  return '<div class="person" data-id="' + id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">&nbsp;<a href="https://browsergameshq.com' + v.page + '" target="_blank" rel="noopener">' + v.page + '</a></span><span class="device ' + d + '">' + (v.device || '?') + '</span><span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
+  return '<div class="person" data-id="' + id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">' + pageHtml(v.page) + '</span><span class="device ' + d + '">' + (v.device || '?') + '</span><span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
 }
 
 module.exports = dashboardRouter;
