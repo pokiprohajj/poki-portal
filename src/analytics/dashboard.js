@@ -14,90 +14,83 @@ function dashboardRouter(req, res) {
       return true;
     }
 
-    // JSON stats endpoint — polled every 3s by the dashboard
+    const noCache = { 'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0' };
+
     if (path === '/live/stats' || path === '/admin/live/stats') {
       const stats = tracker.getActiveVisitors();
-      const recent = tracker.visits ? tracker.visits.slice(-20).reverse() : [];
-      res.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      });
+      const recent = tracker.visits ? tracker.visits.slice(-15).reverse() : [];
+      res.writeHead(200, { 'Content-Type': 'application/json', ...noCache });
       res.end(JSON.stringify({ stats, recent }));
       return true;
     }
 
     if (path === '/live' || path === '/admin/live') {
       const stats = tracker.getActiveVisitors();
-      const recent = tracker.visits ? tracker.visits.slice(-20).reverse() : [];
-      res.writeHead(200, {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      });
+      const recent = tracker.visits ? tracker.visits.slice(-15).reverse() : [];
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
       res.end(`<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Live Analytics</title>
+<title>Live View — BrowserGamesHQ</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-body{background:#0f0f23;color:#e0e0e0;padding:20px}
-h1{font-size:24px;margin-bottom:20px;color:#6c5ce7}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.card{background:#1a1a3e;border-radius:12px;padding:20px;border:1px solid #2a2a5e}
-.card h3{font-size:12px;text-transform:uppercase;color:#8888aa;margin-bottom:8px;letter-spacing:1px}
-.card .num{font-size:32px;font-weight:700;color:#fff}
-.panel{background:#1a1a3e;border-radius:12px;padding:20px;border:1px solid #2a2a5e;margin-bottom:16px}
-.panel h3{font-size:12px;text-transform:uppercase;color:#8888aa;margin-bottom:12px;letter-spacing:1px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:6px 4px;border-bottom:1px solid #2a2a5e;color:#8888aa;font-size:11px;text-transform:uppercase}
-td{padding:6px 4px;border-bottom:1px solid #1a1a3e;font-size:13px}
-.bar-wrap{background:#2a2a5e;border-radius:4px;overflow:hidden;display:inline-block;min-width:60px;text-align:right}
-.bar-fill{background:#6c5ce7;height:20px;line-height:20px;padding-right:6px;color:#fff;font-size:11px;text-align:right;transition:width .3s}
-.badge-d{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:#2d3748;color:#a0aec0}
-.badge-m{background:#22543d;color:#68d391}
-.badge-t{background:#2a4365;color:#63b3ed}
-.badge-u{background:#2d3748;color:#a0aec0}
-#activity-log{max-height:400px;overflow-y:auto}
-.activity-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a3e;font-size:12px;animation:fadeIn .3s;gap:8px}
-.activity-row>*{white-space:nowrap}
-.activity-time{color:#8888aa;min-width:65px}
-.activity-page{color:#6c5ce7;overflow:hidden;text-overflow:ellipsis;max-width:250px;min-width:100px}
-.activity-country{min-width:50px}
-@keyframes fadeIn{from{opacity:0;background:#2a2a5e}to{opacity:1;background:transparent}}
-.header-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.time{font-size:13px;color:#8888aa}
-@media(max-width:768px){.cols{grid-template-columns:1fr}.activity-page{max-width:120px}}
+body{background:#0a0a1a;color:#fff;display:flex;min-height:100vh;align-items:center;justify-content:center}
+.container{width:100%;max-width:900px;padding:20px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+.top h1{font-size:20px;color:#6c5ce7;font-weight:700}
+.top .clock{color:#666;font-size:14px;font-family:monospace}
+.counter-row{display:flex;gap:20px;margin-bottom:30px}
+.counter{background:linear-gradient(135deg,#1a1a3e,#151530);border-radius:16px;padding:24px;flex:1;text-align:center;border:1px solid #2a2a5e}
+.counter .label{font-size:11px;text-transform:uppercase;color:#666;letter-spacing:1px;margin-bottom:6px}
+.counter .num{font-size:42px;font-weight:800;color:#fff;line-height:1}
+.counter .num.pulse{animation:pulse 1s ease-in-out}
+@keyframes pulse{0%{opacity:1}50%{opacity:.6}100%{opacity:1}}
+.section{margin-bottom:24px}
+.section h2{font-size:13px;text-transform:uppercase;color:#666;letter-spacing:1px;margin-bottom:12px}
+.list{display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:#1a1a3e;border:1px solid #2a2a5e;border-radius:20px;padding:4px 14px;font-size:13px;display:flex;align-items:center;gap:6px}
+.tag .count{color:#6c5ce7;font-weight:700;font-size:11px}
+.live-stream{background:#1a1a3e;border-radius:12px;border:1px solid #2a2a5e;padding:16px;height:320px;overflow-y:auto}
+.live-stream::-webkit-scrollbar{width:4px}
+.live-stream::-webkit-scrollbar-thumb{background:#2a2a5e;border-radius:2px}
+.entry{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1a1a3e;font-size:13px;animation:slideIn .2s}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.entry:last-child{border-bottom:none}
+.entry .time{color:#555;font-family:monospace;font-size:11px;min-width:60px}
+.entry .page{color:#6c5ce7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;flex:1}
+.entry .flag{min-width:24px}
+.entry .device{font-size:11px;padding:2px 8px;border-radius:10px;min-width:50px;text-align:center}
+.dev-d{background:#1e293b;color:#94a3b8}
+.dev-m{background:#064e3b;color:#6ee7b7}
+.dev-t{background:#1e3a5f;color:#7dd3fc}
+.empty-state{color:#444;text-align:center;padding:60px 20px;font-size:14px}
+.empty-state .big{font-size:48px;margin-bottom:12px}
 </style>
 </head>
 <body>
-<div class="header-bar"><h1>Live Analytics</h1><span class="time" id="clock"></span></div>
-<div class="grid">
-<div class="card"><h3>Active (5m)</h3><div class="num" id="a-total">${stats.total}</div></div>
-<div class="card"><h3>Unique</h3><div class="num" id="a-unique">${stats.unique}</div></div>
-<div class="card"><h3>Pages</h3><div class="num" id="a-pages">${stats.byPage.length}</div></div>
-<div class="card"><h3>Countries</h3><div class="num" id="a-countries">${stats.byCountry.length}</div></div>
+<div class="container">
+<div class="top"><h1>Live View</h1><span class="clock" id="clock"></span></div>
+<div class="counter-row">
+<div class="counter"><div class="label">Active Now</div><div class="num" id="c-total">${stats.total}</div></div>
+<div class="counter"><div class="label">Unique</div><div class="num" id="c-unique">${stats.unique}</div></div>
+<div class="counter"><div class="label">Pages</div><div class="num" id="c-pages">${stats.byPage.length}</div></div>
+<div class="counter"><div class="label">Countries</div><div class="num" id="c-countries">${stats.byCountry.length}</div></div>
 </div>
-<div class="cols">
-<div class="panel"><h3>Pages</h3><div id="pages-list">${renderTable(stats.byPage, 'label')}</div></div>
-<div class="panel"><h3>Countries</h3><div id="countries-list">${renderTable(stats.byCountry.map(c => ({...c, label: flag(c.label) + ' ' + c.label})), 'label')}</div></div>
-</div>
-<div class="cols">
-<div class="panel"><h3>Devices</h3><div id="devices-list">${renderTable(stats.byDevice, 'label')}</div></div>
-<div class="panel"><h3>Live Activity</h3><div id="activity-log">${recent.length === 0 ? '<p style="color:#8888aa;font-size:13px">Waiting for visitors...</p>' : recent.map(v => renderRow(v)).join('')}</div></div>
+<div class="section"><h2>Pages</h2><div class="list" id="pages-list">${stats.byPage.slice(0,12).map(p => `<span class="tag">${p.label} <span class="count">${p.count}</span></span>`).join('')}</div></div>
+<div class="section"><h2>Countries</h2><div class="list" id="countries-list">${stats.byCountry.map(c => `<span class="tag">${flagEmoji(c.label)} ${c.label} <span class="count">${c.count}</span></span>`).join('')}</div></div>
+<div class="section"><h2>Live Stream</h2><div class="live-stream" id="stream">${recent.length === 0 ? '<div class="empty-state"><div class="big">👀</div>Waiting for visitors...</div>' : recent.map(v => entryHtml(v)).join('')}</div></div>
 </div>
 <script>
-const TOKEN = ${JSON.stringify(token)};
-const BASE = location.pathname.replace(/\/+$/,'');
-function flag(c){if(!c||c==='Unknown'||c==='XX')return '';return[...c.toUpperCase()].map(l=>String.fromCodePoint(0x1F1E6+l.charCodeAt(0)-65)).join('')}
-function badge(d){const m=(d||'u').toLowerCase();return'<span class="badge-'+m.charAt(0)+'">'+(d||'?')+'</span>'}
-function tbl(data){if(!data||!data.length)return'<p style="color:#8888aa;font-size:13px">No data</p>';const mx=data[0].count;return'<table><tr><th>Name</th><th style="text-align:right">Count</th></tr>'+data.map(d=>'<tr><td>'+d.label+'</td><td style="text-align:right"><div class="bar-wrap"><div class="bar-fill" style="width:'+Math.max(8,(d.count/mx)*100)+'%">'+d.count+'</div></div></td></tr>').join('')+'</table>'}
-function upd(s){document.getElementById('a-total').textContent=s.total;document.getElementById('a-unique').textContent=s.unique;document.getElementById('a-pages').textContent=s.byPage.length;document.getElementById('a-countries').textContent=s.byCountry.length;document.getElementById('pages-list').innerHTML=tbl(s.byPage);document.getElementById('countries-list').innerHTML=tbl(s.byCountry.map(c=>({...c,label:flag(c.label)+' '+c.label})));document.getElementById('devices-list').innerHTML=tbl(s.byDevice)}
-function addRow(v){const t=new Date(v.timestamp).toLocaleTimeString();const r=document.createElement('div');r.className='activity-row';r.innerHTML='<span class="activity-time">'+t+'</span><span class="activity-page" title="'+v.page+'">'+v.page+'</span><span class="activity-country">'+flag(v.country)+' '+v.country+'</span><span>'+badge(v.device)+'</span>';const log=document.getElementById('activity-log');const p=log.querySelector('p');if(p)p.remove();log.insertBefore(r,log.firstChild);if(log.children.length>100)log.removeChild(log.lastChild)}
-let lastTimestamps = new Set();
-function poll(){fetch(BASE+'/stats?token='+TOKEN).then(r=>r.json()).then(d=>{upd(d.stats);d.recent.forEach(v=>{if(!lastTimestamps.has(v.timestamp)){lastTimestamps.add(v.timestamp);addRow(v)}})}).catch(()=>{})}
-poll();setInterval(poll,3000)
+const TOKEN=${JSON.stringify(token)};
+const BASE=location.pathname.replace(/\\/+$/,'');
+let known=new Set();
+function f(c){if(!c||c==='Unknown'||c==='XX')return '';return[...c.toUpperCase()].map(l=>String.fromCodePoint(0x1F1E6+l.charCodeAt(0)-65)).join('')}
+function poll(){fetch(BASE+'/stats?token='+TOKEN,{cache:'no-store'}).then(r=>r.json()).then(d=>{upd(d.stats);d.recent.forEach(v=>{if(!known.has(v.timestamp)){known.add(v.timestamp);addEntry(v)}})}).catch(()=>{})}
+function upd(s){['total','unique','pages','countries'].forEach(k=>{const el=document.getElementById('c-'+k);if(el&&el.textContent!=String(s[k==='pages'?'byPage.length':k==='countries'?'byCountry.length':k])){el.textContent=s[k==='pages'?'byPage.length':k==='countries'?'byCountry.length':k];el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse')}});const pl=document.getElementById('pages-list');if(pl)pl.innerHTML=s.byPage.slice(0,12).map(p=>'<span class="tag">'+p.label+' <span class="count">'+p.count+'</span></span>').join('');const cl=document.getElementById('countries-list');if(cl)cl.innerHTML=s.byCountry.map(c=>'<span class="tag">'+f(c.label)+' '+c.label+' <span class="count">'+c.count+'</span></span>').join('')}
+function addEntry(v){const st=document.getElementById('stream');const d=document.createElement('div');d.className='entry';d.innerHTML='<span class="time">'+new Date(v.timestamp).toLocaleTimeString()+'</span><span class="page" title="'+v.page+'">'+v.page+'</span><span class="flag">'+f(v.country)+' '+v.country+'</span><span class="device dev-'+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span>';const e=st.querySelector('.empty-state');if(e)e.remove();st.insertBefore(d,st.firstChild);while(st.children.length>60)st.removeChild(st.lastChild)}
+poll();setInterval(poll,2000)
 function clock(){document.getElementById('clock').textContent=new Date().toLocaleString()}
 clock();setInterval(clock,1000)
 </script>
@@ -113,27 +106,13 @@ clock();setInterval(clock,1000)
   return false;
 }
 
-function flag(code) {
+function flagEmoji(code) {
   if (!code || code === 'Unknown' || code === 'XX') return '';
   return [...code.toUpperCase()].map(l => String.fromCodePoint(0x1F1E6 + l.charCodeAt(0) - 65)).join('');
 }
 
-function renderTable(data, key) {
-  if (!data || !data.length) return '<p style="color:#8888aa;font-size:13px">No data</p>';
-  const mx = data[0].count;
-  return '<table><tr><th>Name</th><th style="text-align:right">Count</th></tr>' +
-    data.map(d => '<tr><td>' + d[key] + '</td><td style="text-align:right"><div class="bar-wrap"><div class="bar-fill" style="width:' + Math.max(8, (d.count / mx) * 100) + '%">' + d.count + '</div></div></td></tr>').join('') +
-    '</table>';
-}
-
-function renderRow(v) {
-  const t = new Date(v.timestamp).toLocaleTimeString();
-  return '<div class="activity-row"><span class="activity-time">' + t + '</span><span class="activity-page" title="' + v.page + '">' + v.page + '</span><span class="activity-country">' + flag(v.country) + ' ' + v.country + '</span><span>' + badge(v.device) + '</span></div>';
-}
-
-function badge(device) {
-  const m = (device || 'u').toLowerCase();
-  return '<span class="badge-' + m.charAt(0) + '">' + (device || '?') + '</span>';
+function entryHtml(v) {
+  return '<div class="entry"><span class="time">' + new Date(v.timestamp).toLocaleTimeString() + '</span><span class="page" title="' + v.page + '">' + v.page + '</span><span class="flag">' + flagEmoji(v.country) + ' ' + v.country + '</span><span class="device dev-' + (v.device || 'u').toLowerCase().charAt(0) + '">' + (v.device || '?') + '</span></div>';
 }
 
 module.exports = dashboardRouter;
