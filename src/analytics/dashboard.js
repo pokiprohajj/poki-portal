@@ -123,21 +123,16 @@ function dashboardRouter(req, res) {
 
     if (path === '/login' || path === '/admin/login') {
       if (req.method === 'POST') {
-        let body = '';
-        req.on('data', c => body += c);
-        req.on('end', () => {
-          const params = new URLSearchParams(body);
-          const email = params.get('email');
-          const pass = params.get('pass');
-          if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
-            req.session.adminAuthed = true;
-            res.writeHead(302, { Location: '/admin/live' });
-            res.end();
-          } else {
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
-            res.end(loginPage('Invalid email or password.'));
-          }
-        });
+        const email = req.body?.email;
+        const pass = req.body?.pass;
+        if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+          req.session.adminAuthed = true;
+          res.writeHead(302, { Location: '/admin/live' });
+          res.end();
+        } else {
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
+          res.end(loginPage('Invalid email or password.'));
+        }
         return true;
       }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...noCache });
