@@ -8,7 +8,8 @@ const bulk = require('./posts/bulk');
 const bulk2 = require('./posts/bulk2');
 const bulk3 = require('./posts/bulk3');
 const bulk4 = require('./posts/bulk4');
+const bulk5 = require('./posts/bulk5');
 
-const all = [].concat(original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4);
+const all = [].concat(original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5);
 
 module.exports = all;
