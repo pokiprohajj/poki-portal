@@ -74,9 +74,26 @@ function pageHtml(listHtml, hasMore, page) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Blog - BrowserGamesHQ</title>
 <meta name="description" content="Game guides, tips, and lists at BrowserGamesHQ. Learn how to master your favorite browser games.">
-<link rel="stylesheet" href="/static/css/blog.css?v=20260725">
-${webSiteSchema()}
-</head>
+  <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
+  ${webSiteSchema()}
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '2002475273742428');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=2002475273742428&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
+  </head>
 <body>
 <header class="blog-header">
 <div class="inner">
@@ -230,11 +247,28 @@ function renderPostPage(post, allPosts) {
 <meta property="og:description" content="${post.excerpt}">
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="/static/css/blog.css?v=20260725">
-${faqSchema(post)}
-${articleSchema(post)}
-${breadcrumbSchema(post)}
-</head>
+  <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
+  ${faqSchema(post)}
+  ${articleSchema(post)}
+  ${breadcrumbSchema(post)}
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '2002475273742428');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=2002475273742428&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
+  </head>
 <body>
 <header class="blog-header">
 <div class="inner">
@@ -315,7 +349,7 @@ function blogRouter(req, res) {
     const post = posts.find(p => p.slug === slug);
     if (!post) {
       res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(`<!DOCTYPE html><html><head><title>404 - BrowserGamesHQ</title><link rel="stylesheet" href="/static/css/blog.css?v=20260725"></head><body><div class="not-found"><h1>404</h1><p>Article not found. It may have been moved or deleted.</p><a href="/blog" class="back-link" style="margin:0 auto">&larr; Back to Blog</a></div></body></html>`);
+      res.end(`<!DOCTYPE html><html><head><title>404 - BrowserGamesHQ</title><link rel="stylesheet" href="/static/css/blog.css?v=20260725"><!-- Meta Pixel Code --><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','2002475273742428');fbq('track','PageView');</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2002475273742428&ev=PageView&noscript=1"/></noscript><!-- End Meta Pixel Code --></head><body><div class="not-found"><h1>404</h1><p>Article not found. It may have been moved or deleted.</p><a href="/blog" class="back-link" style="margin:0 auto">&larr; Back to Blog</a></div></body></html>`);
       return true;
     }
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
