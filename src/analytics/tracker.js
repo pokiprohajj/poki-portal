@@ -99,6 +99,7 @@ class LiveTracker {
   getActive() {
     this._prune();
     return Array.from(this.sessions.values()).map(s => ({
+      id: s.ip,
       country: s.country,
       page: s.page,
       device: s.device,
