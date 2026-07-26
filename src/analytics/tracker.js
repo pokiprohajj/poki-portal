@@ -49,15 +49,35 @@ class LiveTracker {
     return true;
   }
 
+  _detectCampaign(query) {
+    if (!query) return null;
+    const p = new URLSearchParams(query);
+    if (p.get('fbclid')) return 'facebook_ad';
+    const us = p.get('utm_source');
+    if (us) {
+      const l = us.toLowerCase();
+      if (l.includes('facebook') || l.includes('fb') || l.includes('instagram')) return 'facebook_ad';
+      if (l.includes('google') || l.includes('search')) return 'google_ad';
+      if (l.includes('twitter') || l.includes('x')) return 'twitter';
+      if (l.includes('linkedin')) return 'linkedin';
+      if (l.includes('tiktok')) return 'tiktok';
+      return us.slice(0, 20);
+    }
+    return null;
+  }
+
   track(req) {
     try {
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
       const page = req.path || '/';
+      const fullUrl = req.url || '';
+      const query = fullUrl.includes('?') ? fullUrl.slice(fullUrl.indexOf('?')) : '';
       const country = req.headers['cf-ipcountry'] || req.headers['x-geo-country'] || 'Unknown';
       const ua = req.headers['user-agent'] || '';
       const device = this._detectDevice(ua);
       const bot = detectBot(ua);
       const referrer = req.headers['referer'] || null;
+      const campaign = this._detectCampaign(query);
 
       const existing = this.sessions.get(ip);
 
@@ -82,6 +102,7 @@ class LiveTracker {
         device,
         bot,
         referrer,
+        campaign,
         visited,
         views,
         lastSeen: Date.now(),
@@ -91,7 +112,7 @@ class LiveTracker {
     }
   }
 
-  trackPage(id, page, country, device, bot, referrer, ip) {
+  trackPage(id, page, country, device, bot, referrer, campaign, ip) {
     // If this is a new beacon session and there's an IP-keyed session, merge it to avoid duplicates
     const existing = this.sessions.get(id);
     if (!existing && ip && this.sessions.has(ip)) {
@@ -100,6 +121,7 @@ class LiveTracker {
       device = device || ipSession.device;
       bot = bot || ipSession.bot;
       referrer = referrer || ipSession.referrer;
+      campaign = campaign || ipSession.campaign;
       this.sessions.delete(ip);
     }
     const session = this.sessions.get(id);
@@ -107,6 +129,7 @@ class LiveTracker {
       session.page = page;
       if (country && session.country === 'Unknown') session.country = country;
       if (device && session.device === 'Unknown') session.device = device;
+      if (campaign && !session.campaign) session.campaign = campaign;
       session.visited.add(page);
       session.views++;
       session.lastSeen = Date.now();
@@ -118,6 +141,7 @@ class LiveTracker {
         device: device || 'Unknown',
         bot: bot || null,
         referrer: referrer || null,
+        campaign: campaign || null,
         visited: new Set([page]),
         views: 1,
         lastSeen: Date.now(),
@@ -155,6 +179,7 @@ class LiveTracker {
       device: s.device,
       bot: s.bot,
       referrer: s.referrer,
+      campaign: s.campaign,
       views: s.views,
       pages: s.visited.size,
       lastSeen: s.lastSeen,

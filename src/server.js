@@ -62,7 +62,10 @@ function handleBeacon(id, page, disconnect, req, res) {
     const device = analyticsTracker._detectDevice(ua);
     const bot = analyticsTracker.detectBot(ua);
     const referrer = req.headers['referer'] || null;
-    analyticsTracker.trackPage(id, page, country, device, bot, referrer, ip);
+    const fullUrl = req.url || '';
+    const query = fullUrl.includes('?') ? fullUrl.slice(fullUrl.indexOf('?')) : '';
+    const campaign = analyticsTracker._detectCampaign(query);
+    analyticsTracker.trackPage(id, page, country, device, bot, referrer, campaign, ip);
   }
   res.status(204).end();
 }
