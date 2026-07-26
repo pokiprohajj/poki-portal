@@ -39,17 +39,25 @@ class LiveTracker {
     this._pruneInterval = setInterval(() => this._prune(), 3000);
   }
 
+  _isPagePath(path) {
+    if (path.startsWith('/admin') || path.startsWith('/api/') || path.startsWith('/static/') ||
+        path.startsWith('/game-proxy/') || path.startsWith('/proxy-media/') || path.startsWith('/wp-content/') ||
+        path === '/t' || path === '/adserver' || path === '/favicon.ico' || path === '/health' ||
+        path === '/ads.txt' || path === '/robots.txt' || path === '/llms.txt' || path === '/sitemap.xml') return false;
+    if (path.includes('.')) return false;
+    return true;
+  }
+
   track(req) {
     try {
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
       const page = req.path || '/';
+      if (!this._isPagePath(page)) return;
+
       const country = req.headers['cf-ipcountry'] || req.headers['x-geo-country'] || 'Unknown';
       const ua = req.headers['user-agent'] || '';
       const device = this._detectDevice(ua);
       const bot = detectBot(ua);
-
-      // Don't track admin
-      if (page.startsWith('/admin')) return;
 
       this.sessions.set(ip, {
         ip,
