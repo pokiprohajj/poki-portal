@@ -8,6 +8,8 @@ process.on('unhandledRejection', (reason) => {
 const config = require('./config');
 const blogRouter = require('./blog');
 const proxyRouter = require('./core/proxy/router');
+const analyticsTracker = require('./analytics/tracker');
+const analyticsDashboard = require('./analytics/dashboard');
 const express = require('express');
 const compression = require('compression');
 const helmet = require('helmet');
@@ -38,6 +40,12 @@ app.use((req, res, next) => {
   res.removeHeader('X-Frame-Options');
   res.set('Cross-Origin-Resource-Policy', 'cross-origin');
   res.set('Access-Control-Allow-Origin', '*');
+  next();
+});
+
+// Passive analytics — never blocks, never throws
+app.use((req, res, next) => {
+  analyticsTracker.track(req);
   next();
 });
 
@@ -125,6 +133,12 @@ app.get('/sitemap.xml', (req, res) => {
 
 app.use('/proxy-media', require('./core/proxy/media'));
 app.use('/game-proxy', require('./core/proxy/game-proxy'));
+
+// Admin dashboard (real-time analytics)
+app.use('/admin', (req, res, next) => {
+  if (analyticsDashboard(req, res)) return;
+  next();
+});
 
 app.use('/', (req, res, next) => {
   if (blogRouter(req, res)) return;
