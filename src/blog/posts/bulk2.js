@@ -1,9 +1,8 @@
-const { post } = require('./generator');
-function rd() { return `2026-0${Math.floor(Math.random()*8)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`; }
+const { post, stableDate } = require('./generator');
 
 const out = [];
 
-out.push(post('browser-games-speedrun-guide', 'Browser Game Speedrunning: Complete Beginner Guide', rd(), 'Guides',
+out.push(post('browser-games-speedrun-guide', 'Browser Game Speedrunning: Complete Beginner Guide', stableDate('browser-games-speedrun-guide'), 'Guides',
   'Learn how to speedrun browser games. Comprehensive guide covering techniques, tools, practice methods, and communities for competitive browser game speedrunning.',
   `<p>Speedrunning browser games is a growing hobby that combines gaming skill with meticulous practice and optimization. This comprehensive guide will teach you everything you need to know to get started with browser game speedrunning, from the basic concepts to advanced techniques used by top runners.</p>
 <h2>What Is Speedrunning?</h2>
@@ -19,7 +18,7 @@ out.push(post('browser-games-speedrun-guide', 'Browser Game Speedrunning: Comple
 <h2>Joining the Speedrunning Community</h2>
 <p>The browser game speedrunning community is welcoming and supportive. Share your times, ask for advice, and participate in community challenges. The collective knowledge of the community accelerates everyone's improvement. Remember that every world record holder started as a beginner who simply refused to give up.</p>`));
 
-out.push(post('how-to-get-unlimited-coins-legit', 'How to Get Unlimited Coins in Browser Games: Legitimate Methods', rd(), 'Guides',
+out.push(post('how-to-get-unlimited-coins-legit', 'How to Get Unlimited Coins in Browser Games: Legitimate Methods', stableDate('how-to-get-unlimited-coins-legit'), 'Guides',
   'Earn unlimited coins and in-game currency in your favorite browser games without cheating or exploiting. Proven, legitimate farming methods that work in Subway Surfers, Temple Run 2, and more.',
   `<p>Everyone wants more coins in their favorite games. While cheating or exploiting glitches might seem tempting, legitimate coin-earning methods are more reliable, safer, and ultimately more satisfying. This guide covers proven strategies for maximizing your coin income in any browser game, focusing on sustainable techniques that work long-term.</p>
 <h2>1. Master the Daily Login System</h2>
@@ -35,7 +34,7 @@ out.push(post('how-to-get-unlimited-coins-legit', 'How to Get Unlimited Coins in
 <h2>Apply These Strategies</h2>
 <p>Start applying these methods in your favorite games today. Focus on consistency over intensity, prioritize high-value activities, and always collect your daily rewards. With these legitimate strategies, you will never need to consider cheating again.</p>`));
 
-out.push(post('browser-games-for-adults-over-40', 'Browser Games for Adults Over 40: Easy and Fun Online Games', rd(), 'Lists',
+out.push(post('browser-games-for-adults-over-40', 'Browser Games for Adults Over 40: Easy and Fun Online Games', stableDate('browser-games-for-adults-over-40'), 'Lists',
   'Curated selection of browser games perfect for adults over 40. Relaxed pace, simple controls, no competitive pressure, and cognitive benefits for mature players.',
   `<p>Browser games are perfect for adults over 40 who want to enjoy gaming without the pressure of competitive multiplayer, complex controls, or time-consuming commitments. This curated selection focuses on games that are accessible, relaxing, and genuinely enjoyable for mature players.</p>
 <h2>1. Apple Worm — Gentle Physics Puzzles</h2>
@@ -49,7 +48,7 @@ out.push(post('browser-games-for-adults-over-40', 'Browser Games for Adults Over
 <h2>Why Browser Games Are Ideal for Adults Over 40</h2>
 <p>Browser games offer several advantages for mature players. They require no special equipment — just a computer or tablet with an internet connection. Sessions can be as short or long as you like. There is no social pressure to perform. And research suggests that regular gaming can help maintain cognitive function, improve hand-eye coordination, and provide meaningful stress relief.</p>`));
 
-out.push(post('browser-games-for-students', 'Best Browser Games for Students: Study Breaks and Focus', rd(), 'Lists',
+out.push(post('browser-games-for-students', 'Best Browser Games for Students: Study Breaks and Focus', stableDate('browser-games-for-students'), 'Lists',
   'Curated browser games that help students take effective study breaks. Quick, mentally refreshing games that reset your focus without consuming your attention.',
   `<p>Students need effective study breaks to maintain focus and productivity throughout long study sessions. The right browser game can provide a perfect mental reset — long enough to refresh your mind but short enough to not derail your study momentum. Here are our top recommendations for student-friendly browser games.</p>
 <h2>1. Subway Surfers — The Perfect 3-Minute Break</h2>
@@ -63,7 +62,7 @@ out.push(post('browser-games-for-students', 'Best Browser Games for Students: St
 <h2>Bookmark Your Break Games</h2>
 <p><a href="/">Save BrowserGamesHQ as a bookmark</a> for instant access to your study break games. Having a go-to collection of quick games means you never waste your precious break time deciding what to play.</p>`));
 
-out.push(post('browser-games-for-anxiety-relief', 'Browser Games for Anxiety and Stress Relief: A Guide to Calm Gaming', rd(), 'Articles',
+out.push(post('browser-games-for-anxiety-relief', 'Browser Games for Anxiety and Stress Relief: A Guide to Calm Gaming', stableDate('browser-games-for-anxiety-relief'), 'Articles',
   'Discover how browser games can help reduce anxiety and stress when used mindfully. Calming game recommendations and techniques for using gaming as a relaxation tool.',
   `<p>When used mindfully, browser games can be an effective tool for managing anxiety and reducing stress. The key is choosing the right games and approaching them with the right mindset. This guide explores how to use browser gaming as a relaxation technique rather than a source of additional stress.</p>
 <h2>Best Games for Relaxation</h2>
@@ -76,7 +75,7 @@ out.push(post('browser-games-for-anxiety-relief', 'Browser Games for Anxiety and
 <h2>When Gaming Helps vs Hurts</h2>
 <p>Gaming helps anxiety when it provides a genuine mental break, leaves you feeling refreshed, and fits naturally into your day. Gaming hurts anxiety when it becomes compulsive, interferes with responsibilities, or leaves you feeling guilty about time spent. Pay attention to how you feel during and after gaming sessions, and adjust your habits accordingly.</p>`));
 
-out.push(post('browser-games-accessibility-guide', 'Browser Games Accessibility Guide: Gaming for Everyone', rd(), 'Guides',
+out.push(post('browser-games-accessibility-guide', 'Browser Games Accessibility Guide: Gaming for Everyone', stableDate('browser-games-accessibility-guide'), 'Guides',
   'Comprehensive guide to accessible browser gaming. Learn about features, tips, and games that are playable by people with visual, motor, audio, and cognitive disabilities.',
   `<p>Browser games can be accessible to players with a wide range of disabilities when the right games and settings are chosen. This guide provides practical information for players with different accessibility needs and highlights games that work well with various assistive technologies.</p>
 <h2>Visual Accessibility</h2>
@@ -90,7 +89,7 @@ out.push(post('browser-games-accessibility-guide', 'Browser Games Accessibility 
 <h2>BrowserGamesHQ Commitment</h2>
 <p><a href="/">Browse the full game collection on BrowserGamesHQ</a> where we believe gaming should be accessible to everyone. We are committed to hosting games that can be enjoyed by players of all abilities.</p>`));
 
-out.push(post('best-f2p-browser-games', 'Best Free-to-Play Browser Games with No Pay-to-Win Mechanics', rd(), 'Lists',
+out.push(post('best-f2p-browser-games', 'Best Free-to-Play Browser Games with No Pay-to-Win Mechanics', stableDate('best-f2p-browser-games'), 'Lists',
   'Truly free browser games with no pay-to-win mechanics. Fair gaming where skill alone determines your success. No hidden costs, no advantages for spending money.',
   `<p>Not all free games are truly fair. Some games give paying players advantages that free players cannot match through skill alone. The browser games on this list have no pay-to-win mechanics whatsoever — your success is determined entirely by your skill, practice, and dedication.</p>
 <h2>1. Subway Surfers — Pure Skill Competition</h2>
@@ -106,7 +105,7 @@ out.push(post('best-f2p-browser-games', 'Best Free-to-Play Browser Games with No
 <h2>Why Fair Gaming Matters</h2>
 <p>Games that respect your time and skill create more meaningful achievements. When you set a high score or complete a difficult challenge in these games, you know it was your skill that earned it — not your wallet. BrowserGamesHQ is committed to hosting only games that are truly free and fair for everyone.</p>`));
 
-out.push(post('browser-games-for-family-night', 'Browser Games for Family Game Night: Fun for All Ages', rd(), 'Lists',
+out.push(post('browser-games-for-family-night', 'Browser Games for Family Game Night: Fun for All Ages', stableDate('browser-games-for-family-night'), 'Lists',
   'Perfect browser games for family game night. Everyone can play together with no special equipment. Fun for kids, parents, and grandparents alike.',
   `<p>Family game night does not require expensive board games or video game consoles. These browser games work perfectly for family fun — everyone plays on their own device or takes turns on a shared screen. No special equipment needed, no complicated rules to learn, and no cost.</p>
 <h2>1. Subway Surfers Tournament</h2>
@@ -122,7 +121,7 @@ out.push(post('browser-games-for-family-night', 'Browser Games for Family Game N
 <h2>Making Family Game Night Work</h2>
 <p>Set a schedule — the same time each week creates anticipation and tradition. Rotate who chooses the game each week so everyone feels included. Keep the atmosphere light and fun — the goal is spending time together, not winning. Snacks are mandatory.</p>`));
 
-out.push(post('browser-games-for-team-building', 'Browser Games for Team Building at Work', rd(), 'Lists',
+out.push(post('browser-games-for-team-building', 'Browser Games for Team Building at Work', stableDate('browser-games-for-team-building'), 'Lists',
   'Fun browser games for workplace team building. Icebreakers, competitions, and collaborative challenges that work in an office or remote setting without any setup.',
   `<p>Team building does not have to involve awkward trust falls or expensive off-site activities. These browser games create genuine team bonding through shared fun and friendly competition. Best of all, they require zero setup, zero cost, and work for both in-office and remote teams.</p>
 <h2>Virtual Tournament Format</h2>

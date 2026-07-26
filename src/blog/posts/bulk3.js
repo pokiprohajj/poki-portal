@@ -1,9 +1,8 @@
-const { post } = require('./generator');
-function rd() { return `2026-0${Math.floor(Math.random()*8)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`; }
+const { post, stableDate } = require('./generator');
 
 const out = [];
 
-out.push(post('best-online-games-summer-2026', 'Best Online Games to Play This Summer 2026', rd(), 'Lists',
+out.push(post('best-online-games-summer-2026', 'Best Online Games to Play This Summer 2026', stableDate('best-online-games-summer-2026'), 'Lists',
   'Curated selection of the best browser games to play during summer 2026. From sunny endless runners to tropical adventures, these games capture summer vibes perfectly.',
   `<p>Summer is the perfect season for discovering new browser games. Whether you are relaxing by the pool, taking a break from summer work, or looking for indoor entertainment on a rainy summer day, these games capture the spirit of the season.</p>
 <h2>1. Subway Surfers — Summer Vibes All Year Round</h2>
@@ -19,7 +18,7 @@ out.push(post('best-online-games-summer-2026', 'Best Online Games to Play This S
 <h2>Summer Gaming Tips</h2>
 <p>Take your gaming outside! Tablets and laptops make it easy to play browser games on the patio, at the park, or by the pool. Just be mindful of screen glare — many browser games have bright color schemes that work well even in direct sunlight.</p>`));
 
-out.push(post('best-winter-browser-games', 'Best Browser Games to Play in Winter: Cozy Indoor Gaming', rd(), 'Lists',
+out.push(post('best-winter-browser-games', 'Best Browser Games to Play in Winter: Cozy Indoor Gaming', stableDate('best-winter-browser-games'), 'Lists',
   'Warm up with the best browser games for winter. Cozy games, winter-themed adventures, and perfect indoor entertainment for cold days.',
   `<p>Winter is the perfect season for cozy indoor gaming. When the weather outside is frightful, these browser games make staying inside delightful. From winter-themed adventures to cozy puzzles, here are our top picks for cold-weather gaming.</p>
 <h2>1. Temple Run 2 Frozen Shadows — Winter Theme Perfection</h2>
@@ -33,7 +32,7 @@ out.push(post('best-winter-browser-games', 'Best Browser Games to Play in Winter
 <h2>Creating the Ultimate Winter Gaming Setup</h2>
 <p>Maximize your winter gaming comfort with the right setup. Wrap up in your warmest blanket. Prepare a hot drink — tea, coffee, or hot chocolate. Set up near a window if possible to enjoy the winter scenery between gaming sessions. The combination of warm indoor comfort and winter atmosphere creates an unbeatable cozy gaming experience.</p>`));
 
-out.push(post('browser-games-that-improve-brain-function', 'Browser Games That Improve Brain Function: Science-Backed Cognitive Benefits', rd(), 'Articles',
+out.push(post('browser-games-that-improve-brain-function', 'Browser Games That Improve Brain Function: Science-Backed Cognitive Benefits', stableDate('browser-games-that-improve-brain-function'), 'Articles',
   'Scientific evidence shows that certain browser games can improve cognitive function. Learn how reaction time, memory, problem-solving, and spatial awareness benefit from regular gaming.',
   `<p>Research in cognitive neuroscience has demonstrated that certain types of video gaming can produce measurable improvements in various cognitive functions. Browser games, in particular, offer a convenient way to incorporate brain-training activities into your daily routine. This article explores the science-backed cognitive benefits of browser gaming.</p>
 <h2>Reaction Time Improvement</h2>
@@ -47,7 +46,7 @@ out.push(post('browser-games-that-improve-brain-function', 'Browser Games That I
 <h2>Recommended Gaming Schedule for Cognitive Benefits</h2>
 <p>Research suggests that 15-30 minutes of daily gaming provides optimal cognitive benefits. Consistency is more important than session length — a daily 15-minute session produces better results than a weekly 2-hour marathon. Mix different game types to exercise different cognitive skills.</p>`));
 
-out.push(post('browser-games-for-competitive-people', 'Browser Games for Competitive People: Satisfy Your Rivalry', rd(), 'Lists',
+out.push(post('browser-games-for-competitive-people', 'Browser Games for Competitive People: Satisfy Your Rivalry', stableDate('browser-games-for-competitive-people'), 'Lists',
   'Browser games that satisfy competitive urges. Leaderboards, high-score chases, and head-to-head challenges for players who thrive on competition.',
   `<p>If you are naturally competitive, these browser games will scratch that rivalrous itch. Whether you are competing against your own personal best or challenging friends to beat your scores, these games provide endless opportunities for competition.</p>
 <h2>1. Subway Surfers — The Ultimate High Score Chase</h2>
@@ -61,7 +60,7 @@ out.push(post('browser-games-for-competitive-people', 'Browser Games for Competi
 <h2>Building a Competitive Gaming Practice</h2>
 <p>To maximize your competitive potential, develop a structured practice routine. Warm up with 2-3 casual runs before attempting serious score attempts. Focus on one specific skill during each practice session. Record your best runs and analyze them to identify improvement opportunities.</p>`));
 
-out.push(post('cozy-browser-games', 'Cozy Browser Games for Relaxing Evenings at Home', rd(), 'Lists',
+out.push(post('cozy-browser-games', 'Cozy Browser Games for Relaxing Evenings at Home', stableDate('cozy-browser-games'), 'Lists',
   'Wind down with the best cozy browser games. Gentle, relaxing games perfect for evening unwinding after a long day.',
   `<p>Not every gaming session needs to be high-intensity. Sometimes you want a game that helps you unwind, relax, and decompress after a long day. These cozy browser games are perfect for those quiet evening moments when you want gentle entertainment without pressure.</p>
 <h2>1. Apple Worm — The Ultimate Cozy Game</h2>
@@ -73,7 +72,7 @@ out.push(post('cozy-browser-games', 'Cozy Browser Games for Relaxing Evenings at
 <h2>Creating the Perfect Cozy Gaming Setup</h2>
 <p>Dim the lights and use warm lighting if possible. Make a warm drink — tea, hot chocolate, or a cozy latte. Put on comfortable clothes and wrap up in a blanket. Use a tablet or laptop so you can play from your most comfortable spot. The physical comfort of your setup is just as important as the game itself for creating a relaxing experience.</p>`));
 
-out.push(post('browser-games-for-social-distancing', 'Best Browser Games for Staying Connected While Apart', rd(), 'Lists',
+out.push(post('browser-games-for-social-distancing', 'Best Browser Games for Staying Connected While Apart', stableDate('browser-games-for-social-distancing'), 'Lists',
   'Browser games that help you stay connected with friends and family when you cannot be together in person. Virtual gaming sessions that bridge the distance.',
   `<p>Browser games are a wonderful way to stay connected with loved ones when distance keeps you apart. They require no special equipment, no synchronization of gaming platforms, and no technical expertise. Everyone just opens a link and starts playing together.</p>
 <h2>1. Subway Surfers Virtual Challenge</h2>
@@ -87,7 +86,7 @@ out.push(post('browser-games-for-social-distancing', 'Best Browser Games for Sta
 <h2>Making Virtual Gaming Social</h2>
 <p>The key to successful virtual gaming sessions is treating them like real social events. Schedule them in advance. Prepare snacks and drinks on your end. Keep the video call going throughout. The social connection matters more than the game itself.</p>`));
 
-out.push(post('browser-games-for-creative-people', 'Browser Games for Creative Thinkers: Think Outside the Box', rd(), 'Lists',
+out.push(post('browser-games-for-creative-people', 'Browser Games for Creative Thinkers: Think Outside the Box', stableDate('browser-games-for-creative-people'), 'Lists',
   'Browser games that appeal to creative minds. Games that reward unconventional thinking, experimentation, and creative problem-solving.',
   `<p>Creative people often enjoy games that reward unconventional thinking and offer multiple approaches to challenges. These browser games appeal to the creative mind by providing open-ended problems, multiple solutions, and opportunities for creative expression through gameplay.</p>
 <h2>1. Apple Worm — Multiple Solutions</h2>
@@ -101,7 +100,7 @@ out.push(post('browser-games-for-creative-people', 'Browser Games for Creative T
 <h2>Why Creative People Excel at Browser Games</h2>
 <p>Browser games often have simpler mechanics than console or PC games, which paradoxically allows for more creative expression. With fewer rules and systems to manage, your creative energy can focus on novel approaches to the challenges presented. The simplicity of browser games is not a limitation — it is an invitation to creativity.</p>`));
 
-out.push(post('browser-games-healthy-boundaries', 'Healthy Browser Gaming: Setting Boundaries for Balanced Play', rd(), 'Articles',
+out.push(post('browser-games-healthy-boundaries', 'Healthy Browser Gaming: Setting Boundaries for Balanced Play', stableDate('browser-games-healthy-boundaries'), 'Articles',
   'How to enjoy browser games without overdoing it. Practical strategies for maintaining a healthy relationship with gaming while still having fun.',
   `<p>Browser games are designed to be engaging and rewarding — that is what makes them fun. But the same design features that make games enjoyable can also make them difficult to put down. This guide provides practical strategies for maintaining a healthy, balanced relationship with gaming.</p>
 <h2>Set Clear Time Limits</h2>

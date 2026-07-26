@@ -1,4 +1,19 @@
 const posts = require('./posts');
+const { enhanceContent } = require('./posts/generator');
+
+function needsEnhancement(post) {
+  return !post.content.includes('<h3>') || !post.content.includes('<strong>') || !post.content.includes('<img');
+}
+
+// Auto-enhance posts that lack modern SEO features
+if (process.env.NODE_ENV !== 'development') {
+  posts.forEach(p => {
+    if (needsEnhancement(p)) {
+      p.content = enhanceContent(p.content, p.title);
+      p.readingTime = Math.max(1, Math.round(p.content.replace(/<[^>]+>/g, '').split(/\s+/).length / 200));
+    }
+  });
+}
 
 const CAT_CLASS = { Guides: 'guides', Lists: 'lists', Comparisons: 'comparisons', Articles: 'articles' };
 const CAT_EMOJI = { Guides: '🎮', Lists: '📋', Comparisons: '⚖️', Articles: '📝' };

@@ -1,8 +1,7 @@
-const { post } = require('./generator');
-function rd() { return `2026-0${Math.floor(Math.random()*8)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`; }
+const { post, stableDate } = require('./generator');
 
 module.exports = [
-  post('subway-surfers-daily-challenges', 'Subway Surfers Daily Challenges: Complete Guide and Rewards', rd(), 'Guides',
+  post('subway-surfers-daily-challenges', 'Subway Surfers Daily Challenges: Complete Guide and Rewards', stableDate('subway-surfers-daily-challenges'), 'Guides',
     'Master Subway Surfers daily challenges. Learn how to complete every mission type and earn maximum rewards.',
     `<p>Subway Surfers daily challenges are the fastest way to earn keys, coins, and exclusive items. This guide covers every challenge type and how to complete them efficiently.</p>
 <h2>Types of Daily Challenges</h2>
@@ -16,7 +15,7 @@ module.exports = [
 <h2>Rewards for Completing Challenges</h2>
 <p>Daily challenges reward you with keys, coins, and exclusive cosmetic items. Keys allow you to continue after crashing, purchase mystery boxes, and unlock characters. Coins fund your hoverboard purchases and character upgrades. Exclusive items like limited-edition outfits and boards are only available through challenge completion. The more challenges you complete, the more rewards accumulate. Over time, regular challenge completion gives you a significant advantage in resources compared to players who only do casual runs. Make checking and completing challenges part of your daily gaming routine for maximum benefit.</p>`),
 
-  post('temple-run-2-achievements-guide', 'Temple Run 2 Achievements: Complete List and Unlock Guide', rd(), 'Guides',
+  post('temple-run-2-achievements-guide', 'Temple Run 2 Achievements: Complete List and Unlock Guide', stableDate('temple-run-2-achievements-guide'), 'Guides',
     'Every Temple Run 2 achievement explained. Learn exactly what to do to unlock every achievement and earn bragging rights.',
     `<p>Temple Run 2 has a comprehensive achievement system that rewards specific gameplay milestones. Here is how to unlock every achievement.</p>
 <h2>Distance Achievements</h2>
@@ -30,7 +29,7 @@ module.exports = [
 <h2>Hardest Achievements and How to Get Them</h2>
 <p>The most challenging Temple Run 2 achievements require exceptional skill and dedication. The 10 Million Points achievement demands consistent high-level play over extended runs. The All Maps Master achievement requires you to reach specific distances on every map variant. Speed run achievements test your ability to balance speed with survival. For these difficult achievements, focus on one achievement at a time rather than trying to progress on multiple simultaneously. Use power-ups strategically — shields for survival achievements, coin magnets for collection achievements, and boosts for distance achievements.</p>`),
 
-  post('drive-mad-all-tracks-guide', 'Drive Mad: All Tracks Walkthrough and Completion Guide', rd(), 'Guides',
+  post('drive-mad-all-tracks-guide', 'Drive Mad: All Tracks Walkthrough and Completion Guide', stableDate('drive-mad-all-tracks-guide'), 'Guides',
     'Complete guide to every Drive Mad track. Learn the optimal paths, jump timing, and balance tricks for each level.',
     `<p>Drive Mad features numerous tracks that challenge your balance and precision. This guide covers every track type and how to conquer them.</p>
 <h2>Beginner Tracks</h2>
@@ -44,7 +43,7 @@ module.exports = [
 <h2>Understanding Vehicle Physics in Drive Mad</h2>
 <p>Drive Mad's physics engine simulates realistic vehicle dynamics that affect every track. Your vehicles center of gravity determines how easily it tips. Longer wheelbases provide more stability but reduce maneuverability. Lighter vehicles jump farther but are more affected by wind and landing impact. Heavier vehicles power through obstacles but accelerate more slowly. Understanding these physics principles helps you choose the right approach for each track. On jump-heavy tracks, choose lighter vehicles with careful throttle control. On obstacle-heavy tracks, heavier vehicles with more stability perform better.</p>`),
 
-  post('monster-tracks-upgrade-guide', 'Monster Tracks: Best Upgrade Path and Vehicle Guide', rd(), 'Guides',
+  post('monster-tracks-upgrade-guide', 'Monster Tracks: Best Upgrade Path and Vehicle Guide', stableDate('monster-tracks-upgrade-guide'), 'Guides',
     'Optimize your Monster Tracks upgrades. Learn which vehicle upgrades to prioritize and which vehicles perform best.',
     `<p>Monster Tracks features a deep upgrade system for your monster trucks. Making the right upgrade choices dramatically improves your performance.</p>
 <h2>First Upgrades to Buy</h2>
@@ -58,7 +57,7 @@ module.exports = [
 <h2>Track-Specific Upgrade Recommendations</h2>
 <p>Different Monster Tracks tracks benefit from different upgrade priorities. Mud tracks require tire upgrades first and foremost — traction is everything when surfaces are slippery. Jump-heavy tracks benefit from suspension upgrades that improve landing stability and reduce bounce. Speed-focused tracks with long straight sections favor engine and acceleration upgrades. Mixed terrain tracks require balanced upgrades across all categories. Before spending coins on upgrades, consider which track types you enjoy most and prioritize upgrades that benefit those tracks. You can always re-spec your upgrades later as your preferences evolve.</p>`),
 
-  post('murder-all-cases-walkthrough', 'Murder: All Cases Walkthrough and Solutions Guide', rd(), 'Guides',
+  post('murder-all-cases-walkthrough', 'Murder: All Cases Walkthrough and Solutions Guide', stableDate('murder-all-cases-walkthrough'), 'Guides',
     'Complete walkthrough for every Murder case. Tips for finding clues, making deductions, and solving each mystery.',
     `<p>Murder features multiple cases with increasing difficulty. This guide provides strategies for solving every case without spoiling the solutions.</p>
 <h2>Case 1: The Basics</h2>
@@ -72,7 +71,7 @@ module.exports = [
 <h2>Advanced Detective Techniques</h2>
 <p>As cases become more difficult, basic clue gathering is not enough. Advanced techniques include timeline construction — ordering events based on when clues suggest they occurred. Motive analysis helps narrow suspects by identifying who benefits most from the crime. Environmental storytelling means paying attention to room layouts, object positions, and visual details that suggest what happened. Character relationship mapping helps identify connections between suspects that may not be obvious from individual interviews. Combining these techniques transforms you from a casual clue-gatherer into a master detective who can solve even the most complex cases.</p>`),
 
-  post('apple-worm-all-levels-guide', 'Apple Worm: All Levels Walkthrough and Puzzle Solutions', rd(), 'Guides',
+  post('apple-worm-all-levels-guide', 'Apple Worm: All Levels Walkthrough and Puzzle Solutions', stableDate('apple-worm-all-levels-guide'), 'Guides',
     'Complete guide to Apple Worm levels. Physics puzzle solutions, tips, and strategies for every stage of the game.',
     `<p>Apple Worm features dozens of physics puzzle levels. This guide provides strategies for solving each type of puzzle you will encounter.</p>
 <h2>Early Levels (1-10)</h2>
@@ -86,7 +85,7 @@ module.exports = [
 <h2>Physics Principles That Help You Solve Puzzles</h2>
 <p>Understanding basic physics makes Apple Worm puzzles easier to solve. The pendulum principle governs worm swinging — the longer your swing arc, the more momentum you build. Conservation of momentum means that swinging back and forth builds energy that launches your worm farther when released. Friction affects how your worm moves across different surfaces. Bounce elasticity determines how high your worm rebounds after falling. Gravity pulls your worm toward the apple faster over longer drops. Recognizing which physics principle applies to each puzzle helps you identify the correct solution approach more quickly.</p>`),
 
-  post('temple-run-2-jungle-fall-walkthrough', 'Temple Run 2 Jungle Fall: Complete Walkthrough Guide', rd(), 'Guides',
+  post('temple-run-2-jungle-fall-walkthrough', 'Temple Run 2 Jungle Fall: Complete Walkthrough Guide', stableDate('temple-run-2-jungle-fall-walkthrough'), 'Guides',
     'Master the Jungle Fall map with this complete walkthrough. Learn vine mechanics, water crossings, and obstacle patterns.',
     `<p>Temple Run 2 Jungle Fall transports you to a lush tropical jungle filled with ancient ruins and natural obstacles. This guide covers everything you need to master this map.</p>
 <h2>Jungle Environment Mechanics</h2>
@@ -102,7 +101,7 @@ module.exports = [
 
   // === GENERIC CHALLENGE POSTS ===
 
-  post('how-to-set-high-score-records', 'How to Set High Score Records in Any Endless Runner', rd(), 'Guides',
+  post('how-to-set-high-score-records', 'How to Set High Score Records in Any Endless Runner', stableDate('how-to-set-high-score-records'), 'Guides',
     'The systematic approach to setting high score records. These universal strategies work for any endless runner game.',
     `<p>Setting high score records requires more than just playing well. It requires a systematic approach. These strategies work for any endless runner game, including Subway Surfers and Temple Run 2.</p>
 <h2>Record Your Runs</h2>
@@ -118,7 +117,7 @@ module.exports = [
 <h2>Building a Practice Schedule</h2>
 <p>Consistent practice yields better results than sporadic marathon sessions. Create a weekly schedule that allocates specific times for focused practice. Dedicate Monday to practicing Subway Surfers lane-switching patterns. Reserve Wednesday for Temple Run 2 turning mechanics. Use Friday for combined practice in both games. Each session should last no more than thirty minutes to maintain concentration. Track your high scores daily and review your progress weekly. A structured approach to practice transforms casual improvement into systematic skill development that produces reliable results over time.</p>`),
 
-  post('best-games-for-5-minute-breaks', 'Best Games for 5-Minute Breaks: Quick Fun at Work or School', rd(), 'Lists',
+  post('best-games-for-5-minute-breaks', 'Best Games for 5-Minute Breaks: Quick Fun at Work or School', stableDate('best-games-for-5-minute-breaks'), 'Lists',
     'Perfect games for short breaks. Play for exactly 5 minutes and return to work refreshed. No commitment required.',
     `<p>Short breaks are essential for productivity. These browser games are perfect for 5-minute sessions that refresh your mind without derailing your focus.</p>
 <h2>1. Subway Surfers</h2>
@@ -134,7 +133,7 @@ module.exports = [
 <h2>Expanding Your Break Game Library</h2>
 <p>Beyond the core recommendations, several other games fit perfectly into 5-minute breaks. Monster Tracks offers quick race sessions that last 2-3 minutes per track. Temple Run 2 Frozen Shadows provides icy endless running with the same instant-play convenience. Temple Run 2 Spooky Summit adds atmospheric variety to quick gaming sessions. The key to successful break gaming is having multiple games ready so you can choose based on your mood. Keep a bookmark folder of your preferred break games for easy access. Rotate through them to prevent any single game from becoming stale during your daily routine.</p>`),
 
-  post('browser-games-for-couples', 'Best Browser Games for Couples to Play Together Online', rd(), 'Lists',
+  post('browser-games-for-couples', 'Best Browser Games for Couples to Play Together Online', stableDate('browser-games-for-couples'), 'Lists',
     'Fun browser games for couples. Play together, compare scores, and enjoy quality time without leaving home.',
     `<p>Looking for games to play with your partner? These browser games are perfect for couples. No special equipment needed — just two browsers and an internet connection.</p>
 <h2>1. Subway Surfers</h2>
@@ -151,7 +150,7 @@ module.exports = [
 <h2>Creative Ways for Couples to Play</h2>
 <p>Beyond simple high-score comparisons, couples can create more engaging game experiences together. Try cooperative play where you discuss strategies before each turn — one person plays while the other offers advice and encouragement. Create themed game nights with snacks and a mini tournament bracket. For puzzle games like Murder, work through cases as a true team, discussing each clue and making decisions together. For competitive games, keep a running tally of wins over a month and reward the winner with a special date activity of their choice. The social aspect of playing together makes browser games a wonderful bonding activity.</p>`),
 
-  post('browser-games-for-grandparents', 'Browser Games for Seniors and Grandparents: Easy and Fun', rd(), 'Lists',
+  post('browser-games-for-grandparents', 'Browser Games for Seniors and Grandparents: Easy and Fun', stableDate('browser-games-for-grandparents'), 'Lists',
     'Simple, enjoyable browser games for seniors. Easy controls, gentle learning curves, and no pressure gameplay.',
     `<p>Browser games are excellent for seniors because they are low-pressure, easy to learn, and require no special equipment. Here are games that are particularly well-suited for older players.</p>
 <h2>1. Apple Worm</h2>
@@ -165,7 +164,7 @@ module.exports = [
 <h2>Setting Up Games for Senior Players</h2>
 <p>Helping senior players get started with browser games is simple. Choose a game with the largest text and simplest interface first — Apple Worm is ideal. Ensure the device screen brightness is comfortable and font size is set to large if possible. Demonstrate the controls slowly, letting your senior family member practice each action before combining them. Be patient and let them play at their own pace without pressure. Start with the easiest levels and gradually increase difficulty as their confidence grows. Many seniors discover an unexpected enjoyment of gaming when introduced through well-chosen browser games.</p>`),
 
-  post('browser-games-for-zoom-parties', 'Browser Games to Play During Zoom Parties and Video Calls', rd(), 'Lists',
+  post('browser-games-for-zoom-parties', 'Browser Games to Play During Zoom Parties and Video Calls', stableDate('browser-games-for-zoom-parties'), 'Lists',
     'Make your video calls more fun with these browser games. Perfect for virtual parties, team building, and family gatherings.',
     `<p>Video calls can be more fun with games. These browser games work perfectly during Zoom, Google Meet, or FaceTime calls. Everyone plays from their own device.</p>
 <h2>1. Subway Surfers High Score Challenge</h2>
@@ -181,7 +180,7 @@ module.exports = [
 <h2>Game Recommendations for Large Groups</h2>
 <p>Different games work better for different group sizes. For groups of 2-4 people, head-to-head competitions in Subway Surfers or Drive Mad work perfectly. For groups of 5-10 people, tournament formats with brackets keep everyone engaged. A Subway Surfers tournament with 8 players takes about 20 minutes and guarantees high energy with natural breaks between rounds. For groups larger than 10, consider dividing into teams with team captains who compete while teammates cheer and provide strategic advice. The flexibility of browser games means you can adapt the format to suit any group size or dynamic.</p>`),
 
-  post('games-to-play-when-internet-slow', 'Browser Games That Work with Slow Internet Connections', rd(), 'Guides',
+  post('games-to-play-when-internet-slow', 'Browser Games That Work with Slow Internet Connections', stableDate('games-to-play-when-internet-slow'), 'Guides',
     'These browser games are optimized for slow or unstable internet connections. Keep playing even when your connection is weak.',
     `<p>Slow internet does not have to end your gaming session. These browser games are designed to work well on limited bandwidth connections.</p>
 <h2>Low-Bandwidth Games</h2>
@@ -198,7 +197,7 @@ module.exports = [
 <h2>How Browser Games Handle Limited Bandwidth</h2>
 <p>Browser games use clever techniques to work well on slow connections. Game assets are loaded progressively — the core game starts immediately while additional visual elements load in the background. Texture streaming loads only the graphics needed for your current game section. Cached assets mean that games you have played before load much faster on subsequent visits. Audio files are often compressed to reduce bandwidth without sacrificing quality. Some games offer reduced-graphics modes that lower bandwidth requirements while maintaining smooth gameplay. These optimizations ensure that browser games remain accessible to players regardless of their internet connection quality.</p>`),
 
-  post('browser-games-that-need-no-gpu', 'Browser Games That Work Without a Dedicated Graphics Card', rd(), 'Lists',
+  post('browser-games-that-need-no-gpu', 'Browser Games That Work Without a Dedicated Graphics Card', stableDate('browser-games-that-need-no-gpu'), 'Lists',
     'Play these browser games on integrated graphics or low-end GPUs. No dedicated graphics card required for smooth gameplay.',
     `<p>Not everyone has a dedicated graphics card. The good news is that browser games are designed to run on integrated graphics. Here are games that work perfectly on basic hardware.</p>
 <h2>1. Apple Worm</h2>
@@ -215,7 +214,7 @@ module.exports = [
 <h2>Comparing Integrated vs Dedicated Graphics Performance</h2>
 <p>The gap between integrated graphics and dedicated GPUs is significant for native games, but much smaller for browser games. Integrated graphics in modern CPUs from Intel and AMD can handle WebGL 2.0 rendering surprisingly well. Chrome and Edge both use hardware acceleration that works efficiently with integrated graphics. The key difference appears in complex 3D scenes with many light sources and particle effects. Temple Run 2 with its detailed environments will run well on integrated graphics, while simpler 2D games like Apple Worm and Murder will perform identically regardless of your graphics hardware. For browser gaming, integrated graphics are more than sufficient.</p>`),
 
-  post('best-time-killer-games', 'Best Time Killer Games for Boring Days', rd(), 'Lists',
+  post('best-time-killer-games', 'Best Time Killer Games for Boring Days', stableDate('best-time-killer-games'), 'Lists',
     'Kill time with these addictive browser games. Perfect for long waits, boring commutes, or days with nothing to do.',
     `<p>Some games are perfect for killing time. They are addictive, easy to start, and hard to put down. Here are the best time-killer browser games.</p>
 <h2>1. Subway Surfers</h2>
@@ -233,7 +232,7 @@ module.exports = [
 <h2>Why These Games Are Addictive Time Killers</h2>
 <p>The games on this list share characteristics that make them effective time killers. They have short feedback loops — every few seconds you get a reward or a challenge. They offer constant progression through score improvements, level completions, or upgrade unlocks. They require just enough concentration to engage your mind without exhausting it. They are forgiving of interruptions — you can stop at any moment without penalty. These design elements combine to create the one-more-round feeling that makes time disappear. Understanding why these games are addictive helps you appreciate the craftsmanship behind their design while enjoying the experience they deliver.</p>`),
 
-  post('games-for-competitive-friends', 'Competitive Browser Games for Friends: Settle the Score', rd(), 'Lists',
+  post('games-for-competitive-friends', 'Competitive Browser Games for Friends: Settle the Score', stableDate('games-for-competitive-friends'), 'Lists',
     'These browser games let you compete with friends. Settle debates, prove who is better, and have fun doing it.',
     `<p>Sometimes you just need to settle who is the best. These browser games let you compete directly with friends using high scores and timed challenges.</p>
 <h2>Best for Competition</h2>

@@ -1,9 +1,8 @@
-const { post } = require('./generator');
+const { post, stableDate } = require('./generator');
 
-function rd() { return `2026-0${Math.floor(Math.random()*8)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`; }
 
 module.exports = [
-  post('best-free-online-games-no-download', '10 Best Free Online Games That Need No Download in 2026', rd(), 'Lists',
+  post('best-free-online-games-no-download', '10 Best Free Online Games That Need No Download in 2026', stableDate('best-free-online-games-no-download'), 'Lists',
     'Discover the best free online games you can play instantly in your browser. No downloads, no installs — just click and play.',
     `<p>Browser games have never been better. Modern HTML5 technology means you can play console-quality games directly in your browser without downloading anything. Here are the top free online games you can play right now.</p>
 <h2>1. Subway Surfers</h2><p>The king of endless runners. <a href="/en/g/subway-surfers">Play Subway Surfers online</a> and dodge trains through colorful cities worldwide. Updated regularly with new locations.</p>
@@ -18,7 +17,7 @@ module.exports = [
 <h2>10. Monster Tracks</h2><p>Off-road monster truck action. <a href="/en/g/monster-tracks">Play Monster Tracks</a> and conquer rough terrain.</p>
 <p>All of these games are completely free and playable directly in your browser. No downloads, no sign-ups — just instant fun.</p>`),
 
-  post('games-like-subway-surfers', '10 Games Like Subway Surfers You Must Play Online', rd(), 'Comparisons',
+  post('games-like-subway-surfers', '10 Games Like Subway Surfers You Must Play Online', stableDate('games-like-subway-surfers'), 'Comparisons',
     'Love Subway Surfers? Discover 10 similar endless runner games you can play for free in your browser. New favorites await.',
     `<p>If you love Subway Surfers, you are always looking for similar games that capture the same fast-paced running excitement. Here are ten games like Subway Surfers that you can play online for free.</p>
 <h2>1. Temple Run 2</h2><p>The closest alternative to Subway Surfers with a different setting. <a href="/en/g/temple-run-2">Play Temple Run 2</a> for ancient ruin exploration instead of train tracks.</p>
@@ -33,7 +32,7 @@ module.exports = [
 <h2>10. More Browser Games</h2><p><a href="/">Browse all games on BrowserGamesHQ</a> to discover your next endless runner obsession.</p>
 <p>Each of these games offers something unique while capturing the pick-up-and-play magic that makes endless runners so addictive.</p>`),
 
-  post('best-free-browser-games-2026', 'Top 25 Free Browser Games to Play Online in 2026', rd(), 'Lists',
+  post('best-free-browser-games-2026', 'Top 25 Free Browser Games to Play Online in 2026', stableDate('best-free-browser-games-2026'), 'Lists',
     'The definitive list of the 25 best free browser games in 2026. From action to puzzles, find your next favorite game.',
     `<p>Browser gaming has exploded in 2026. With HTML5 technology powering increasingly sophisticated games, you no longer need a console or gaming PC for great gameplay. Here are the 25 best free browser games you can play right now.</p>
 <h2>Endless Runners</h2>
@@ -53,7 +52,7 @@ module.exports = [
 <p>The best part about browser gaming is discovering new favorites. <a href="/">Browse the full game collection on BrowserGamesHQ</a> and find your next obsession. With new games added regularly, there is always something fresh to play.</p>
 <p>All games are completely free — no downloads, no subscriptions, no hidden fees. Just click and play.</p>`),
 
-  post('fun-games-for-school-chromebook', 'Best Free Games for Chromebook at School: Play Online in 2026', rd(), 'Lists',
+  post('fun-games-for-school-chromebook', 'Best Free Games for Chromebook at School: Play Online in 2026', stableDate('fun-games-for-school-chromebook'), 'Lists',
     'Find the best free browser games that work on school Chromebooks. No download, no install — just fun games that run in any browser.',
     `<p>School Chromebooks often have restrictions that prevent installing apps or games. Fortunately, browser games bypass these limitations completely. Here are the best games that work perfectly on school Chromebooks.</p>
 <h2>1. Subway Surfers</h2><p>Runs perfectly in any browser. <a href="/en/g/subway-surfers">Play Subway Surfers on Chromebook</a> and enjoy smooth gameplay with keyboard controls.</p>
@@ -68,7 +67,7 @@ module.exports = [
 <h2>10. Temple Run 2 Spooky Summit</h2><p>Works on any Chromebook model. <a href="/en/g/temple-run-2-spooky-summit">Play Spooky Summit</a> for spooky fun.</p>
 <p>Bookmark BrowserGamesHQ so you always have access to these games. They work on any Chromebook, any browser, any school network.</p>`),
 
-  post('best-action-games-online-free', '10 Best Action Games You Can Play Online Free Right Now', rd(), 'Lists',
+  post('best-action-games-online-free', '10 Best Action Games You Can Play Online Free Right Now', stableDate('best-action-games-online-free'), 'Lists',
     'Get your adrenaline pumping with the best free action games for browser. No downloads, no lag — just pure action.',
     `<p>Action games are the most popular genre in browser gaming, and for good reason. They deliver instant excitement without any setup. Here are the best action games you can play for free in your browser.</p>
 <h2>1. Subway Surfers</h2><p>Non-stop action at increasing speeds. <a href="/en/g/subway-surfers">Play Subway Surfers</a> and test your reflexes against speeding trains.</p>
@@ -83,7 +82,7 @@ module.exports = [
 <h2>10. Apple Worm</h2><p>Physics action that rewards precision. <a href="/en/g/apple-worm">Play Apple Worm</a> for a different kind of action.</p>
 <p>All these games run directly in your browser. No downloads, no plugins — just click and experience the action.</p>`),
 
-  post('play-free-games-without-download', 'Play Free Games Without Downloading Anything: Complete Guide', rd(), 'Lists',
+  post('play-free-games-without-download', 'Play Free Games Without Downloading Anything: Complete Guide', stableDate('play-free-games-without-download'), 'Lists',
     'Complete guide to playing free browser games without any downloads. Everything you need to know about instant-play gaming.',
     `<p>Playing games without downloading anything is easier than ever. Modern browser games use HTML5 technology that runs natively in Chrome, Firefox, Safari, and Edge. Here is everything you need to know.</p>
 <h2>How Browser Gaming Works</h2>
@@ -104,7 +103,7 @@ module.exports = [
 <p>Use Chrome or Edge for the best performance. Close unnecessary tabs to free up memory. A stable internet connection ensures smooth gameplay. Use keyboard controls when available for better precision.</p>
 <p><a href="/">Explore all no-download games on BrowserGamesHQ</a> and start playing instantly.</p>`),
 
-  post('top-endless-runner-games-2026', 'Best Endless Runner Games Online: Top Picks for 2026', rd(), 'Lists',
+  post('top-endless-runner-games-2026', 'Best Endless Runner Games Online: Top Picks for 2026', stableDate('top-endless-runner-games-2026'), 'Lists',
     'The ultimate collection of endless runner games you can play for free online. Find your next high-score chase.',
     `<p>Endless runner games are the perfect genre for quick gaming sessions. They are easy to learn, difficult to master, and endlessly replayable. Here are the best endless runner games available online in 2026.</p>
 <h2>1. Subway Surfers</h2><p>The most popular endless runner worldwide. <a href="/en/g/subway-surfers">Play Subway Surfers online</a> for colorful, fast-paced running action with regular location updates.</p>
@@ -115,7 +114,7 @@ module.exports = [
 <h2>6. Temple Run 2 Spooky Summit</h2><p>Atmospheric endless running with spooky themes. <a href="/en/g/temple-run-2-spooky-summit">Play Spooky Summit</a> for a darker experience.</p>
 <p>Endless runners are defined by their simple controls and increasing difficulty. The best ones balance challenge with fairness, giving you enough time to learn patterns while constantly pushing your skills. Each game above does this masterfully.</p>`),
 
-  post('free-online-games-no-signup', 'Free Online Games with No Sign Up Required: Play Instantly', rd(), 'Lists',
+  post('free-online-games-no-signup', 'Free Online Games with No Sign Up Required: Play Instantly', stableDate('free-online-games-no-signup'), 'Lists',
     'Play free online games without creating an account. No sign-ups, no emails, no passwords — just click and play.',
     `<p>The best browser games do not require any account creation. You click a link and start playing immediately. Here are the best no-sign-up games available right now.</p>
 <h2>Why No Sign-Up Games Are Better</h2>
@@ -139,7 +138,7 @@ module.exports = [
 <h2>Why Developers Skip Sign-Ups</h2>
 <p>Game developers choose not to require accounts because it maximizes their audience. Every person who clicks a link becomes a potential player. Adding a sign-up wall would lose 90 percent of visitors before they even see the game. The ad-based revenue model works better with a larger audience, so keeping games accessible to everyone benefits both players and developers.</p>`),
 
-  post('best-puzzle-games-browser', 'Best Puzzle Games to Play in Your Browser for Free', rd(), 'Lists',
+  post('best-puzzle-games-browser', 'Best Puzzle Games to Play in Your Browser for Free', stableDate('best-puzzle-games-browser'), 'Lists',
     'Challenge your brain with the best free puzzle games available in your browser. From physics puzzles to mysteries.',
     `<p>Puzzle games are perfect for browser play. They do not require fast reflexes or expensive hardware — just a thinking mind. Here are the best puzzle games you can play for free in your browser.</p>
 <h2>1. Apple Worm</h2><p>A physics-based puzzle game where you guide a worm to apples. Each level is a unique challenge that requires creative thinking. <a href="/en/g/apple-worm">Play Apple Worm</a> and solve increasingly clever puzzles.</p>
@@ -150,7 +149,7 @@ module.exports = [
 <p>Browser puzzle games improve critical thinking, pattern recognition, and problem-solving skills. They are also excellent stress relievers — the satisfaction of solving a difficult puzzle releases dopamine naturally. Best of all, they are completely free on BrowserGamesHQ.</p>
 <p><a href="/">Browse all puzzle and brain games on BrowserGamesHQ</a> for more challenges.</p>`),
 
-  post('games-to-play-when-bored-free', 'Games to Play When Bored: Free Online Fun for Everyone', rd(), 'Lists',
+  post('games-to-play-when-bored-free', 'Games to Play When Bored: Free Online Fun for Everyone', stableDate('games-to-play-when-bored-free'), 'Lists',
     'Bored? Play these free online games instantly in your browser. No downloads needed — just fun when you need it most.',
     `<p>We have all been there — staring at a screen with nothing to do. When boredom strikes, these browser games provide instant entertainment without any setup.</p>
 <h2>Quick Fix Games (Under 5 Minutes)</h2>
@@ -177,7 +176,7 @@ module.exports = [
 <h2>Rotating Game Strategies</h2>
 <p>To keep things fresh, rotate between game types. Play a fast-paced endless runner like Subway Surfers when you need an energy boost. Switch to a puzzle game like Apple Worm when you want mental stimulation. Try a racing game like Drive Mad when you crave competition. Having variety in your gaming rotation prevents boredom even with games you have played many times before.</p>`),
 
-  post('racing-games-online-free-browser', 'Best Racing Games to Play Online Free in Your Browser', rd(), 'Lists',
+  post('racing-games-online-free-browser', 'Best Racing Games to Play Online Free in Your Browser', stableDate('racing-games-online-free-browser'), 'Lists',
     'Race at full speed with the best free browser racing games. No downloads, no lag — just pure racing action.',
     `<p>Racing games are a natural fit for browser play. Simple controls, instant action, and endless replayability. Here are the best racing games you can play for free in your browser.</p>
 <h2>1. Drive Mad</h2><p>Physics-based stunt racing with realistic vehicle handling. Master balance and momentum to conquer challenging tracks. <a href="/en/g/drive-mad">Play Drive Mad</a> for high-speed action.</p>
@@ -190,7 +189,7 @@ module.exports = [
 <h2>Track Types in Browser Racing Games</h2>
 <p>Browser racing games feature diverse track types that test different skills. Off-road tracks with mud and rocks require careful throttle control and momentum management. Urban tracks with tight corners demand precision steering and braking timing. Hill climb tracks test your vehicle balance and weight distribution. Each track type offers a unique challenge, and mastering all of them makes you a well-rounded racing game player. Start with simpler tracks and gradually work up to the most difficult ones.</p>`),
 
-  post('cool-browser-games-to-play', 'Cool Browser Games to Play Online: Curated Collection', rd(), 'Lists',
+  post('cool-browser-games-to-play', 'Cool Browser Games to Play Online: Curated Collection', stableDate('cool-browser-games-to-play'), 'Lists',
     'Looking for cool browser games? This curated collection features the most entertaining free online games you can play right now.',
     `<p>Not all browser games are created equal. This curated list features games that are genuinely fun, well-designed, and worth your time. No filler, just quality.</p>
 <h2>1. Subway Surfers</h2><p>Still the coolest endless runner after all these years. <a href="/en/g/subway-surfers">Play Subway Surfers online</a> and see why millions play daily.</p>
@@ -206,7 +205,7 @@ module.exports = [
 <h2>How We Curated This List</h2>
 <p>Every game on this list was tested for performance, gameplay quality, and replay value. We looked for games that you can return to again and again without getting bored. Games with shallow mechanics or poor performance were excluded regardless of their popularity. The result is a curated collection of browser games that represent the very best of what the platform offers in 2026.</p>`),
 
-  post('best-multiplayer-games-browser', 'Best Multiplayer Browser Games to Play with Friends Online', rd(), 'Lists',
+  post('best-multiplayer-games-browser', 'Best Multiplayer Browser Games to Play with Friends Online', stableDate('best-multiplayer-games-browser'), 'Lists',
     'Play these multiplayer browser games with friends online. No downloads needed — everyone just opens a link and plays.',
     `<p>Multiplayer browser games let you play with friends without any setup. Everyone opens the same link and starts playing. Here are the best multiplayer-friendly browser games.</p>
 <h2>High Score Challenges</h2>
@@ -227,7 +226,7 @@ module.exports = [
 <h2>Organizing a Multiplayer Session</h2>
 <p>Running a successful multiplayer session requires some coordination. First, agree on the game everyone will play. Share the link with all participants. Set a time limit for each round or run. Use a shared document or chat to track scores. For larger groups, create a tournament bracket before starting. The key to keeping things fun is ensuring everyone gets equal play time and that the competitive atmosphere remains friendly. Browser games are particularly good for this because there is no setup delay — everyone clicks the same link and starts playing immediately.</p>`),
 
-  post('free-online-games-for-kids-safe', 'Safe Free Online Games for Kids: Parent-Approved Browser Games', rd(), 'Lists',
+  post('free-online-games-for-kids-safe', 'Safe Free Online Games for Kids: Parent-Approved Browser Games', stableDate('free-online-games-for-kids-safe'), 'Lists',
     'Safe, educational, and fun browser games for kids. Parent-approved online games with no violence and no inappropriate content.',
     `<p>Finding safe online games for kids can be challenging. These browser games are appropriate for children of all ages, with no violence, no inappropriate content, and no chat features.</p>
 <h2>1. Apple Worm</h2><p>A charming physics puzzle game suitable for all ages. Guide a cute worm to apples through creative levels. <a href="/en/g/apple-worm">Play Apple Worm</a> for kid-friendly puzzle fun.</p>

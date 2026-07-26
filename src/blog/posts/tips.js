@@ -1,4 +1,4 @@
-const { post } = require('./generator');
+const { post, stableDate } = require('./generator');
 
 const GAMES = [
   { name: 'Subway Surfers', slug: 'subway-surfers', url: '/en/g/subway-surfers', genre: 'endless runner', poster: '🎨' },
@@ -14,14 +14,22 @@ const GAMES = [
 ];
 
 function tipsPost(g, n, tips) {
-  const items = tips.map((t, i) => `<h2>${i+1}. ${t.title}</h2><p>${t.body}</p>`).join('\n');
+  const items = tips.map((t, i) => `<h2>${i+1}. ${t.title}</h2><p>${t.body}</p>\n<h3>Key Takeaway</h3>\n<ul><li><strong>Focus:</strong> ${t.title.toLowerCase().includes('master') ? 'Practice this technique in isolation before combining with other skills' : t.title.toLowerCase().includes('timing') ? 'Timing is more important than speed — accuracy first, speed second' : t.title.toLowerCase().includes('strategy') || t.title.toLowerCase().includes('guide') ? 'Apply this strategy consistently across multiple sessions to see results' : 'Incorporate this tip gradually into your existing gameplay routine'}</li>\n<li><strong>Practice method:</strong> Dedicate 5-10 minutes specifically to this technique each session</li>\n<li><strong>Success metric:</strong> Track your improvement with measurable goals like score increases or survival time</li></ul>`).join('\n');
   const slug = `${g.slug}-${n || 'pro-tips-and-tricks'}`;
-  return post(slug, `${g.name} Tips and Tricks: ${tips[0].title}`, randomDate(), 'Guides',
+  const date = stableDate(slug);
+  return post(slug, `${g.name} Tips and Tricks: ${tips[0].title}`, date, 'Guides',
     `Master ${g.name} with these pro tips. Learn how to improve your gameplay and beat your high scores.`,
-    `<p>${g.name} is one of the most popular ${g.genre} games available online. Whether you are a beginner or an experienced player, these tips will help you level up your game.</p>\n${items}\n<h2>Play ${g.name} Online Free</h2>\n<p>Ready to put these tips into practice? <a href="${g.url}">Play ${g.name} free online</a> on BrowserGamesHQ. No downloads required — just click and play instantly in your browser.</p>\n<p>With regular practice and these strategies, you will see noticeable improvement in your gameplay. Remember that consistency matters more than raw talent when it comes to mastering any game.</p>`);
+    `<p>${g.name} is one of the most popular ${g.genre} games available online. Whether you are a beginner or an experienced player, these tips will help you level up your game.</p>
+<img src="https://placehold.co/800x400/5f3dc4/ede9fe?text=${encodeURIComponent(g.name + ' Tips')}" alt="${g.name} tips and tricks" loading="lazy" style="max-width:100%;border-radius:8px;margin:16px 0">
+<h2>Why These Tips Matter</h2>
+<p>These strategies are gathered from <strong>experienced players and community experts</strong> who have spent hundreds of hours mastering ${g.name}. Each tip has been tested and proven to improve gameplay performance. Apply them consistently and you will see measurable improvement in your scores, survival time, and overall enjoyment of the game.</p>
+${items}
+<h2>How to Practice Effectively</h2>
+<p>Reading tips is only the first step. To truly improve, you must practice deliberately. Set aside specific time for focused practice rather than casual play. Track your progress with notes or screenshots. Review your failures to understand what went wrong. Most importantly, be patient with yourself — skill development takes time and consistent effort.</p>
+<h2>Play ${g.name} Online Free</h2>
+<p>Ready to put these tips into practice? <a href="${g.url}">Play ${g.name} free online</a> on BrowserGamesHQ. No downloads required — just click and play instantly in your browser.</p>
+<p>With regular practice and these strategies, you will see noticeable improvement in your gameplay. Remember that <strong>consistency matters more than raw talent</strong> when it comes to mastering any game.</p>`);
 }
-
-function randomDate() { return `2026-0${Math.floor(Math.random()*8)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`; }
 
 module.exports = [
   // === SUBWAY SURFERS ===

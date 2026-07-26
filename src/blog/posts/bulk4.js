@@ -1,9 +1,8 @@
-const { post } = require('./generator');
-function rd() { return `2026-0${Math.floor(Math.random()*8)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`; }
+const { post, stableDate } = require('./generator');
 
 const out = [];
 
-out.push(post('subway-surfers-timing-guide', 'Subway Surfers Timing Guide: When to Swipe for Perfect Runs', rd(), 'Guides',
+out.push(post('subway-surfers-timing-guide', 'Subway Surfers Timing Guide: When to Swipe for Perfect Runs', stableDate('subway-surfers-timing-guide'), 'Guides',
   'Master the precise timing of Subway Surfers. Learn exactly when to swipe, jump, and slide for perfect obstacle navigation and longer runs with higher scores.',
   `<p>Timing is the single most important skill in Subway Surfers. You can know exactly what to do, but if your timing is off by even a fraction of a second, you will crash. This guide breaks down the optimal timing for every obstacle type, helping you develop the precise muscle memory needed for high-score runs.</p>
 <h2>Mastering Train Timing</h2>
@@ -17,7 +16,7 @@ out.push(post('subway-surfers-timing-guide', 'Subway Surfers Timing Guide: When 
 <h2>Play and Practice</h2>
 <p><a href="/en/g/subway-surfers">Play Subway Surfers online</a> and apply these timing techniques. Remember that perfect timing comes from repetition — the more you practice, the more automatic your reactions become. With consistent practice, you will develop the kind of intuitive timing that separates elite players from casual ones.</p>`));
 
-out.push(post('drive-mad-vehicle-guide', 'Drive Mad Vehicle Guide: Complete Stats and Handling Analysis', rd(), 'Guides',
+out.push(post('drive-mad-vehicle-guide', 'Drive Mad Vehicle Guide: Complete Stats and Handling Analysis', stableDate('drive-mad-vehicle-guide'), 'Guides',
   'Every Drive Mad vehicle analyzed in depth. Learn which vehicle handles best on each track type and how to match vehicles to your driving style for optimal performance.',
   `<p>Drive Mad features a range of vehicles with dramatically different handling characteristics. Choosing the right vehicle for each track can be the difference between a clean run and a frustrating crash. This comprehensive guide analyzes every vehicle type and provides track-specific recommendations.</p>
 <h2>Light Vehicles: Speed and Agility</h2>
@@ -31,7 +30,7 @@ out.push(post('drive-mad-vehicle-guide', 'Drive Mad Vehicle Guide: Complete Stat
 <h2>Play Drive Mad</h2>
 <p><a href="/en/g/drive-mad">Play Drive Mad</a> and experiment with different vehicles on your favorite tracks. The right vehicle choice can dramatically improve your performance.</p>`));
 
-out.push(post('monster-tracks-track-guide', 'Monster Tracks Track Guide: Master Every Surface Type', rd(), 'Guides',
+out.push(post('monster-tracks-track-guide', 'Monster Tracks Track Guide: Master Every Surface Type', stableDate('monster-tracks-track-guide'), 'Guides',
   'Complete guide to every surface type in Monster Tracks. Learn the unique driving strategies for mud, rock, sand, and pavement to maximize your speed and control.',
   `<p>Monster Tracks features several distinct surface types, each with unique driving characteristics that require different techniques. Understanding how to handle each surface is the key to consistent performance across all tracks. This guide covers every surface type in detail.</p>
 <h2>Mud Tracks: Power Through</h2>
@@ -47,7 +46,7 @@ out.push(post('monster-tracks-track-guide', 'Monster Tracks Track Guide: Master 
 <h2>Play Monster Tracks</h2>
 <p><a href="/en/g/monster-tracks">Play Monster Tracks</a> and apply these surface-specific strategies. Understanding terrain is the difference between good drivers and great ones.</p>`));
 
-out.push(post('temple-run-2-power-ups-guide', 'Temple Run 2 Power-Ups: Complete Guide and Optimal Usage', rd(), 'Guides',
+out.push(post('temple-run-2-power-ups-guide', 'Temple Run 2 Power-Ups: Complete Guide and Optimal Usage', stableDate('temple-run-2-power-ups-guide'), 'Guides',
   'Comprehensive guide to every Temple Run 2 power-up. Learn when and how to use each power-up for maximum effectiveness, including advanced strategies for combining them.',
   `<p>Power-ups can dramatically extend your Temple Run 2 runs when used correctly. This guide covers every power-up in detail, including optimal usage timing, combination strategies, and the common mistakes that waste their potential.</p>
 <h2>Shield — Your Most Valuable Asset</h2>
@@ -63,7 +62,7 @@ out.push(post('temple-run-2-power-ups-guide', 'Temple Run 2 Power-Ups: Complete 
 <h2>Play Temple Run 2</h2>
 <p><a href="/en/g/temple-run-2">Play Temple Run 2 free</a> and practice your power-up timing. Master these strategies and you will see immediate improvement in your run length and score.</p>`));
 
-out.push(post('apple-worm-physics-guide', 'Apple Worm Physics Guide: Mastering Momentum and Trajectory', rd(), 'Guides',
+out.push(post('apple-worm-physics-guide', 'Apple Worm Physics Guide: Mastering Momentum and Trajectory', stableDate('apple-worm-physics-guide'), 'Guides',
   'Deep dive into Apple Worm physics mechanics. Learn how momentum, gravity, collision, and tension work to solve puzzles more efficiently and discover advanced techniques.',
   `<p>Apple Worm physics can seem simple at first, but understanding the underlying mechanics reveals a surprisingly deep and satisfying puzzle system. This guide explains the core physics principles and how to apply them to solve even the most challenging levels.</p>
 <h2>Understanding Momentum Transfer</h2>
@@ -77,7 +76,7 @@ out.push(post('apple-worm-physics-guide', 'Apple Worm Physics Guide: Mastering M
 <h2>Play Apple Worm</h2>
 <p><a href="/en/g/apple-worm">Play Apple Worm</a> and apply these physics principles. Understanding the underlying mechanics transforms seemingly impossible levels into satisfying puzzles waiting to be solved.</p>`));
 
-out.push(post('murder-evidence-guide', 'Murder Evidence Guide: How to Think Like a Real Detective', rd(), 'Guides',
+out.push(post('murder-evidence-guide', 'Murder Evidence Guide: How to Think Like a Real Detective', stableDate('murder-evidence-guide'), 'Guides',
   'Master the art of criminal investigation in Murder. Professional detective techniques for gathering evidence, analyzing clues, identifying suspects, and making correct deductions.',
   `<p>Solving cases in Murder requires more than just clicking on everything in sight. Professional detectives use systematic investigation techniques that can be applied directly to the game. This guide teaches you how to think like a real detective and solve cases with confidence.</p>
 <h2>The Four Categories of Evidence</h2>
@@ -91,7 +90,7 @@ out.push(post('murder-evidence-guide', 'Murder Evidence Guide: How to Think Like
 <h2>Play Murder</h2>
 <p><a href="/en/g/murder">Play Murder online</a> and practice these detective techniques. Each case you solve will make you a better investigator for the next one.</p>`));
 
-out.push(post('subway-surfers-character-guide', 'Subway Surfers Character Guide: Complete Roster and Unlock Guide', rd(), 'Guides',
+out.push(post('subway-surfers-character-guide', 'Subway Surfers Character Guide: Complete Roster and Unlock Guide', stableDate('subway-surfers-character-guide'), 'Guides',
   'Complete guide to every character in Subway Surfers. Learn how to unlock each character, their unique styles, and whether character choice actually affects gameplay.',
   `<p>Subway Surfers features an extensive roster of characters, each with unique visual designs and unlock requirements. While all characters play identically in terms of mechanics, collecting them adds variety, achievement progression, and personal expression to your gameplay experience. This guide covers every character and how to unlock them.</p>
 <h2>Starting Characters and How to Unlock More</h2>
@@ -105,7 +104,7 @@ out.push(post('subway-surfers-character-guide', 'Subway Surfers Character Guide:
 <h2>Play Subway Surfers</h2>
 <p><a href="/en/g/subway-surfers">Play Subway Surfers online</a> and start building your character collection. With regular play and mission completion, you will unlock characters faster than you expect.</p>`));
 
-out.push(post('subway-surfers-hoverboard-guide', 'Subway Surfers Hoverboards Guide: Best Boards and Strategies', rd(), 'Guides',
+out.push(post('subway-surfers-hoverboard-guide', 'Subway Surfers Hoverboards Guide: Best Boards and Strategies', stableDate('subway-surfers-hoverboard-guide'), 'Guides',
   'Complete guide to Subway Surfers hoverboards. Learn how they work, when to activate them, which boards to choose, and how to use them to dramatically extend your runs.',
   `<p>Hoverboards are one of the most important tools in Subway Surfers. They function as protective shields that can save you from crashes and dramatically extend your runs. This comprehensive guide covers everything you need to know about hoverboards, from basic mechanics to advanced usage strategies.</p>
 <h2>How Hoverboards Work</h2>
@@ -119,7 +118,7 @@ out.push(post('subway-surfers-hoverboard-guide', 'Subway Surfers Hoverboards Gui
 <h2>Play Subway Surfers</h2>
 <p><a href="/en/g/subway-surfers">Play Subway Surfers online</a> and practice your hoverboard timing. Mastering hoverboards is one of the fastest ways to dramatically extend your average run length and achieve new high scores.</p>`));
 
-out.push(post('temple-run-2-coin-collection-guide', 'Temple Run 2 Coin Collection Guide: Maximize Every Run', rd(), 'Guides',
+out.push(post('temple-run-2-coin-collection-guide', 'Temple Run 2 Coin Collection Guide: Maximize Every Run', stableDate('temple-run-2-coin-collection-guide'), 'Guides',
   'Expert strategies for collecting coins in Temple Run 2. Learn optimal routes, multiplier strategies, power-up combinations, and advanced techniques to maximize your coin income on every run.',
   `<p>Coins are the lifeblood of Temple Run 2 — they unlock characters, power-ups, and upgrades. Maximizing your coin collection efficiency means you progress faster and have access to more resources. This guide covers every technique for maximizing your coin income.</p>
 <h2>Identifying High-Density Routes</h2>
@@ -133,7 +132,7 @@ out.push(post('temple-run-2-coin-collection-guide', 'Temple Run 2 Coin Collectio
 <h2>Play Temple Run 2</h2>
 <p><a href="/en/g/temple-run-2">Play Temple Run 2 free</a> and apply these coin collection strategies. Track your coin income across multiple runs to see which techniques produce the best results for your play style.</p>`));
 
-out.push(post('temple-run-2-mine-cart-guide', 'Temple Run 2 Mine Cart Guide: Surviving Cart Sections', rd(), 'Guides',
+out.push(post('temple-run-2-mine-cart-guide', 'Temple Run 2 Mine Cart Guide: Surviving Cart Sections', stableDate('temple-run-2-mine-cart-guide'), 'Guides',
   'Complete guide to surviving mine cart sections in Temple Run 2. Learn the timing, patterns, and strategies for navigating the most dangerous sections of the game.',
   `<p>Mine cart sections are widely considered the most challenging parts of Temple Run 2. The combination of fixed-speed movement, dense obstacles, and limited mobility creates high-pressure situations that end many promising runs. This guide will teach you how to survive mine cart sections consistently.</p>
 <h2>Understanding Mine Cart Mechanics</h2>
@@ -147,7 +146,7 @@ out.push(post('temple-run-2-mine-cart-guide', 'Temple Run 2 Mine Cart Guide: Sur
 <h2>Play Temple Run 2</h2>
 <p><a href="/en/g/temple-run-2">Play Temple Run 2 free</a> and practice mine cart navigation. Cart sections become manageable with practice — they only seem impossible because they demand more focused attention than normal sections.</p>`));
 
-out.push(post('temple-run-2-zip-line-guide', 'Temple Run 2 Zip Line Guide: Mastering Aerial Sections', rd(), 'Guides',
+out.push(post('temple-run-2-zip-line-guide', 'Temple Run 2 Zip Line Guide: Mastering Aerial Sections', stableDate('temple-run-2-zip-line-guide'), 'Guides',
   'Complete guide to zip line navigation in Temple Run 2. Learn speed management, obstacle avoidance, and landing techniques for perfect zip line transitions.',
   `<p>Zip line sections add vertical variety to Temple Run 2, requiring different skills than ground-level navigation. Mastering zip lines is essential for achieving top scores, as they appear in every map and can end runs just as easily as ground obstacles.</p>
 <h2>Zip Line Mechanics Explained</h2>
@@ -161,7 +160,7 @@ out.push(post('temple-run-2-zip-line-guide', 'Temple Run 2 Zip Line Guide: Maste
 <h2>Play Temple Run 2</h2>
 <p><a href="/en/g/temple-run-2">Play Temple Run 2 free</a> and master zip line navigation. Consistent zip line performance is one of the hallmarks of an experienced Temple Run 2 player.</p>`));
 
-out.push(post('temple-run-2-avoid-crashing-guide', 'Temple Run 2: How to Stop Crashing and Run Forever', rd(), 'Guides',
+out.push(post('temple-run-2-avoid-crashing-guide', 'Temple Run 2: How to Stop Crashing and Run Forever', stableDate('temple-run-2-avoid-crashing-guide'), 'Guides',
   'Stop crashing in Temple Run 2 with these proven techniques. Identify your specific crash patterns and learn the exact fixes for every common mistake.',
   `<p>If you feel like you keep crashing in Temple Run 2 at the same points run after run, you are not alone. Most players have specific crash patterns that they repeat without realizing it. This guide helps you identify your personal crash patterns and provides targeted fixes for each one.</p>
 <h2>Identifying Your Crash Patterns</h2>
@@ -177,7 +176,7 @@ out.push(post('temple-run-2-avoid-crashing-guide', 'Temple Run 2: How to Stop Cr
 <h2>Play Temple Run 2</h2>
 <p><a href="/en/g/temple-run-2">Play Temple Run 2 free</a> and consciously apply these fixes. Focus on one fix at a time during each play session. Improvement comes from targeted practice, not from simply playing more.</p>`));
 
-out.push(post('browser-games-productivity-tips', 'Browser Games That Boost Productivity: Strategic Break Gaming', rd(), 'Articles',
+out.push(post('browser-games-productivity-tips', 'Browser Games That Boost Productivity: Strategic Break Gaming', stableDate('browser-games-productivity-tips'), 'Articles',
   'Scientific evidence shows that short gaming sessions can boost productivity when used strategically. Learn how to use browser games as productivity tools rather than distractions.',
   `<p>The relationship between gaming and productivity is more nuanced than most people realize. While excessive gaming can certainly interfere with productivity, research shows that short, strategic gaming sessions during breaks can actually improve your focus, creativity, and overall output. This article explains the science and provides a practical system for using browser games productively.</p>
 <h2>The Science of Break Gaming</h2>
@@ -191,7 +190,7 @@ out.push(post('browser-games-productivity-tips', 'Browser Games That Boost Produ
 <h2>Implement the System</h2>
 <p>Start implementing this productivity gaming system today. Set a timer for 25 minutes of focused work. When it goes off, allow yourself one game session as a reward. Return to work for another 25 minutes. This structured approach transforms gaming from a potential distraction into a genuine productivity tool.</p>`));
 
-out.push(post('browser-games-mental-health', 'Browser Games for Mental Health: Therapeutic Benefits of Casual Gaming', rd(), 'Articles',
+out.push(post('browser-games-mental-health', 'Browser Games for Mental Health: Therapeutic Benefits of Casual Gaming', stableDate('browser-games-mental-health'), 'Articles',
   'How browser games can support mental health when used mindfully. Evidence-based therapeutic benefits of casual gaming for stress, anxiety, and mood management.',
   `<p>An emerging body of research suggests that casual gaming can have genuine therapeutic benefits for mental health when used appropriately. Browser games, in particular, offer a low-barrier way to incorporate these benefits into your daily wellness routine. This article explores the evidence-based mental health benefits of browser gaming and provides guidance for using games as part of a comprehensive mental health strategy.</p>
 <h2>Stress Reduction Through Focused Play</h2>

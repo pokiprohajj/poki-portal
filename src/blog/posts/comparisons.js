@@ -1,8 +1,7 @@
-const { post } = require('./generator');
-function rd() { return `2026-0${Math.floor(Math.random()*8)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`; }
+const { post, stableDate } = require('./generator');
 
 module.exports = [
-  post('subway-surfers-vs-temple-run-2-comparison', 'Subway Surfers vs Temple Run 2: Which Endless Runner Is Better?', rd(), 'Comparisons',
+  post('subway-surfers-vs-temple-run-2-comparison', 'Subway Surfers vs Temple Run 2: Which Endless Runner Is Better?', stableDate('subway-surfers-vs-temple-run-2-comparison'), 'Comparisons',
     'Detailed comparison of Subway Surfers and Temple Run 2. We analyze gameplay, graphics, replay value, and help you choose which endless runner deserves your time.',
     `<p>Subway Surfers and Temple Run 2 are the two biggest names in endless runner gaming. Both have millions of daily players, but they offer very different experiences. This detailed comparison will help you understand which game suits your preferences and playing style.</p>
 <h2>Gameplay Differences</h2>
@@ -16,7 +15,7 @@ module.exports = [
 <h2>Our Verdict</h2>
 <p>Play both! They offer different enough experiences that you can enjoy them on different days. Subway Surfers for quick, energetic sessions and Temple Run 2 for longer, more immersive runs. Having both in your rotation ensures you never get bored.</p>`),
 
-  post('drive-mad-vs-monster-tracks', 'Drive Mad vs Monster Tracks: Which Browser Racing Game Wins?', rd(), 'Comparisons',
+  post('drive-mad-vs-monster-tracks', 'Drive Mad vs Monster Tracks: Which Browser Racing Game Wins?', stableDate('drive-mad-vs-monster-tracks'), 'Comparisons',
     'Drive Mad and Monster Tracks are the top browser racing games. Compare physics, vehicles, tracks, and decide which racing game to play first.',
     `<p>Drive Mad and Monster Tracks are the premier racing games available in browsers. Both offer unique driving experiences, but they cater to different preferences and skill levels. This comparison will help you decide which game matches your racing style.</p>
 <h2>Gameplay Comparison</h2>
@@ -28,7 +27,7 @@ module.exports = [
 <h2>Which Should You Play?</h2>
 <p>Choose <a href="/en/g/drive-mad">Drive Mad</a> if you want realistic physics and a challenging skill-based experience. Choose <a href="/en/g/monster-tracks">Monster Tracks</a> if you want arcade-style fun with monster trucks and forgiving gameplay. Both are free and playable in your browser.</p>`),
 
-  post('temple-run-2-vs-frozen-shadows', 'Temple Run 2 vs Frozen Shadows: What Is Different?', rd(), 'Comparisons',
+  post('temple-run-2-vs-frozen-shadows', 'Temple Run 2 vs Frozen Shadows: What Is Different?', stableDate('temple-run-2-vs-frozen-shadows'), 'Comparisons',
     'How does Temple Run 2 Frozen Shadows compare to the original? We break down the differences in gameplay, obstacles, difficulty, and which version you should play first.',
     `<p>Temple Run 2 Frozen Shadows takes the classic Temple Run 2 formula and adds ice physics and freezing environments. But how different is it really from the original? This detailed comparison covers every difference to help you decide which version to play.</p>
 <h2>Core Mechanics</h2>
@@ -42,7 +41,7 @@ module.exports = [
 <h2>Which Should You Play?</h2>
 <p>Play <a href="/en/g/temple-run-2">Temple Run 2</a> for the classic experience that started it all. Play <a href="/en/g/temple-run-2-frozen-shadows">Frozen Shadows</a> when you want a fresh challenge with unique mechanics and a colder atmosphere. Both maps are worth mastering for different reasons.</p>`),
 
-  post('holi-festival-vs-spooky-summit', 'Temple Run 2 Holi Festival vs Spooky Summit: Map Comparison', rd(), 'Comparisons',
+  post('holi-festival-vs-spooky-summit', 'Temple Run 2 Holi Festival vs Spooky Summit: Map Comparison', stableDate('holi-festival-vs-spooky-summit'), 'Comparisons',
     'Two of the most unique Temple Run 2 maps compared head to head. Holi Festival vs Spooky Summit — which themed map offers the better experience?',
     `<p>Temple Run 2 Holi Festival and Spooky Summit represent opposite ends of the thematic spectrum. One is a celebration of color and joy, the other a dark and spooky mountain adventure. This comparison helps you decide which map matches your mood and play style.</p>
 <h2>Visual Design</h2>
@@ -54,7 +53,7 @@ module.exports = [
 <h2>Our Pick</h2>
 <p><a href="/en/g/temple-run-2-holi-festival">Play Holi Festival</a> for a fun, energetic experience that lifts your mood. <a href="/en/g/temple-run-2-spooky-summit">Play Spooky Summit</a> if you want a genuine challenge and enjoy atmospheric gameplay that tests more than just your reflexes. Both maps are excellent additions to the Temple Run 2 lineup.</p>`),
 
-  post('temple-run-2-maps-comparison', 'Temple Run 2 All Maps Comparison: Which Map Should You Play?', rd(), 'Comparisons',
+  post('temple-run-2-maps-comparison', 'Temple Run 2 All Maps Comparison: Which Map Should You Play?', stableDate('temple-run-2-maps-comparison'), 'Comparisons',
     'Complete comparison of every Temple Run 2 map. Compare the original, Frozen Shadows, Holi Festival, Jungle Fall, and Spooky Summit to find your perfect match.',
     `<p>Temple Run 2 has five distinct maps, each offering a completely unique experience with different environments, obstacles, and difficulty levels. This comprehensive comparison helps you decide which map matches your skill level and preferences.</p>
 <h2>Original Temple Run 2</h2>
@@ -70,7 +69,7 @@ module.exports = [
 <h2>Which Map Is Best for You?</h2>
 <p>Beginners: Start with the original to learn core mechanics. Intermediate players: Try Jungle Fall or Holi Festival for variety. Advanced players: Master Frozen Shadows and Spooky Summit for the ultimate challenge. Each map has its own leaderboard, so you can compete on all five independently.</p>`),
 
-  post('subway-surfers-vs-temple-run-2-vs-drive-mad', 'Subway Surfers vs Temple Run 2 vs Drive Mad: Best Browser Game?', rd(), 'Comparisons',
+  post('subway-surfers-vs-temple-run-2-vs-drive-mad', 'Subway Surfers vs Temple Run 2 vs Drive Mad: Best Browser Game?', stableDate('subway-surfers-vs-temple-run-2-vs-drive-mad'), 'Comparisons',
     'Three of the most popular browser games compared head-to-head across gameplay, skill requirements, and time investment. Which one deserves your playtime?',
     `<p>Subway Surfers, Temple Run 2, and Drive Mad represent three different approaches to browser gaming. Each has its own strengths and appeals to different types of players. This three-way comparison helps you decide which game to invest your time in.</p>
 <h2>Genre Differences</h2>
@@ -82,7 +81,7 @@ module.exports = [
 <h2>Which Is the Best?</h2>
 <p>There is no single answer — it depends on what you value in a game. Play <a href="/en/g/subway-surfers">Subway Surfers</a> for colorful, reflex-based action. Play <a href="/en/g/temple-run-2">Temple Run 2 free</a> for adventure atmosphere and spatial challenges. Play <a href="/en/g/drive-mad">Drive Mad</a> for physics-based precision and skill development. Or play all three — they are all free and each offers a unique experience.</p>`),
 
-  post('browser-games-vs-mobile-games', 'Browser Games vs Mobile Games: Which Is Better in 2026?', rd(), 'Comparisons',
+  post('browser-games-vs-mobile-games', 'Browser Games vs Mobile Games: Which Is Better in 2026?', stableDate('browser-games-vs-mobile-games'), 'Comparisons',
     'Browser games and mobile games both offer convenience and accessibility. Compare storage requirements, performance, cost, and discover which platform is right for your gaming needs.',
     `<p>The debate between browser games and mobile games has intensified as browser technology continues to improve. In 2026, browser games can deliver experiences that rival mobile games in quality while offering unique advantages. This honest comparison will help you decide where to invest your gaming time.</p>
 <h2>Storage and Setup</h2>
@@ -96,7 +95,7 @@ module.exports = [
 <h2>Our Verdict</h2>
 <p>Browser games are better for casual players, those with limited device storage, and anyone who values convenience and zero cost. Mobile games are better for players who want access anywhere without internet connectivity. Both have their place, but browser gaming is the clear winner for convenience, cost, and accessibility.</p>`),
 
-  post('apple-worm-vs-physics-puzzle-games', 'Apple Worm vs Other Physics Puzzle Games: What Makes It Special?', rd(), 'Comparisons',
+  post('apple-worm-vs-physics-puzzle-games', 'Apple Worm vs Other Physics Puzzle Games: What Makes It Special?', stableDate('apple-worm-vs-physics-puzzle-games'), 'Comparisons',
     'How does Apple Worm compare to other physics puzzle games available online? Discover what makes this charming game unique and why it stands out from the crowd.',
     `<p>Physics puzzle games have a long and storied history in browser gaming. Apple Worm stands out from the crowd in several meaningful ways that make it worth your attention even if you have played other physics puzzle games before.</p>
 <h2>Unique Physics Mechanics</h2>
@@ -108,7 +107,7 @@ module.exports = [
 <h2>Why Play Apple Worm?</h2>
 <p><a href="/en/g/apple-worm">Play Apple Worm</a> for a physics puzzle experience that is accessible, charming, and genuinely challenging. Whether you are a casual gamer looking for a relaxing puzzle experience or a dedicated puzzle enthusiast seeking satisfying physics challenges, Apple Worm delivers on all fronts.</p>`),
 
-  post('murder-vs-other-mystery-games', 'Murder vs Other Online Mystery Games: Which Detective Game Wins?', rd(), 'Comparisons',
+  post('murder-vs-other-mystery-games', 'Murder vs Other Online Mystery Games: Which Detective Game Wins?', stableDate('murder-vs-other-mystery-games'), 'Comparisons',
     'Compare Murder with other online mystery and detective games. Find out which game offers the best puzzle-solving experience and the most satisfying deduction mechanics.',
     `<p>Murder is a unique entry in the browser mystery game genre, offering a detective experience that stands apart from other mystery games available online. This comparison highlights what makes Murder special and helps you decide if it is the right mystery game for you.</p>
 <h2>Gameplay Approach</h2>
@@ -120,7 +119,7 @@ module.exports = [
 <h2>Play Murder Online</h2>
 <p><a href="/en/g/murder">Play Murder online</a> and test your detective skills against increasingly complex cases. If you enjoy the satisfaction of solving a challenging mystery through your own intellect, Murder will become your go-to browser game for mystery entertainment.</p>`),
 
-  post('browser-games-vs-console-games', 'Browser Games vs Console Games: 10 Key Differences', rd(), 'Comparisons',
+  post('browser-games-vs-console-games', 'Browser Games vs Console Games: 10 Key Differences', stableDate('browser-games-vs-console-games'), 'Comparisons',
     'How do browser games compare to console games in 2026? We examine graphics, cost, convenience, gameplay, and accessibility to help you understand the strengths of each platform.',
     `<p>Browser games and console games serve different purposes in the gaming ecosystem, but the line between them is blurring. In 2026, browser games can deliver experiences that were once exclusive to consoles. Here are the key differences between the two platforms.</p>
 <h2>Cost</h2>
