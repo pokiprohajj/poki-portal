@@ -35,7 +35,7 @@ function detectBot(ua) {
 class LiveTracker {
   constructor() {
     this.sessions = new Map();
-    this.TIMEOUT_MS = 12000;
+    this.TIMEOUT_MS = 30000;
     this._pruneInterval = setInterval(() => this._prune(), 3000);
   }
 
@@ -59,12 +59,19 @@ class LiveTracker {
       const device = this._detectDevice(ua);
       const bot = detectBot(ua);
 
+      const existing = this.sessions.get(ip);
+      const visited = existing ? existing.visited : new Set();
+      const views = existing ? existing.views + 1 : 1;
+      visited.add(page);
+
       this.sessions.set(ip, {
         ip,
         page,
         country,
         device,
         bot,
+        visited,
+        views,
         lastSeen: Date.now(),
       });
     } catch (e) {
@@ -96,6 +103,8 @@ class LiveTracker {
       page: s.page,
       device: s.device,
       bot: s.bot,
+      views: s.views,
+      pages: s.visited.size,
       lastSeen: s.lastSeen,
     }));
   }

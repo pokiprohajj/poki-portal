@@ -49,6 +49,7 @@ h1{font-size:22px;color:#6c5ce7;margin-bottom:6px}
 .person .country{font-size:14px;font-weight:600;min-width:40px}
 .person .page a{color:#6c5ce7;text-decoration:none}
 .person .page a:hover{text-decoration:underline;color:#8b7cf7}
+.person .views{font-size:11px;color:#8888aa;min-width:50px;text-align:center;white-space:nowrap}
 .person .device{font-size:11px;padding:2px 10px;border-radius:12px;min-width:50px;text-align:center}
 .d{background:#1e293b;color:#94a3b8}
 .m{background:#064e3b;color:#6ee7b7}
@@ -77,7 +78,7 @@ let currentIds=new Set();
 function f(c){if(!c||c==='Unknown'||c==='XX')return '';return[...c.toUpperCase()].map(l=>String.fromCodePoint(0x1F1E6+l.charCodeAt(0)-65)).join('')}
 function poll(){fetch(BASE+'/stats?token='+TOKEN,{cache:'no-store'}).then(r=>r.json()).then(d=>{render(d)}).catch(()=>{})}
 function pLink(p){return'&nbsp;<a href="https://browsergameshq.com'+p+'" target="_blank" rel="noopener">'+p+'</a>'}
-function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const newIds=new Set();const incoming=new Map();d.visitors.forEach(v=>{const id=v.country+':'+v.page+':'+v.device+':'+(v.bot||'');newIds.add(id);incoming.set(id,v)});const existing=new Map();list.querySelectorAll('.person').forEach(el=>{const id=el.dataset.id;if(!newIds.has(id)){el.classList.add('removing');setTimeout(()=>el.remove(),300)}else{existing.set(id,el)}});incoming.forEach((v,id)=>{if(!existing.has(id)){const div=document.createElement('div');div.className='person';div.dataset.id=id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">'+pLink(v.page)+'</span><span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span><span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';const empty=list.querySelector('.empty');if(empty)empty.remove();list.appendChild(div)}});currentIds=newIds}
+function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const empty=list.querySelector('.empty');if(empty&&d.count>0)empty.remove();const lookup={};list.querySelectorAll('.person').forEach(el=>{lookup[el.dataset.id]=el});const seen=new Set();d.visitors.forEach(v=>{const id=v.country+':'+v.device+':'+(v.bot||'');seen.add(id);const el=lookup[id];if(el){const oldPage=el.querySelector('.page a')||el.querySelector('.page');if(oldPage&&oldPage.innerHTML!==pLink(v.page)){el.querySelector('.page').innerHTML=pLink(v.page);el.querySelector('.page').title=v.page}const oldViews=el.querySelector('.views');if(oldViews)oldViews.textContent=(v.views||1)+' pg'}else{const div=document.createElement('div');div.className='person';div.dataset.id=id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">'+pLink(v.page)+'</span><span class="views">'+(v.views||1)+' pg</span><span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span><span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';list.appendChild(div)}});Object.keys(lookup).forEach(id=>{if(!seen.has(id)){const el=lookup[id];el.classList.add('removing');setTimeout(()=>{if(el.parentNode)el.remove()},300)}})}
 poll();setInterval(poll,2000)
 </script>
 </body>
@@ -104,8 +105,8 @@ function pageHtml(path) {
 function personHtml(v) {
   const d = (v.device || 'u').toLowerCase().charAt(0);
   const bot = v.bot;
-  const id = v.country + ':' + v.page + ':' + v.device + ':' + (bot || '');
-  return '<div class="person" data-id="' + id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">' + pageHtml(v.page) + '</span><span class="device ' + d + '">' + (v.device || '?') + '</span><span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
+  const id = v.country + ':' + v.device + ':' + (bot || '');
+  return '<div class="person" data-id="' + id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">' + pageHtml(v.page) + '</span><span class="views">' + (v.views || 1) + ' pg</span><span class="device ' + d + '">' + (v.device || '?') + '</span><span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
 }
 
 module.exports = dashboardRouter;
