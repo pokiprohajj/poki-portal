@@ -148,7 +148,7 @@ class LiveTracker {
 
   getActive() {
     this._prune();
-    return Array.from(this.sessions.values()).map(s => ({
+    return Array.from(this.sessions.values()).sort((a, b) => b.lastSeen - a.lastSeen).map(s => ({
       id: s.ip,
       country: s.country,
       page: s.page,
