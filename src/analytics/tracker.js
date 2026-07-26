@@ -42,6 +42,7 @@ class LiveTracker {
   _isPagePath(path) {
     if (path.startsWith('/admin') || path.startsWith('/api/') || path.startsWith('/static/') ||
         path.startsWith('/game-proxy/') || path.startsWith('/proxy-media/') || path.startsWith('/wp-content/') ||
+        path.startsWith('/estimate/') || path.startsWith('/-/') ||
         path === '/t' || path === '/adserver' || path === '/favicon.ico' || path === '/health' ||
         path === '/ads.txt' || path === '/robots.txt' || path === '/llms.txt' || path === '/sitemap.xml') return false;
     if (path.includes('.')) return false;
@@ -50,6 +51,9 @@ class LiveTracker {
 
   track(req) {
     try {
+      // Only track requests that expect HTML (page navigations, not XHR/fetch)
+      if (!req.accepts('html')) return;
+
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
       const page = req.path || '/';
       if (!this._isPagePath(page)) return;
