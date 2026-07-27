@@ -48,6 +48,8 @@ app.use((req, res, next) => {
   res.removeHeader('X-Frame-Options');
   res.set('Cross-Origin-Resource-Policy', 'cross-origin');
   res.set('Access-Control-Allow-Origin', '*');
+  res.set('X-Sitemap', `https://${config.domain}/sitemap.xml`);
+  res.set('Link', `<https://${config.domain}/sitemap.xml>; rel="sitemap"`);
   next();
 });
 
@@ -140,9 +142,10 @@ app.get('/sitemap.xml', (req, res) => {
   const cacheHeaders = { 'Cache-Control': 'public, max-age=86400' };
   res.set(cacheHeaders);
   res.type('application/xml');
+  const today = new Date().toISOString().split('T')[0];
 
   const pages = ['', 'games', 'categories'].map(p =>
-    `  <url>\n    <loc>https://${config.domain}/${p}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}/${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`
   ).join('\n');
 
   const gamePages = [
@@ -151,16 +154,16 @@ app.get('/sitemap.xml', (req, res) => {
     '/en/casual-games', '/en/strategy-games', '/en/io-games',
   ];
   const gameUrls = gamePages.map(p =>
-    `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
   const posts = require('./blog/posts');
   const blogUrls = posts.map(p =>
-    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <lastmod>${p.date || today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
   ).join('\n');
 
   const blogCatUrls = ['guides', 'lists', 'comparisons', 'articles'].map(c =>
-    `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${blogCatUrls}\n${blogUrls}\n</urlset>`);

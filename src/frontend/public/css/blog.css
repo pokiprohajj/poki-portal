@@ -204,6 +204,42 @@ a:hover{color:var(--accent-dark);text-decoration:underline}
 .blog-footer .footer-links a:hover{color:#fff;text-decoration:none}
 .blog-footer .footer-copy{opacity:.5;font-size:.8rem}
 
+/* === TABLE OF CONTENTS === */
+.toc{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 2rem;margin:0 0 2rem}
+.toc h3{font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:.8rem}
+.toc ol{padding-left:1.4rem;margin:0}
+.toc li{margin-bottom:.35rem;font-size:.9rem}
+.toc li a{color:var(--accent);font-weight:500}
+.toc li a:hover{text-decoration:underline}
+.toc li a::before{content:'§ ';font-size:.8rem;opacity:.5}
+
+/* === SOCIAL SHARE === */
+.social-share{display:flex;align-items:center;gap:.75rem;padding:1.2rem 0;margin:1.5rem 0 0;border-top:1px solid var(--border)}
+.social-share span{font-size:.85rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
+.social-share a{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;transition:all var(--transition);color:#fff}
+.social-share a:hover{transform:translateY(-2px);text-decoration:none}
+.share-twitter{background:#1da1f2}
+.share-twitter:hover{background:#1a91da;box-shadow:0 4px 12px rgba(29,161,242,.4)}
+.share-facebook{background:#1877f2}
+.share-facebook:hover{background:#166fe5;box-shadow:0 4px 12px rgba(24,119,242,.4)}
+.share-reddit{background:#ff4500}
+.share-reddit:hover{background:#e03d00;box-shadow:0 4px 12px rgba(255,69,0,.4)}
+
+/* === NEWSLETTER === */
+.newsletter-signup{background:linear-gradient(135deg,#1a1040,#2d1b69);border-radius:var(--radius-lg);padding:2.5rem;margin:2rem 0;text-align:center;position:relative;overflow:hidden}
+.newsletter-signup::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(108,92,231,.15) 0%,transparent 60%);pointer-events:none}
+.newsletter-signup .newsletter-inner{position:relative;z-index:1}
+.newsletter-signup h3{color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:.4rem}
+.newsletter-signup p{color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:1.2rem}
+.newsletter-form{display:flex;gap:.5rem;max-width:440px;margin:0 auto}
+.newsletter-form input{flex:1;padding:.75rem 1rem;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;font-family:var(--font);outline:none;transition:border-color var(--transition)}
+.newsletter-form input::placeholder{color:rgba(255,255,255,.4)}
+.newsletter-form input:focus{border-color:var(--accent-light)}
+.newsletter-form button{padding:.75rem 1.5rem;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:.9rem;cursor:pointer;transition:all var(--transition);font-family:var(--font);white-space:nowrap}
+.newsletter-form button:hover{background:linear-gradient(135deg,#6d28d9,#7c3aed);transform:translateY(-1px);box-shadow:0 4px 16px rgba(124,58,237,.4)}
+.newsletter-note{font-size:.75rem!important;opacity:.5!important;margin-top:.6rem!important;margin-bottom:0!important}
+@media(max-width:500px){.newsletter-form{flex-direction:column}.newsletter-form button{width:100%}}
+
 /* === 404 === */
 .not-found{text-align:center;padding:5rem 1.5rem;max-width:500px;margin:0 auto}
 .not-found h1{font-size:5rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:.5rem}

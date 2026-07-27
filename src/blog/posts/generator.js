@@ -25,7 +25,8 @@ function enhanceContent(html, title) {
   // 1. Add <img> after first <p> if no <img> exists
   if (!c.includes('<img')) {
     const encoded = encodeURIComponent(titleClean.split(' ').slice(0, 3).join(' '));
-    c = c.replace('</p>', `</p>\n<img src="https://placehold.co/800x400/5f3dc4/ede9fe?text=${encoded}" alt="${titleClean}" loading="lazy" style="max-width:100%;border-radius:8px;margin:16px 0">`);
+    const descriptiveAlt = 'Learn about ' + titleClean + ' — free browser game guide and tips';
+    c = c.replace('</p>', `</p>\n<img src="https://placehold.co/800x400/5f3dc4/ede9fe?text=${encoded}" alt="${descriptiveAlt}" loading="lazy" style="max-width:100%;border-radius:8px;margin:16px 0">`);
   }
 
   // 2. Add <strong> to first sentence of each <p> that doesn't already have <strong>
