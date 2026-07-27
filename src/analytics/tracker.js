@@ -95,6 +95,7 @@ class LiveTracker {
       const views = existing ? existing.views + 1 : 1;
       visited.add(page);
 
+      const now = Date.now();
       this.sessions.set(ip, {
         ip,
         page,
@@ -105,7 +106,8 @@ class LiveTracker {
         campaign,
         visited,
         views,
-        lastSeen: Date.now(),
+        started: existing ? existing.started : now,
+        lastSeen: now,
       });
     } catch (e) {
       // silently fail
@@ -125,6 +127,7 @@ class LiveTracker {
       this.sessions.delete(ip);
     }
     const session = this.sessions.get(id);
+    const now = Date.now();
     if (session) {
       session.page = page;
       if (country && session.country === 'Unknown') session.country = country;
@@ -132,7 +135,7 @@ class LiveTracker {
       if (campaign && !session.campaign) session.campaign = campaign;
       session.visited.add(page);
       session.views++;
-      session.lastSeen = Date.now();
+      session.lastSeen = now;
     } else {
       this.sessions.set(id, {
         ip: id,
@@ -144,7 +147,8 @@ class LiveTracker {
         campaign: campaign || null,
         visited: new Set([page]),
         views: 1,
-        lastSeen: Date.now(),
+        started: now,
+        lastSeen: now,
       });
     }
   }
@@ -177,6 +181,7 @@ class LiveTracker {
 
   getActive() {
     this._prune();
+    const now = Date.now();
     return Array.from(this.sessions.values()).sort((a, b) => b.lastSeen - a.lastSeen).map(s => ({
       id: s.ip,
       country: s.country,
@@ -185,6 +190,7 @@ class LiveTracker {
       bot: s.bot,
       referrer: s.referrer,
       campaign: s.campaign,
+      duration: s.started ? now - s.started : 0,
       views: s.views,
       pages: s.visited.size,
       lastSeen: s.lastSeen,

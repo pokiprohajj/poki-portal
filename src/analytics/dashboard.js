@@ -70,6 +70,7 @@ h1{font-size:22px;color:#6c5ce7;margin-bottom:6px}
 .person .page a{color:#6c5ce7;text-decoration:none}
 .person .page a:hover{text-decoration:underline;color:#8b7cf7}
 .person .views{font-size:11px;color:#8888aa;min-width:50px;text-align:center;white-space:nowrap}
+.person .time{font-size:11px;color:#555;min-width:50px;text-align:center;white-space:nowrap}
 .person .ref{font-size:11px;padding:2px 8px;border-radius:12px;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis}
 .ref-search{background:#1e3a1e;color:#7ddc7d}.ref-social{background:#3a1e3a;color:#dc7ddc}.ref-direct{background:#1e1e3a;color:#7d7ddc}.ref-other{background:#2a2a1e;color:#dcdc7d}
 .campaign{font-size:11px;padding:2px 8px;border-radius:12px;white-space:nowrap;background:#3a1e1e;color:#fca5a5}
@@ -105,7 +106,8 @@ function poll(){fetch(BASE+'/stats',{cache:'no-store',credentials:'same-origin'}
 function pLink(p){return'&nbsp;<a href="https://browsergameshq.com'+p+'" target="_blank" rel="noopener">'+p+'</a>'}
 function s(r){if(!r)return'<span class="ref ref-direct">Direct</span>';var l=r.toLowerCase();if(l.includes('google'))return'<span class="ref ref-search">Google</span>';if(l.includes('bing'))return'<span class="ref ref-search">Bing</span>';if(l.includes('yahoo'))return'<span class="ref ref-search">Yahoo</span>';if(l.includes('duckduckgo'))return'<span class="ref ref-search">DuckDuckGo</span>';if(l.includes('yandex'))return'<span class="ref ref-search">Yandex</span>';if(l.includes('baidu'))return'<span class="ref ref-search">Baidu</span>';if(l.includes('facebook')||l.includes('fb.com')||l.includes('l.facebook'))return'<span class="ref ref-social">Facebook</span>';if(l.includes('instagram'))return'<span class="ref ref-social">Instagram</span>';if(l.includes('twitter')||l.includes('x.com'))return'<span class="ref ref-social">Twitter</span>';if(l.includes('linkedin'))return'<span class="ref ref-social">LinkedIn</span>';if(l.includes('pinterest'))return'<span class="ref ref-social">Pinterest</span>';if(l.includes('reddit'))return'<span class="ref ref-social">Reddit</span>';if(l.includes('discord'))return'<span class="ref ref-social">Discord</span>';if(l.includes('telegram'))return'<span class="ref ref-social">Telegram</span>';if(l.includes('whatsapp'))return'<span class="ref ref-social">WhatsApp</span>';if(l.includes('tiktok'))return'<span class="ref ref-social">TikTok</span>';if(l.includes('youtube'))return'<span class="ref ref-social">YouTube</span>';if(l.includes('browsergameshq.com'))return'';try{var h=new URL(r).hostname.replace(/^www\./,'').slice(0,12);return'<span class="ref ref-other" title="'+r.replace(/"/g,'&quot;')+'">'+h+'</span>'}catch(e){return''}}
 function c(c){if(!c)return'';return'<span class="campaign">'+(c=='facebook_ad'?'📱':c=='google_ad'?'🔍':c=='twitter'?'🐦':c=='linkedin'?'💼':c=='tiktok'?'🎵':'📢')+' '+c.replace(/_/g,' ')+'</span>'}
-function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const empty=list.querySelector('.empty');if(empty&&d.count>0)empty.remove();const lookup={};list.querySelectorAll('.person').forEach(el=>{lookup[el.dataset.id]=el});const seen=new Set();for(var i=d.visitors.length-1;i>=0;i--){var v=d.visitors[i];seen.add(v.id);var el=lookup[v.id];if(el){var pp=el.querySelector('.page a')||el.querySelector('.page');if(pp&&pp.innerHTML!==pLink(v.page)){pp.innerHTML=pLink(v.page);pp.title=v.page}var vw=el.querySelector('.views');if(vw)vw.textContent=(v.views||1)+' pg'}else{var div=document.createElement('div');div.className='person';div.dataset.id=v.id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">'+pLink(v.page)+'</span><span class="views">'+(v.views||1)+' pg</span><span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span>'+c(v.campaign)+s(v.referrer)+'<span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';list.insertBefore(div,list.firstChild)}}Object.keys(lookup).forEach(function(id){if(!seen.has(id)){var el=lookup[id];el.classList.add('removing');setTimeout(function(){if(el.parentNode)el.remove()},300)}})}
+function t(ms){if(!ms)return'<span class="time">-</span>';var s=Math.floor(ms/1000);if(s<60)return'<span class="time">'+s+'s</span>';return'<span class="time">'+Math.floor(s/60)+'m '+s%60+'s</span>'}
+function render(d){const list=document.getElementById('list');const countEl=document.getElementById('count');countEl.textContent=d.count;const empty=list.querySelector('.empty');if(empty&&d.count>0)empty.remove();const lookup={};list.querySelectorAll('.person').forEach(el=>{lookup[el.dataset.id]=el});const seen=new Set();for(var i=d.visitors.length-1;i>=0;i--){var v=d.visitors[i];seen.add(v.id);var el=lookup[v.id];if(el){var pp=el.querySelector('.page a')||el.querySelector('.page');if(pp&&pp.innerHTML!==pLink(v.page)){pp.innerHTML=pLink(v.page);pp.title=v.page}var vw=el.querySelector('.views');if(vw)vw.textContent=(v.views||1)+' pg';var tm=el.querySelector('.time');if(tm)tm.textContent=t(v.duration).replace(/<[^>]+>/g,'')}else{var div=document.createElement('div');div.className='person';div.dataset.id=v.id;div.innerHTML='<span class="flag">'+f(v.country)+'</span><span class="country">'+v.country+'</span><span class="page" title="'+v.page+'">'+pLink(v.page)+'</span><span class="views">'+(v.views||1)+' pg</span>'+t(v.duration)+'<span class="device '+((v.device||'u').toLowerCase().charAt(0))+'">'+(v.device||'?')+'</span>'+c(v.campaign)+s(v.referrer)+'<span class="bot-badge '+(v.bot?'bot-yes':'bot-no')+'">'+(v.bot?'🤖 '+v.bot:'👤 Human')+'</span>';list.insertBefore(div,list.firstChild)}}Object.keys(lookup).forEach(function(id){if(!seen.has(id)){var el=lookup[id];el.classList.add('removing');setTimeout(function(){if(el.parentNode)el.remove()},300)}})}
 poll();setInterval(poll,2000)
 </script>
 </body>
@@ -215,10 +217,19 @@ function campaignLabel(c) {
   return '<span class="campaign">' + (emojis[c] || '📢') + ' ' + c.replace(/_/g, ' ') + '</span>';
 }
 
+function timeLabel(ms) {
+  if (!ms) return '<span class="time">—</span>';
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return '<span class="time">' + s + 's</span>';
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return '<span class="time">' + m + 'm ' + r + 's</span>';
+}
+
 function personHtml(v) {
   const d = (v.device || 'u').toLowerCase().charAt(0);
   const bot = v.bot;
-  return '<div class="person" data-id="' + v.id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">' + pageHtml(v.page) + '</span><span class="views">' + (v.views || 1) + ' pg</span><span class="device ' + d + '">' + (v.device || '?') + '</span>' + campaignLabel(v.campaign) + sourceLabel(v.referrer) + '<span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
+  return '<div class="person" data-id="' + v.id + '"><span class="flag">' + flagEmoji(v.country) + '</span><span class="country">' + v.country + '</span><span class="page" title="' + v.page + '">' + pageHtml(v.page) + '</span><span class="views">' + (v.views || 1) + ' pg</span>' + timeLabel(v.duration) + '<span class="device ' + d + '">' + (v.device || '?') + '</span>' + campaignLabel(v.campaign) + sourceLabel(v.referrer) + '<span class="bot-badge ' + (bot ? 'bot-yes' : 'bot-no') + '">' + (bot ? '🤖 ' + bot : '👤 Human') + '</span></div>';
 }
 
 module.exports = dashboardRouter;
