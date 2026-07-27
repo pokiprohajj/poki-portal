@@ -116,25 +116,6 @@ function rewriteHtml(html, sourcePath) {
     }
   });
 
-  // Pass 7b: Rewrite visible body text — replace Poki brand in all text nodes (body only, skip scripts/style)
-  if ($('body').length) {
-    var textWalker = function (el) {
-      if (!el || !el.tagName) return;
-      var tag = el.tagName.toLowerCase();
-      if (tag === 'script' || tag === 'style' || tag === 'textarea') return;
-      $(el).contents().each(function () {
-        if (this.type === 'text') {
-          if (this.data && (this.data.indexOf('Poki') !== -1 || this.data.indexOf('poki') !== -1)) {
-            this.data = this.data.replace(/Poki/gi, 'BrowserGamesHQ');
-          }
-        } else if (this.type === 'tag') {
-          textWalker(this);
-        }
-      });
-    };
-    textWalker($('body')[0]);
-  }
-
   // Pass 8: Rewrite meta tags
   rewriteMetaTags($, sourceDomain, targetDomain);
   rewriteOpenGraph($, sourceDomain, targetDomain);
@@ -143,8 +124,10 @@ function rewriteHtml(html, sourcePath) {
   // Pass 9: Replace Poki logo with custom logo (responsive for all devices)
   replacePokiLogo($);
 
-  // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side (most reliable)
-  rewriteGameInitState($, sourcePath);
+  // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side — only for game pages (skip for homepage etc)
+  if (sourcePath && (sourcePath.includes('/g/') || sourcePath.includes('/game/'))) {
+    rewriteGameInitState($, sourcePath);
+  }
 
   // Pass 9c: On ALL pages, inject TikTok pixel
   if ($('head').length) {
