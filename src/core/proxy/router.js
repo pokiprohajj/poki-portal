@@ -100,8 +100,8 @@ function cleanPokiBranding(html) {
       .replace(/Poki\.io/gi, 'BrowserGamesHQ');
   });
 
-  // Fix canonical & og:url that React Helmet overrides from window.context.site.domain
-  const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\');if(c&&c.href.indexOf("poki.com")>0)c.href=c.href.replace(/https?:\\/\\/[^\\/]+/,"https://'+config.domain+'");var o=document.querySelector(\'meta[property="og:url"]\');if(o){var u=o.getAttribute("content");if(u&&(u.indexOf("poki.com")>0||u.indexOf("BrowserGamesHQ")<0))o.setAttribute("content","https://'+config.domain+'/")}});</script>';
+  // Fix canonical & meta tags that React Helmet overrides from window.context
+  const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\');if(c&&c.href.indexOf("poki.com")>0)c.href=c.href.replace(/https?:\\/\\/[^\\/]+/,"https://'+config.domain+'");var d="'+config.domain+'";[].forEach.call(document.querySelectorAll(\'meta[content*="Poki"],meta[content*="poki"]\'),function(m){var v=m.getAttribute("content");if(v.indexOf("http")===0&&v.indexOf("poki.com")>0)m.setAttribute("content",v.replace(/https?:\\/\\/[^\\/]+/,"https://"+d));else if(v.indexOf("http")!==0)m.setAttribute("content",v.replace(/Poki\.com/gi,d).replace(/Poki/gi,"BrowserGamesHQ").replace(/poki/gi,"browsergameshq"))})});</script>';
   result = result.replace('</body>', canonicalFix + '</body>');
 
   return result;
