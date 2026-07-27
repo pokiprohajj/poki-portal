@@ -57,7 +57,7 @@ async function fetchSource(path, visitorUA) {
   return html;
 }
 
-function cleanPokiBranding(html) {
+function cleanPokiBranding(html, sourcePath) {
   let result = html;
 
   // ONLY replace visible branding — never touch window.context or internal JSON data
@@ -102,6 +102,13 @@ function cleanPokiBranding(html) {
 
   // Fix canonical & meta tags that React Helmet overrides from window.context
   const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\');if(c&&c.href.indexOf("poki.com")>0)c.href=c.href.replace(/https?:\\/\\/[^\\/]+/,"https://'+config.domain+'");var d="'+config.domain+'";[].forEach.call(document.querySelectorAll(\'meta[content*="Poki"],meta[content*="poki"]\'),function(m){var v=m.getAttribute("content");if(v.indexOf("http")===0&&v.indexOf("poki.com")>0)m.setAttribute("content",v.replace(/https?:\\/\\/[^\\/]+/,"https://"+d));else if(v.indexOf("http")!==0)m.setAttribute("content",v.replace(/Poki\.com/gi,d).replace(/Poki/gi,"BrowserGamesHQ").replace(/poki/gi,"browsergameshq"))})});</script>';
+
+  // Replace contact email on contact pages (Poki React renders it client-side)
+  if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
+    const contactEmailFix = '<script>document.addEventListener("DOMContentLoaded",function(){var mo=new MutationObserver(function(){var e=document.querySelector(\'a[href*="hello@poki.com"]\');if(e)e.href=e.href.replace("hello@poki.com","hajjoutiforskype@gmail.com");var n=document.createTreeWalker(document.body,4);var r=[];while(n.nextNode()){if(n.currentNode.nodeValue&&n.currentNode.nodeValue.indexOf("hello@poki.com")!==-1)r.push(n.currentNode)}for(var i=0;i<r.length;i++){r[i].nodeValue=r[i].nodeValue.replace(/hello@poki\.com/gi,"hajjoutiforskype@gmail.com")}if(!r.length)return;mo.disconnect()});mo.observe(document.body,{childList:true,subtree:true,characterData:true})});</script>';
+    result = result.replace('</body>', contactEmailFix + '</body>');
+  }
+
   result = result.replace('</body>', canonicalFix + '</body>');
 
   return result;
@@ -137,7 +144,7 @@ async function handlePageRequest(req, res) {
     html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');
     html = html.replace(/<meta[^>]*content\s*=\s*["'][^"']*url\s*=[^"']*poki\.[^"']*["'][^>]*>/gi, '');
 
-    html = cleanPokiBranding(html);
+    html = cleanPokiBranding(html, sourcePath);
 
     html = rewriteHtml(html, sourcePath);
 
