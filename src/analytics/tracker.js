@@ -35,6 +35,7 @@ function detectBot(ua) {
 class LiveTracker {
   constructor() {
     this.sessions = new Map();
+    this._claimedIps = new Set();
     this.TIMEOUT_MS = 15000;
     this._pruneInterval = setInterval(() => this._prune(), 3000);
   }
@@ -79,23 +80,24 @@ class LiveTracker {
       const referrer = req.headers['referer'] || null;
       const campaign = this._detectCampaign(query);
 
-      const existing = this.sessions.get(ip);
+      if (!this._isPagePath(page)) return;
 
-      // Always update lastSeen for active sessions
+      // If this IP was already merged into a beacon session, skip creating a duplicate IP session
+      if (this._claimedIps.has(ip)) return;
+
+      const existing = this.sessions.get(ip);
       if (existing) {
+        // Preserve original external referrer and campaign — don't overwrite with internal navigation data
+        existing.page = page;
         existing.country = country;
         existing.device = device;
         existing.bot = bot;
+        existing.visited.add(page);
+        existing.views++;
         existing.lastSeen = Date.now();
+        return;
       }
 
-      if (!this._isPagePath(page)) return;
-
-      const visited = existing ? existing.visited : new Set();
-      const views = existing ? existing.views + 1 : 1;
-      visited.add(page);
-
-      const now = Date.now();
       this.sessions.set(ip, {
         ip,
         page,
@@ -104,10 +106,10 @@ class LiveTracker {
         bot,
         referrer,
         campaign,
-        visited,
-        views,
-        started: existing ? existing.started : now,
-        lastSeen: now,
+        visited: new Set([page]),
+        views: 1,
+        started: Date.now(),
+        lastSeen: Date.now(),
       });
     } catch (e) {
       // silently fail
@@ -125,6 +127,7 @@ class LiveTracker {
       referrer = referrer || ipSession.referrer;
       campaign = campaign || ipSession.campaign;
       this.sessions.delete(ip);
+      this._claimedIps.add(ip);
     }
     const session = this.sessions.get(id);
     const now = Date.now();
@@ -176,6 +179,14 @@ class LiveTracker {
       if (session.lastSeen < cutoff) {
         this.sessions.delete(id);
       }
+    }
+    // Clean up claimed IPs whose beacon sessions have timed out
+    for (const ip of this._claimedIps) {
+      let found = false;
+      for (const [, session] of this.sessions) {
+        if (session.ip === ip) { found = true; break; }
+      }
+      if (!found) this._claimedIps.delete(ip);
     }
   }
 
