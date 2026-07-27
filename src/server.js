@@ -65,10 +65,12 @@ function handleBeacon(id, page, disconnect, req, res) {
     const ua = req.headers['user-agent'] || '';
     const device = analyticsTracker._detectDevice(ua);
     const bot = analyticsTracker.detectBot(ua);
-    const referrer = req.headers['referer'] || null;
-    const fullUrl = req.url || '';
-    const query = fullUrl.includes('?') ? fullUrl.slice(fullUrl.indexOf('?')) : '';
-    const campaign = analyticsTracker._detectCampaign(query);
+    // DON'T use req.headers['referer'] — beacon requests come from the site itself,
+    // so the referrer would be the current page URL, not the external source.
+    // The real external referrer is captured by the server middleware on initial page load
+    // and merged into the UUID session via trackPage().
+    const referrer = null;
+    const campaign = analyticsTracker._detectCampaign(req.url?.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
     analyticsTracker.trackPage(id, page, country, device, bot, referrer, campaign, ip);
   }
   res.status(204).end();
