@@ -99,6 +99,10 @@ function cleanPokiBranding(html) {
       .replace(/Poki\.io/gi, 'BrowserGamesHQ');
   });
 
+  // Fix canonical & og:url that React Helmet overrides from window.context.site.domain
+  const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\');if(c&&c.href.indexOf("poki.com")>0)c.href=c.href.replace(/https?:\\/\\/[^\\/]+/,"https://'+config.domain+'");var o=document.querySelector(\'meta[property="og:url"]\');if(o){var u=o.getAttribute("content");if(u&&(u.indexOf("poki.com")>0||u.indexOf("BrowserGamesHQ")<0))o.setAttribute("content","https://'+config.domain+'/")}});</script>';
+  result = result.replace('</body>', canonicalFix + '</body>');
+
   return result;
 }
 
