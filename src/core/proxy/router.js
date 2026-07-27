@@ -68,10 +68,11 @@ function cleanPokiBranding(html) {
     return match.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ');
   });
 
-  // Replace in meta tags (content attributes) — visible to search engines / social
-  result = result.replace(/(<meta[^>]*content="[^"]*?)Poki\.com([^"]*?"[^>]*>)/gi, '$1BrowserGamesHQ$2');
-  result = result.replace(/(<meta[^>]*content="[^"]*?)Poki([^"]*?"[^>]*>)/gi, '$1BrowserGamesHQ$2');
-  result = result.replace(/(<meta[^>]*content="[^"]*?)poki([^"]*?"[^>]*>)/gi, '$1browsergameshq$2');
+  // Replace Poki domains in meta content URLs — keep .com intact
+  result = result.replace(/(<meta[^>]*content="[^"]*?https?:\/\/)(?:[^\/]*?)poki\.com([^"]*?"[^>]*>)/gi, '$1' + config.domain + '$2');
+  // Replace "Poki" brand text in meta content descriptions (not URLs)
+  result = result.replace(/(<meta[^>]*content=")((?!https?:\/\/)[^"]*?)Poki([^"]*?">)/gi, '$1$2BrowserGamesHQ$3');
+  result = result.replace(/(<meta[^>]*content=")((?!https?:\/\/)[^"]*?)poki([^"]*?">)/gi, '$1$2browsergameshq$3');
 
   // Replace in <link rel="canonical"> — visible to search engines
   result = result.replace(/(<link[^>]*rel="canonical"[^>]*href="[^"]*?)poki\.com([^"]*?"[^>]*>)/gi, '$1' + config.domain + '$2');
