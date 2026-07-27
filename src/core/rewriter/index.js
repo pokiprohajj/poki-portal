@@ -136,11 +136,6 @@ function rewriteHtml(html, sourcePath) {
     '</script>');
   }
 
-  // Pass 9f: Lightweight cookie popup removal — CSS only (zero JS overhead)
-  if ($('head').length) {
-    $('head').append('<style>.fc-consent-root,.CybotCookiebotDialog,.cc-banner,.cookie-banner,.cookie-notice{display:none!important}</style>');
-  }
-
   // Pass 9e: Inject GSC verification + title suffix + JSON-LD schema
   if ($('head').length) {
     // Google Search Console + Bing verification
