@@ -159,7 +159,11 @@ app.get('/sitemap.xml', (req, res) => {
     `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
   ).join('\n');
 
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${blogUrls}\n</urlset>`);
+  const blogCatUrls = ['guides', 'lists', 'comparisons', 'articles'].map(c =>
+    `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
+  ).join('\n');
+
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${blogCatUrls}\n${blogUrls}\n</urlset>`);
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
