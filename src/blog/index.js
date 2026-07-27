@@ -71,10 +71,10 @@ function ctaSection() {
 }
 
 function pageHtml(listHtml, hasMore, page, cat) {
+  const isCat = cat && CAT_CLASS[cat];
   const loadMoreHtml = hasMore
     ? `<div class="load-more-wrap"><button class="load-more-btn" data-page="${page}"${isCat ? ' data-cat="' + (CAT_CLASS[cat] || '') + '"' : ''} onclick="loadMore(this)"><span class="spinner"></span><span class="btn-text">Load More Articles</span></button></div>`
     : '';
-  const isCat = cat && CAT_CLASS[cat];
   const pageTitle = isCat ? `${CAT_H1[CAT_CLASS[cat]]} - BrowserGamesHQ` : 'Blog - BrowserGamesHQ';
   const pageDesc = isCat ? CAT_DESC[CAT_CLASS[cat]] : 'Game guides, tips, and lists at BrowserGamesHQ. Learn how to master your favorite browser games.';
   const catSchema = isCat ? categorySchema(cat) : '';
