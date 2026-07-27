@@ -58,6 +58,11 @@ function enhanceContent(html, title) {
     c += `\n<ul>\n<li><strong>Play for free</strong> — no downloads, no subscriptions, no hidden costs</li>\n<li><strong>Improve over time</strong> — track your progress and celebrate small victories</li>\n<li><strong>Join the community</strong> — share tips and compete with other players</li>\n<li><strong>Stay consistent</strong> — regular short sessions beat occasional marathon sessions</li>\n</ul>`;
   }
 
+  // Add internal links section
+  if (!c.includes('internal-links-section')) {
+    c += '\n<div class="internal-links-section">\n<h3>Related Browser Games</h3>\n<p>Looking for more browser games? Check out these popular titles:</p>\n<ul>\n<li><a href="/en/g/retro-bowl">Retro Bowl</a> — Football management at its finest</li>\n<li><a href="/en/g/subway-surfers">Subway Surfers</a> — Endless running adventure</li>\n<li><a href="/en/g/drive-mad">Drive Mad</a> — Physics driving challenges</li>\n<li><a href="/en/g/geometry-dash">Geometry Dash</a> — Rhythm-based platformer</li>\n<li><a href="/en/g/cookie-clicker">Cookie Clicker</a> — Addictive idle game</li>\n</ul>\n<p>Browse all categories: <a href="/blog/category/guides">Guides</a> | <a href="/blog/category/lists">Lists</a> | <a href="/blog/category/comparisons">Comparisons</a> | <a href="/blog/category/articles">Articles</a></p>\n</div>';
+  }
+
   return c;
 }
 
