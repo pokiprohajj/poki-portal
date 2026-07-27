@@ -35,8 +35,8 @@ function detectBot(ua) {
 class LiveTracker {
   constructor() {
     this.sessions = new Map();
-    this.TIMEOUT_MS = 300000;
-    this._pruneInterval = setInterval(() => this._prune(), 15000);
+    this.TIMEOUT_MS = 15000;
+    this._pruneInterval = setInterval(() => this._prune(), 3000);
   }
 
   _isPagePath(path) {
@@ -151,6 +151,11 @@ class LiveTracker {
 
   untrack(id) {
     this.sessions.delete(id);
+  }
+
+  ping(id) {
+    const s = this.sessions.get(id);
+    if (s) s.lastSeen = Date.now();
   }
 
   _detectDevice(ua) {

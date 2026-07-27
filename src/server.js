@@ -55,6 +55,8 @@ app.use((req, res, next) => {
 function handleBeacon(id, page, disconnect, req, res) {
   if (disconnect) {
     if (id) analyticsTracker.untrack(id);
+  } else if (id && !page) {
+    analyticsTracker.ping(id);
   } else if (id && page) {
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || null;
     const country = req.headers['cf-ipcountry'] || req.headers['x-geo-country'] || null;

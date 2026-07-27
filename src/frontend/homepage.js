@@ -45,7 +45,7 @@ const render = (req, res) => {
   /></noscript>
   <!-- End Meta Pixel Code -->
   <script>
-  (function(){var k='_bghtid',id=sessionStorage.getItem(k)||(Date.now().toString(36)+Math.random().toString(36).slice(2,6));sessionStorage.setItem(k,id);var b=function(p,u){try{var d=new Blob([(u?'id='+encodeURIComponent(id)+'&page='+encodeURIComponent(p):'id='+encodeURIComponent(id)+'&disconnect=1')],{type:'application/x-www-form-urlencoded'});navigator.sendBeacon('/t',d)}catch(e){}};b(location.pathname,1);var ph=history.pushState,rh=history.replaceState;history.pushState=function(){ph.apply(history,arguments);b(location.pathname,1)};history.replaceState=function(){rh.apply(history,arguments);b(location.pathname,1)};window.addEventListener('popstate',function(){b(location.pathname,1)});window.addEventListener('beforeunload',function(){b('',0)})})();
+  (function(){var k='_bghtid',id=sessionStorage.getItem(k)||(Date.now().toString(36)+Math.random().toString(36).slice(2,6));sessionStorage.setItem(k,id);var g=function(s){try{var d=new Blob(['id='+encodeURIComponent(id)+(s||'')],{type:'application/x-www-form-urlencoded'});navigator.sendBeacon('/t',d)}catch(e){}};g('&page='+encodeURIComponent(location.pathname));setInterval(function(){g('')},8000);var ph=history.pushState,rh=history.replaceState;history.pushState=function(){ph.apply(history,arguments);g('&page='+encodeURIComponent(location.pathname))};history.replaceState=function(){rh.apply(history,arguments);g('&page='+encodeURIComponent(location.pathname))};window.addEventListener('popstate',function(){g('&page='+encodeURIComponent(location.pathname))});window.addEventListener('beforeunload',function(){g('&disconnect=1')})})();
   </script>
 </head>
 <body>
