@@ -153,6 +153,28 @@ function rewriteHtml(html, sourcePath) {
     '</script>');
   }
 
+  // Pass 9f: Remove Poki cookie consent popups (CSS + MutationObserver)
+  if ($('head').length) {
+    $('head').append('<style id="portal-nuke-cookie">' +
+      '[class*="cookie"],[id*="cookie"],[class*="Cookie"],[id*="Cookie"],' +
+      '[class*="gdpr"],[id*="gdpr"],[class*="GDPR"],[id*="GDPR"],' +
+      '[class*="consent"],[id*="consent"],[class*="Consent"],[id*="Consent"],' +
+      '[class*="notice"][class*="cookie"],[id*="notice"][id*="cookie"],' +
+      '.fc-consent-root,.CybotCookiebotDialog,.cc-banner,.cookie-banner,.cookie-notice,.gdpr-notice' +
+      '{display:none!important;opacity:0!important;pointer-events:none!important;visibility:hidden!important}' +
+      '</style>');
+    $('head').append('<script>' +
+      '(function(){' +
+      'var s="[class*=\\"cookie\\"],[id*=\\"cookie\\"],[class*=\\"gdpr\\"],[id*=\\"gdpr\\"],[class*=\\"consent\\"],[id*=\\"consent\\"],.fc-consent-root,.CybotCookiebotDialog,.cc-banner";' +
+      'function nuke(){document.querySelectorAll(s).forEach(function(el){if(el&&el.parentNode)el.parentNode.removeChild(el)})}' +
+      'nuke();' +
+      'var mo=new MutationObserver(function(){nuke()});' +
+      'try{mo.observe(document.documentElement,{childList:true,subtree:true})}catch(e){}' +
+      'setInterval(nuke,1000)' +
+      '})();' +
+      '</script>');
+  }
+
   // Pass 9e: Inject GSC verification + title suffix + JSON-LD schema
   if ($('head').length) {
     // Google Search Console + Bing verification
