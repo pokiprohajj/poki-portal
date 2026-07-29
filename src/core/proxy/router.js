@@ -146,11 +146,15 @@ const SUBDOMAIN_SOURCE = {
   'about.browsergameshq.com': 'https://about.poki.com',
 };
 
+const ROUTE_SOURCE = {
+  '/about': 'https://about.poki.com',
+};
+
 async function handlePageRequest(req, res) {
   const sourcePath = req.path;
   const deviceType = detectDevice(req.headers['user-agent']);
   const host = req.hostname || '';
-  const sourceOrigin = SUBDOMAIN_SOURCE[host];
+  const sourceOrigin = SUBDOMAIN_SOURCE[host] || ROUTE_SOURCE[sourcePath];
 
   const cacheKey = `html:${deviceType}:${sourcePath}:${host}`;
   const cached = cache.getHtml(cacheKey);
