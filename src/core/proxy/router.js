@@ -147,7 +147,7 @@ function cleanPokiBranding(html, sourcePath) {
 
   // Phase 9: Client-side branding observer — replaces "Poki" with "BrowserGamesHQ" in
   // visible text nodes + display attributes immediately after React renders them.
-  // Uses MutationObserver instead of polling for instant response to SPA navigation.
+  // Uses MutationObserver for instant response to React hydration + SPA navigation.
   const domFix = '<script>(function(){var re=/Poki/gi;function rn(el){if(!el)return;var w=document.createTreeWalker(el,4,null,false);while(w.nextNode()){' +
   'var n=w.currentNode,p=n.parentNode;if(p&&(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))continue;' +
   'if(n.nodeValue&&n.nodeValue.indexOf("Poki")>=0)n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
@@ -155,12 +155,18 @@ function cleanPokiBranding(html, sourcePath) {
   'var q=el.querySelectorAll("["+a+"*=\\"Poki\\"]");for(var i=0;i<q.length;i++){' +
   'var v=q[i].getAttribute(a);if(v&&v.indexOf("Poki")>=0)q[i].setAttribute(a,v.replace(re,"BrowserGamesHQ"))}})}' +
   'rn(document.body);ra(document.body);' +
-  'try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
+  'try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){' +
+  'if(ms[i].type==="characterData"){var n=ms[i].target;' +
+  'if(n.nodeType===3&&n.parentNode){var p=n.parentNode;' +
+  'if(!(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))' +
+  'n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
+  'if(ms[i].type==="childList"){var ns=ms[i].addedNodes;' +
   'for(var j=0;j<ns.length;j++){var n=ns[j];' +
   'if(n.nodeType===3&&n.parentNode){var p=n.parentNode;' +
   'if(!(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))' +
   'n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}' +
-  'else if(n.nodeType===1){rn(n);ra(n)}}}}}).observe(document.body,{childList:true,subtree:true})' +
+  'else if(n.nodeType===1){rn(n);ra(n)}}}}}).observe(document.body,{' +
+  'childList:true,subtree:true,characterData:true})' +
   '}catch(e){}})();</script>';
   result = result.replace('</body>', domFix + '</body>');
 
