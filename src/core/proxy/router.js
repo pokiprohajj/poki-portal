@@ -79,8 +79,8 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/__BrowserGamesHQData/gi, '__pokiData');
   result = result.replace(/BrowserGamesHQPlayground/gi, 'pokiPlayground');
   // Domain field in __pokiData JSON — must be poki.com for API calls
-  result = result.replace(/["\\"]domain["\\"]\s*:\s*["\\"]BrowserGamesHQ\.com["\\"]/gi, '"domain":"poki.com"');
-  result = result.replace(/["\\"]domain_title["\\"]\s*:\s*["\\"]BrowserGamesHQ\.com["\\"]/gi, '"domain_title":"Poki.com"');
+  result = result.replace(/(["\\]?"domain["\\]?\s*:\s*["\\]?)BrowserGamesHQ\.com(["\\]?)/gi, '$1poki.com$2');
+  result = result.replace(/(["\\]?"domain_title["\\]?\s*:\s*["\\]?)BrowserGamesHQ\.com(["\\]?)/gi, '$1Poki.com$2');
   // Functional subdomains (CDN, API, etc — must stay as poki for asset loading)
   result = result.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
   // Legal name (Poki B.V. is the actual company entity)
@@ -114,7 +114,7 @@ function cleanPokiBranding(html, sourcePath) {
   // (They already are after the global replace - BrowserGamesHQ is correct)
 
   // Phase 8: Client-side fix for React Helmet override — NO reference to "poki.com" in the script
-  const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\'),d="' + config.domain + '";if(c&&!c.href.includes(d))c.href=c.href.replace(/https?:\\/\\/[^\\/]+/,"https://"+d);[].forEach.call(document.querySelectorAll(\'meta[content*="BrowserGamesHQ"]\'),function(m){var v=m.getAttribute("content");if(v&&v.indexOf("http")===0&&!v.includes(d))m.setAttribute("content",v.replace(/https?:\\/\\/[^\\/]+/,"https://"+d))})});</script>';
+  const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\'),d="' + config.domain + '",re=/https?:\\/\\/[^\\/]+/i;if(c&&!c.href.toLowerCase().includes(d))c.href=c.href.replace(re,"https://"+d);[].forEach.call(document.querySelectorAll(\'meta[content*="BrowserGamesHQ"],meta[content*="browsergameshq"]\'),function(m){var v=m.getAttribute("content");if(v&&v.indexOf("http")===0&&!v.toLowerCase().includes(d))m.setAttribute("content",v.replace(re,"https://"+d))})});</script>';
 
   if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
     const contactEmailFix = '<script>document.addEventListener("DOMContentLoaded",function(){var mo=new MutationObserver(function(){var e=document.querySelector(\'a[href*="hello@"]\');if(e&&!e.href.includes("hajjoutiforskype"))e.href="mailto:hajjoutiforskype@gmail.com";var n=document.createTreeWalker(document.body,4);while(n.nextNode()){if(n.currentNode.nodeValue&&n.currentNode.nodeValue.includes("hello@poki"))n.currentNode.nodeValue=n.currentNode.nodeValue.replace(/hello\s*@\s*poki\s*\.\s*com/gi,"hajjoutiforskype@gmail.com")}mo.disconnect()});mo.observe(document.body,{childList:true,subtree:true,characterData:true})});</script>';
