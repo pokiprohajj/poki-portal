@@ -109,8 +109,9 @@ function cleanPokiBranding(html, sourcePath) {
   // Fix URL casing: BrowserGamesHQ.com → browsergameshq.com (lowercase domain in URLs)
   result = result.replace(/https?:\/\/BrowserGamesHQ\.com/gi, (m) => m.toLowerCase());
 
-  // Phase 4: Fix email addresses
-  result = result.replace(/hello\s*@\s*browsergameshq/i, 'hello@poki');
+  // Phase 4: Fix email addresses — change from browsergameshq.com to poki.pro
+  result = result.replace(/hello\s*@\s*browsergameshq\.com/gi, 'hello@poki.pro');
+  result = result.replace(/press\s*@\s*browsergameshq\.com/gi, 'press@poki.pro');
   result = result.replace(/hajjoutiforskype\s*@/i, 'hajjoutiforskype@');
 
   // Phase 5: Restore window.context blocks (also replace Poki branding in them, but keep domain=poki.com)
@@ -148,6 +149,10 @@ function cleanPokiBranding(html, sourcePath) {
   const pokiRx = 'Poki';
   const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("' + pokiRx + '")>=0&&!v.match(/["\']/)&&!v.match(/\.(com|net|org|io)\b/i))n.currentNode.nodeValue=v.replace(r,function(m,i,t){var p=t.slice(Math.max(0,i-1),i),f=t.slice(i+m.length,i+m.length+5);return p.match(/[a-z._"\'=]/i)?m:f.match(/^\.(com|net|org|io)\b/i)?m:"BrowserGamesHQ"})}}x();var o=new MutationObserver(x);o.observe(document.body,{childList:true,subtree:true,characterData:true});setTimeout(function(){o.disconnect()},3e4)});</script>';
   result = result.replace('</body>', domFix + '</body>');
+
+  // Phase 9b: Fix email domains at runtime (@poki.com → @poki.pro) for SPA-loaded content
+  const emailFix = '<script>document.addEventListener("DOMContentLoaded",function(){var er=/(hello|press)(@)poki\\.com/gi;function ef(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;n.currentNode.nodeValue=(n.currentNode.nodeValue||"").replace(er,"$1$2poki.pro")}}ef();var eo=new MutationObserver(ef);eo.observe(document.body,{childList:true,subtree:true,characterData:true});setTimeout(function(){eo.disconnect()},3e4)});</script>';
+  result = result.replace('</body>', emailFix + '</body>');
 
   return result;
 }
@@ -201,7 +206,7 @@ async function handlePageRequest(req, res) {
     if (isContactPage) {
       html = html.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
       html = html.replace(/<\/head>/i, '<meta name="robots" content="index, follow"></head>');
-      html = html.replace('</body>', '<script>document.addEventListener("DOMContentLoaded",function(){var s=document.createElement("section");s.id="contact-content";s.style.cssText="max-width:800px;margin:40px auto;padding:0 24px;text-align:center";var em="hello"+String.fromCharCode(64)+"browsergameshq.com";s.innerHTML="<h1 style=\'font-size:32px;margin-bottom:8px;color:#fff\'>Get in touch</h1><p style=\'font-size:18px;color:#a0a0c0;margin-bottom:8px\'>We&#39;d love to hear from you</p><p style=\'font-size:26px;color:#6c5ce7;font-weight:700;margin-bottom:40px;cursor:pointer\' onclick=\'location.href=&quot;mailto:&quot;+em\'>"+em+"</p><div style=\'display:flex;gap:12px;justify-content:center;flex-wrap:wrap\'><a href=\'/en/c/faq\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>Need help? Check FAQ</a><a href=\'https://developers.browsergameshq.com\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>For Developers</a><a href=\'https://jobs.browsergameshq.com\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>Join our team</a></div>";var f=document.querySelector("footer");if(f)f.parentNode.insertBefore(s,f);else document.body.appendChild(s);var r=document.getElementById("app-root")||document.getElementById("root");if(r&&window.MutationObserver){new MutationObserver(function(){if(!document.getElementById("contact-content")){var s2=s.cloneNode(true);var f2=document.querySelector("footer");if(f2)f2.parentNode.insertBefore(s2,f2);else document.body.appendChild(s2)}}).observe(r,{childList:true,subtree:true})}});</script></body>');
+      html = html.replace('</body>', '<script>document.addEventListener("DOMContentLoaded",function(){var s=document.createElement("section");s.id="contact-content";s.style.cssText="max-width:800px;margin:40px auto;padding:0 24px;text-align:center";var em="hello"+String.fromCharCode(64)+"poki.pro";s.innerHTML="<h1 style=\'font-size:32px;margin-bottom:8px;color:#fff\'>Get in touch</h1><p style=\'font-size:18px;color:#a0a0c0;margin-bottom:8px\'>We&#39;d love to hear from you</p><p style=\'font-size:26px;color:#6c5ce7;font-weight:700;margin-bottom:40px;cursor:pointer\' onclick=\'location.href=&quot;mailto:&quot;+em\'>"+em+"</p><div style=\'display:flex;gap:12px;justify-content:center;flex-wrap:wrap\'><a href=\'/en/c/faq\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>Need help? Check FAQ</a><a href=\'https://developers.browsergameshq.com\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>For Developers</a><a href=\'https://jobs.browsergameshq.com\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>Join our team</a></div>";var f=document.querySelector("footer");if(f)f.parentNode.insertBefore(s,f);else document.body.appendChild(s);var r=document.getElementById("app-root")||document.getElementById("root");if(r&&window.MutationObserver){new MutationObserver(function(){if(!document.getElementById("contact-content")){var s2=s.cloneNode(true);var f2=document.querySelector("footer");if(f2)f2.parentNode.insertBefore(s2,f2);else document.body.appendChild(s2)}}).observe(r,{childList:true,subtree:true})}});</script></body>');
     }
 
     html = rewriteHtml(html, reqPath);
