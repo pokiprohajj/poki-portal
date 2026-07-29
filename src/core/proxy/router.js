@@ -111,6 +111,15 @@ function cleanPokiBranding(html, sourcePath) {
   // Fix URL casing: BrowserGamesHQ.com → browsergameshq.com (lowercase domain in URLs)
   result = result.replace(/https?:\/\/BrowserGamesHQ\.com/gi, (m) => m.toLowerCase());
 
+  // Restore Poki SDK storage keys + JS identifiers (BrowserGamesHQ_xxx → poki_xxx)
+  result = result.replace(/(["'\s;,.!?()\[\]{}=+>&|^])BrowserGamesHQ_([a-z]+)/gi, '$1poki_$2');
+  result = result.replace(/^BrowserGamesHQ_([a-z]+)/gm, 'poki_$1');
+  // Restore analytics + tracking domains (t.poki.io, etc.)
+  result = result.replace(/(["'\s])t\.browsergameshq\.io/gi, '$1t.poki.io');
+  result = result.replace(/^t\.browsergameshq\.io/gim, 't.poki.io');
+  // Restore Poki SDK domain allow-list (all Poki TLDs used in SDK validation)
+  result = result.replace(/(["'\s,]+)BrowserGamesHQ\.(co\.il|com\.br|cz|dk|fi|it|jp|nl|pt|be|by|ch|cn)/gi, '$1poki.$2');
+
   // Phase 4: Fix email addresses — change from browsergameshq.com to poki.pro
   result = result.replace(/hello\s*@\s*browsergameshq\.com/gi, 'hello@poki.pro');
   result = result.replace(/press\s*@\s*browsergameshq\.com/gi, 'press@poki.pro');
