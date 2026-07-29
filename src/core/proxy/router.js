@@ -148,22 +148,20 @@ function cleanPokiBranding(html, sourcePath) {
   // Phase 9: Client-side branding observer — replaces "Poki" with "BrowserGamesHQ" in
   // visible text nodes + display attributes immediately after React renders them.
   // Uses MutationObserver instead of polling for instant response to SPA navigation.
-  const domFix = '<script>(function(){var b="BrowserGamesHQ",r=/Poki/gi;function t(v){return typeof v==="string"&&v.indexOf("Poki")>=0?v.replace(r,b):v}' +
-  'function tn(r){var w=document.createTreeWalker(r,4,null,false);while(w.nextNode()){var n=w.currentNode,pp=n.parentNode;' +
-  'if(pp&&(pp.nodeName==="SCRIPT"||pp.nodeName==="STYLE"||pp.nodeName==="TEXTAREA"))continue;' +
-  'if(n.nodeValue&&n.nodeValue.indexOf("Poki")>=0)n.nodeValue=n.nodeValue.replace(r,b)}}' +
-  'function ta(r){var a=["alt","title","placeholder","aria-label","value"];' +
-  'for(var i=0;i<a.length;i++){var els=r.querySelectorAll("["+a[i]+"*=\\"Poki\\"]");' +
-  'for(var j=0;j<els.length;j++){var v=els[j].getAttribute(a[i]);if(v&&v.indexOf("Poki")>=0)els[j].setAttribute(a[i],v.replace(r,b))}}}' +
-  'var db=document.body;if(db){tn(db);ta(db);}' +
-  'var mo=new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
+  const domFix = '<script>(function(){var re=/Poki/gi;function rn(el){if(!el)return;var w=document.createTreeWalker(el,4,null,false);while(w.nextNode()){' +
+  'var n=w.currentNode,p=n.parentNode;if(p&&(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))continue;' +
+  'if(n.nodeValue&&n.nodeValue.indexOf("Poki")>=0)n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
+  'function ra(el){if(!el)return;["alt","title","placeholder","aria-label","value"].forEach(function(a){' +
+  'var q=el.querySelectorAll("["+a+"*=\\"Poki\\"]");for(var i=0;i<q.length;i++){' +
+  'var v=q[i].getAttribute(a);if(v&&v.indexOf("Poki")>=0)q[i].setAttribute(a,v.replace(re,"BrowserGamesHQ"))}})}' +
+  'rn(document.body);ra(document.body);' +
+  'try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
   'for(var j=0;j<ns.length;j++){var n=ns[j];' +
-  'if(n.nodeType===3&&n.parentNode){var pp=n.parentNode;' +
-  'if(!(pp.nodeName==="SCRIPT"||pp.nodeName==="STYLE"||pp.nodeName==="TEXTAREA"))' +
-  'n.nodeValue=t(n.nodeValue)}' +
-  'else if(n.nodeType===1){tn(n);ta(n)}}}});' +
-  'if(db){try{mo.observe(db,{childList:true,subtree:true})}catch(e){}}' +
-  '})();</script>';
+  'if(n.nodeType===3&&n.parentNode){var p=n.parentNode;' +
+  'if(!(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))' +
+  'n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}' +
+  'else if(n.nodeType===1){rn(n);ra(n)}}}}}).observe(document.body,{childList:true,subtree:true})' +
+  '}catch(e){}})();</script>';
   result = result.replace('</body>', domFix + '</body>');
 
   return result;
