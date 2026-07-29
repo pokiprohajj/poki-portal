@@ -79,6 +79,7 @@ function pageHtml(listHtml, hasMore, page, cat) {
   const pageDesc = isCat ? CAT_DESC[CAT_CLASS[cat]] : 'Game guides, tips, and lists at BrowserGamesHQ. Learn how to master your favorite browser games.';
   const catSchema = isCat ? categorySchema(cat) : '';
   const breadcrumbHtml = isCat ? `<div class="breadcrumbs"><a href="/blog">Blog</a><span class="sep">/</span><span class="current">${cat}</span></div>` : '';
+  const canonicalUrl = isCat ? `https://browsergameshq.com/blog/category/${CAT_CLASS[cat]}/` : 'https://browsergameshq.com/blog/';
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,6 +87,7 @@ function pageHtml(listHtml, hasMore, page, cat) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${pageTitle}</title>
 <meta name="description" content="${pageDesc}">
+<link rel="canonical" href="${canonicalUrl}">
   <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
   ${webSiteSchema()}
   ${catSchema}
@@ -322,6 +324,7 @@ function renderPostPage(post, allPosts) {
 <title>${post.title} - BrowserGamesHQ</title>
 <meta name="description" content="${post.excerpt}">
 <meta name="keywords" content="${keywords}">
+<link rel="canonical" href="https://browsergameshq.com/blog/${post.slug}">
 <meta property="og:title" content="${post.title}">
 <meta property="og:description" content="${post.excerpt}">
 <meta property="og:type" content="article">
@@ -462,6 +465,7 @@ function blogRouter(req, res) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${pageTitle}</title>
 <meta name="description" content="${pageDesc}">
+<link rel="canonical" href="https://browsergameshq.com/blog/popular">
   <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
   ${webSiteSchema()}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.ADSENSE_CLIENT_ID || 'ca-pub-7128312414229788'}" crossorigin="anonymous"></script>
