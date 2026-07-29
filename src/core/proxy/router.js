@@ -59,21 +59,26 @@ async function fetchSource(path, visitorUA) {
 
 function cleanPokiBranding(html, sourcePath) {
   let result = html;
+  result = result.replace('</head>', '<!--CLEAN:v4-->' + '</head>');
 
   // 1. Replace in JSON-LD structured data (critical for Google rich results)
   result = result.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, (m) => {
-    return m
-      .replace(/"@type":"Organization"[^}]*?"name":"[^"]*"/g, (s) => s.replace(/"name":"[^"]*"/, '"name":"BrowserGamesHQ"'))
-      .replace(/"legalName":"[^"]*"/g, '"legalName":"BrowserGamesHQ"')
-      .replace(/"slogan":"[^"]*"/g, '"slogan":"Let the world play"')
-      .replace(/"email":"[^"]*"/g, '"email":"hajjoutiforskype@gmail.com"')
-      .replace(/"description":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"description":"' + b + 'BrowserGamesHQ' + a + '"')
-      .replace(/"name":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"name":"' + b + 'BrowserGamesHQ' + a + '"')
-      // SameAs: replace social media handles and our domain URLs
-      .replace(/"sameAs":\[([^\]]+)\]/g, (s) => s
-        .replace(/"(https?:\/\/(?:www\.)?(?:facebook|twitter|youtube|tiktok|instagram|linkedin)\.com[^"]*?)poki([^"]*?)"/gi, '"$1BrowserGamesHQ$2"')
-        .replace(/"https?:\/\/([a-z0-9-]+\.)?poki\.com([^"]*?)"/gi, (u) => u.replace(/poki\.com/i, 'browsergameshq.com'))
-      );
+    let s = m;
+    // Replace "Poki" in any string value within @graph blocks (nested schemas)
+    s = s.replace(/"@graph":\[([\s\S]*?)\]/g, (g) => {
+      return g
+        .replace(/"name":"[^"]*Poki[^"]*"/gi, '"name":"BrowserGamesHQ"')
+        .replace(/"description":"[^"]*Poki[^"]*"/gi, (d) => d.replace(/Poki/gi, 'BrowserGamesHQ'))
+        .replace(/"sameAs":\[([^\]]+)\]/g, (sa) => sa
+          .replace(/"(https?:\/\/(?:www\.)?(?:facebook|twitter|youtube|tiktok|instagram|linkedin)\.com[^"]*?)poki([^"]*?)"/gi, '"$1BrowserGamesHQ$2"')
+          .replace(/"https?:\/\/([a-z0-9-]+\.)?poki\.com([^"]*?)"/gi, (u) => u.replace(/poki\.com/i, 'browsergameshq.com'))
+        );
+    });
+    s = s.replace(/"@type":"Organization"[^}]*?"name":"[^"]*"/g, (o) => o.replace(/"name":"[^"]*"/, '"name":"BrowserGamesHQ"'));
+    s = s.replace(/"legalName":"[^"]*"/g, '"legalName":"BrowserGamesHQ"');
+    s = s.replace(/"slogan":"[^"]*"/g, '"slogan":"Let the world play"');
+    s = s.replace(/"email":"[^"]*"/g, '"email":"hajjoutiforskype@gmail.com"');
+    return s;
   });
 
   // 2. Replace Poki brand in visible text content only (between tags, not in attributes/scripts)
