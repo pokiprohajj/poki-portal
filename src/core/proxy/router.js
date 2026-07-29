@@ -136,7 +136,7 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/https?:\/\/(?:www\.)?about\.poki\.com/gi, 'https://browsergameshq.com/en/about-us');
 
   // Phase 8: Replace navigation logo span with img tag
-  result = result.replace(/<span[^>]*role="img"[^>]*aria-label="BrowserGamesHQ"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="display:inline-block;height:22px;width:auto;max-width:80px;object-fit:contain;vertical-align:middle">');
+  result = result.replace(/<span[^>]*role="img"[^>]*aria-label="[^"]*"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="display:inline-block;height:22px;width:auto;max-width:80px;object-fit:contain;vertical-align:middle">');
 
   // Phase 8b: Strip SPA scripts for contact page (SPA crashes on our domain, serve static HTML only)
   if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
