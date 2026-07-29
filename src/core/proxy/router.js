@@ -58,15 +58,8 @@ async function fetchSource(path, visitorUA, sourceOrigin) {
 }
 
 function cleanPokiBranding(html, sourcePath) {
-  // Phase 1: Save window.context blocks — the Poki SPA needs site.domain="poki.com" for API URLs
-  const ctxBlocks = [];
-  let result = html.replace(/window\.context[\s\S]*?(?=<\/script>)/g, (match) => {
-    ctxBlocks.push(match);
-    return '___WINDOW_CTX_' + (ctxBlocks.length - 1) + '___';
-  });
-
-  // Phase 2: Replace ALL "Poki" with "BrowserGamesHQ" (case-insensitive)
-  result = result.replace(/Poki/gi, 'BrowserGamesHQ');
+  // Phase 1: Replace ALL "Poki" with "BrowserGamesHQ" (case-insensitive)
+  let result = html.replace(/Poki/gi, 'BrowserGamesHQ');
 
   // Phase 3: Restore ONLY functional references that the Poki SPA needs to work
   // CDN domain (must stay as poki-cdn for assets to load)
@@ -112,30 +105,20 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/https?:\/\/BrowserGamesHQ\.com/gi, (m) => m.toLowerCase());
 
   // Restore Poki SDK storage keys + JS identifiers (BrowserGamesHQ_xxx → poki_xxx)
-  result = result.replace(/(["'\s;,.!?()\[\]{}=+>&|^])BrowserGamesHQ_([a-z]+)/gi, '$1poki_$2');
-  result = result.replace(/^BrowserGamesHQ_([a-z]+)/gm, 'poki_$1');
+  result = result.replace(/BrowserGamesHQ_([a-z]+)/gi, 'poki_$1');
+  // Restore Poki SDK camelCase identifiers (BrowserGamesHQFooBar → pokiFooBar)
+  result = result.replace(/BrowserGamesHQ([A-Z][a-zA-Z0-9]*)/gi, 'poki$1');
   // Restore analytics + tracking domains (t.poki.io, etc.)
-  result = result.replace(/(["'\s])t\.browsergameshq\.io/gi, '$1t.poki.io');
-  result = result.replace(/^t\.browsergameshq\.io/gim, 't.poki.io');
+  result = result.replace(/t\.browsergameshq\.io/gi, 't.poki.io');
   // Restore Poki SDK domain allow-list (all Poki TLDs used in SDK validation)
-  result = result.replace(/(["'\s,]+)BrowserGamesHQ\.(co\.il|com\.br|cz|dk|fi|it|jp|nl|pt|be|by|ch|cn)/gi, '$1poki.$2');
+  result = result.replace(/BrowserGamesHQ\.(co\.(il|id|uk)|com\.br|cz|dk|fi|it|jp|nl|pt|be|by|ch|cn|at|no|se|pl|fr|es|de)/gi, 'poki.$1');
 
   // Phase 4: Fix email addresses — change from browsergameshq.com to poki.pro
   result = result.replace(/hello\s*@\s*browsergameshq\.com/gi, 'hello@poki.pro');
   result = result.replace(/press\s*@\s*browsergameshq\.com/gi, 'press@poki.pro');
   result = result.replace(/hajjoutiforskype\s*@/i, 'hajjoutiforskype@');
 
-  // Phase 5: Restore window.context blocks (also replace Poki branding in them, but keep domain=poki.com)
-  result = result.replace(/___WINDOW_CTX_(\d+)___/g, (_, n) => {
-    let block = ctxBlocks[parseInt(n)];
-    block = block.replace(/Poki/gi, 'BrowserGamesHQ');
-    block = block.replace(/"domain"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain":"poki.com"');
-    block = block.replace(/"domain_title"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain_title":"Poki.com"');
-    block = block.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
-    return block;
-  });
-
-  // Phase 6: Replace social URLs with our brand handles (case-insensitive)
+  // Phase 5: Replace social URLs with our brand handles (case-insensitive)
   result = result.replace(/href="https?:\/\/(?:www\.)?facebook\.com\/browsergameshq[^"]*"/gi, 'href="https://www.facebook.com/BrowserGamesHQ"');
   result = result.replace(/href="https?:\/\/(?:www\.)?twitter\.com\/browsergameshq[^"]*"/gi, 'href="https://twitter.com/BrowserGamesHQ"');
   result = result.replace(/href="https?:\/\/(?:www\.)?youtube\.com\/(?:c\/|@)?browsergameshq[^"]*"/gi, 'href="https://www.youtube.com/@BrowserGamesHQ"');
