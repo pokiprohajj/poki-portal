@@ -138,10 +138,10 @@ function cleanPokiBranding(html, sourcePath) {
   // Phase 8: Replace navigation logo span with img tag
   result = result.replace(/<span[^>]*role="img"[^>]*aria-label="[^"]*"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="display:inline-block;height:22px;width:auto;max-width:80px;object-fit:contain;vertical-align:middle">');
 
-  // Phase 8b: Strip SPA scripts for contact page (SPA crashes on our domain, serve static HTML only)
+  // Phase 8b: Contact page — fetch homepage SSR (full content) + replaceState + contact card
   if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
     result = result.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
-    result = result.replace(/<script[\s>][\s\S]*?<\/script>/gi, '');
+    result = result.replace(/<script[^>]*>/i, '<script>window.history.replaceState({},"","/en");</script><script>');
     const contactCard = '<div style="max-width:800px;margin:0 auto 60px;padding:40px;background:#1a1a2e;border-radius:16px;color:#fff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif"><h2 style="font-size:24px;margin:0 0 8px;color:#fff">Contact BrowserGamesHQ</h2><p style="font-size:15px;color:#a0a0c0;margin:0 0 20px;line-height:1.5">Reach out via email for support or inquiries.</p><a href="mailto:hajjoutiforskype@gmail.com" style="display:inline-block;padding:12px 24px;background:#6c5ce7;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Email Us</a><a href="/en" style="display:inline-block;margin-left:12px;padding:12px 24px;background:#2d2d44;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Browse Games</a></div>';
     result = result.replace('</body>', contactCard + '</body>');
   }
@@ -177,12 +177,16 @@ const ROUTE_SOURCE = {
 };
 
 async function handlePageRequest(req, res) {
-  const sourcePath = req.path;
+  const reqPath = req.path;
   const deviceType = detectDevice(req.headers['user-agent']);
   const host = req.hostname || '';
-  const sourceOrigin = SUBDOMAIN_SOURCE[host] || ROUTE_SOURCE[sourcePath];
+  const sourceOrigin = SUBDOMAIN_SOURCE[host] || ROUTE_SOURCE[reqPath];
 
-  const cacheKey = `html:${deviceType}:${sourcePath}:${host}`;
+  // Contact page has empty SSR (71 bytes) + SPA crashes on our domain — fetch homepage instead
+  const isContactPage = reqPath.match(/\/c\/contact/i);
+  const sourcePath = isContactPage ? '/en' : reqPath;
+
+  const cacheKey = `html:${deviceType}:${isContactPage ? reqPath : sourcePath}:${host}`;
   const cached = cache.getHtml(cacheKey);
   if (cached) {
     res.set({
@@ -200,9 +204,9 @@ async function handlePageRequest(req, res) {
     html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');
     html = html.replace(/<meta[^>]*content\s*=\s*["'][^"']*url\s*=[^"']*poki\.[^"']*["'][^>]*>/gi, '');
 
-    html = cleanPokiBranding(html, sourcePath);
+    html = cleanPokiBranding(html, reqPath);
 
-    html = rewriteHtml(html, sourcePath);
+    html = rewriteHtml(html, reqPath);
 
     html = injectAds(html);
 
