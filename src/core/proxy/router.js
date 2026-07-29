@@ -145,9 +145,25 @@ function cleanPokiBranding(html, sourcePath) {
 
   result = result.replace('</body>', canonicalFix + '</body>');
 
-  // Phase 9: Intercept Poki text in visible DOM content via light polling
-  // Replaces "Poki" with "BrowserGamesHQ" in text nodes (skips scripts/styles)
-  const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){try{var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("Poki")>=0)n.currentNode.nodeValue=v.replace(r,"BrowserGamesHQ")}}catch(e){}}x();setInterval(function(){try{x()}catch(e){}},1000);window.addEventListener("popstate",function(){setTimeout(function(){try{x()}catch(e){}},100)})});</script>';
+  // Phase 9: Client-side branding observer — replaces "Poki" with "BrowserGamesHQ" in
+  // visible text nodes + display attributes immediately after React renders them.
+  // Uses MutationObserver instead of polling for instant response to SPA navigation.
+  const domFix = '<script>(function(){var b="BrowserGamesHQ",r=/Poki/gi;function t(v){return typeof v==="string"&&v.indexOf("Poki")>=0?v.replace(r,b):v}' +
+  'function tn(r){var w=document.createTreeWalker(r,4,null,false);while(w.nextNode()){var n=w.currentNode,pp=n.parentNode;' +
+  'if(pp&&(pp.nodeName==="SCRIPT"||pp.nodeName==="STYLE"||pp.nodeName==="TEXTAREA"))continue;' +
+  'if(n.nodeValue&&n.nodeValue.indexOf("Poki")>=0)n.nodeValue=n.nodeValue.replace(r,b)}}' +
+  'function ta(r){var a=["alt","title","placeholder","aria-label","value"];' +
+  'for(var i=0;i<a.length;i++){var els=r.querySelectorAll("["+a[i]+"*=\\"Poki\\"]");' +
+  'for(var j=0;j<els.length;j++){var v=els[j].getAttribute(a[i]);if(v&&v.indexOf("Poki")>=0)els[j].setAttribute(a[i],v.replace(r,b))}}}' +
+  'var db=document.body;if(db){tn(db);ta(db);}' +
+  'var mo=new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
+  'for(var j=0;j<ns.length;j++){var n=ns[j];' +
+  'if(n.nodeType===3&&n.parentNode){var pp=n.parentNode;' +
+  'if(!(pp.nodeName==="SCRIPT"||pp.nodeName==="STYLE"||pp.nodeName==="TEXTAREA"))' +
+  'n.nodeValue=t(n.nodeValue)}' +
+  'else if(n.nodeType===1){tn(n);ta(n)}}}});' +
+  'if(db){try{mo.observe(db,{childList:true,subtree:true})}catch(e){}}' +
+  '})();</script>';
   result = result.replace('</body>', domFix + '</body>');
 
   return result;
