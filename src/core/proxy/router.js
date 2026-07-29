@@ -79,8 +79,10 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/__BrowserGamesHQData/gi, '__pokiData');
   result = result.replace(/BrowserGamesHQPlayground/gi, 'pokiPlayground');
   // Domain field in __pokiData JSON — must be poki.com for API calls
-  result = result.replace(/(["\\]?"domain["\\]?\s*:\s*["\\]?)BrowserGamesHQ\.com(["\\]?)/gi, '$1poki.com$2');
-  result = result.replace(/(["\\]?"domain_title["\\]?\s*:\s*["\\]?)BrowserGamesHQ\.com(["\\]?)/gi, '$1Poki.com$2');
+  result = result.replace(/"domain"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain":"poki.com"');
+  result = result.replace(/\\"domain\\"\s*:\s*\\"BrowserGamesHQ\.com\\"/gi, '\\"domain\\":\\"poki.com\\"');
+  result = result.replace(/"domain_title"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain_title":"Poki.com"');
+  result = result.replace(/\\"domain_title\\"\s*:\s*\\"BrowserGamesHQ\.com\\"/gi, '\\"domain_title\\":\\"Poki.com\\"');
   // Functional subdomains (CDN, API, etc — must stay as poki for asset loading)
   result = result.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
   // Legal name (Poki B.V. is the actual company entity)
