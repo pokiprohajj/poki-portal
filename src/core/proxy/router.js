@@ -19,9 +19,9 @@ function normalizeGamePath(path) {
   return path;
 }
 
-async function fetchSource(path, visitorUA) {
+async function fetchSource(path, visitorUA, sourceOrigin) {
   const normalizedPath = (!path || path === '/') ? '/' : normalizeGamePath(path);
-  const url = `${config.sourceOrigin}${normalizedPath}`;
+  const url = `${sourceOrigin || config.sourceOrigin}${normalizedPath}`;
   const userAgent = visitorUA || getRandomUA();
 
   const response = await fetch(url, {
@@ -85,6 +85,8 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/\\"domain_title\\"\s*:\s*\\"BrowserGamesHQ\.com\\"/gi, '\\"domain_title\\":\\"Poki.com\\"');
   // Functional subdomains (CDN, API, etc — must stay as poki for asset loading)
   result = result.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
+  // SVG icon filenames (must stay poki.svg — the actual file on CDN)
+  result = result.replace(/\/icons\/ui\/BrowserGamesHQ\.svg/gi, '/icons/ui/poki.svg');
   // Legal name (Poki B.V. is the actual company entity)
   result = result.replace(/BrowserGamesHQ\s*B\.\s*V\./gi, 'Poki B.V.');
   result = result.replace(/BrowserGamesHQ\.nl/gi, 'Poki.nl');
@@ -140,11 +142,17 @@ function detectDevice(ua) {
   return 'desktop';
 }
 
+const SUBDOMAIN_SOURCE = {
+  'about.browsergameshq.com': 'https://about.poki.com',
+};
+
 async function handlePageRequest(req, res) {
   const sourcePath = req.path;
   const deviceType = detectDevice(req.headers['user-agent']);
+  const host = req.hostname || '';
+  const sourceOrigin = SUBDOMAIN_SOURCE[host];
 
-  const cacheKey = `html:${deviceType}:${sourcePath}`;
+  const cacheKey = `html:${deviceType}:${sourcePath}:${host}`;
   const cached = cache.getHtml(cacheKey);
   if (cached) {
     res.set({
@@ -156,7 +164,7 @@ async function handlePageRequest(req, res) {
   }
 
   try {
-    let html = await fetchSource(sourcePath, req.headers['user-agent']);
+    let html = await fetchSource(sourcePath, req.headers['user-agent'], sourceOrigin);
 
     // Strip meta refresh tags that redirect to poki.com before JS runs
     html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');

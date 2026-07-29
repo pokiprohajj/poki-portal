@@ -490,7 +490,7 @@ function replacePokiLogo($) {
   // 2. Update visible branding on parent elements (not reverted by React since they're attributes)
   $('span[role="img"]').each(function () {
     var style = $(this).attr('style') || '';
-    if (style.indexOf('poki.svg') === -1) return;
+    if (style.indexOf('poki.svg') === -1 && style.indexOf('BrowserGamesHQ.svg') === -1) return;
     var parentLink = $(this).closest('a');
     if (parentLink.length) {
       parentLink.attr('aria-label', 'BrowserGamesHQ');
