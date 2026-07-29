@@ -135,8 +135,8 @@ function cleanPokiBranding(html, sourcePath) {
   // Phase 7: Rewrite about.poki.com links to browsergameshq.com/en/about-us (global, all pages)
   result = result.replace(/https?:\/\/(?:www\.)?about\.poki\.com/gi, 'https://browsergameshq.com/en/about-us');
 
-  // Phase 8: Replace logo span with img + CSS to contain it within parent + rewrite contact page URL
-  result = result.replace(/<span[^>]*role="img"[^>]*aria-label="[^"]*"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="height:24px;width:auto;max-width:90px;object-fit:scale-down;vertical-align:middle;display:inline-block">');
+  // Phase 8: Replace logo span (aria-label="BrowserGamesHQ" or "poki") with img + CSS
+  result = result.replace(/<span[^>]*role="img"[^>]*aria-label="(?:BrowserGamesHQ|poki)"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="height:24px;width:auto;max-width:90px;object-fit:scale-down;vertical-align:middle;display:inline-block">');
   result = result.replace('</head>', '<style>a[aria-label="BrowserGamesHQ"]{display:inline-flex!important;align-items:center!important}</style></head>');
 
   // Phase 8c: Client-side fix for React Helmet override — NO reference to "poki.com" in the script
