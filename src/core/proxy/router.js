@@ -60,14 +60,15 @@ async function fetchSource(path, visitorUA) {
 function cleanPokiBranding(html, sourcePath) {
   let result = html;
 
-  // 1. Replace in JSON-LD structured data only (critical for Google rich results)
-  result = result.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, (match) => {
-    return match
-      .replace(/"@type":"Organization"[^}]*?"name":"[^"]*"/g, (m) => m.replace(/"name":"[^"]*"/, '"name":"BrowserGamesHQ"'))
+  // 1. Replace in JSON-LD structured data (critical for Google rich results)
+  result = result.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, (m) => {
+    return m
+      .replace(/"@type":"Organization"[^}]*?"name":"[^"]*"/g, (s) => s.replace(/"name":"[^"]*"/, '"name":"BrowserGamesHQ"'))
       .replace(/"legalName":"[^"]*"/g, '"legalName":"BrowserGamesHQ"')
-      .replace(/"brand"[^}]*?"name":"[^"]*"/g, (m) => m.replace(/"name":"[^"]*"/, '"name":"BrowserGamesHQ"'))
       .replace(/"slogan":"[^"]*"/g, '"slogan":"Let the world play"')
-      .replace(/"email":"[^"]*"/g, '"email":"hajjoutiforskype@gmail.com"');
+      .replace(/"email":"[^"]*"/g, '"email":"hajjoutiforskype@gmail.com"')
+      .replace(/"description":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"description":"' + b + 'BrowserGamesHQ' + a + '"')
+      .replace(/"name":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"name":"' + b + 'BrowserGamesHQ' + a + '"');
   });
 
   // 2. Replace Poki brand in visible text content only (between tags, not in attributes/scripts)
