@@ -86,6 +86,8 @@ function cleanPokiBranding(html, sourcePath) {
   // Legal name (Poki B.V. is the actual company entity)
   result = result.replace(/BrowserGamesHQ\s*B\.\s*V\./gi, 'Poki B.V.');
   result = result.replace(/BrowserGamesHQ\.nl/gi, 'Poki.nl');
+  // Fix URL casing: BrowserGamesHQ.com → browsergameshq.com (lowercase domain in URLs)
+  result = result.replace(/https?:\/\/BrowserGamesHQ\.com/gi, (m) => m.toLowerCase());
 
   // Phase 4: Fix email addresses
   result = result.replace(/hello\s*@\s*browsergameshq/i, 'hello@poki');
