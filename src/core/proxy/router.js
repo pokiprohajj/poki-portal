@@ -137,7 +137,7 @@ function cleanPokiBranding(html, sourcePath) {
 
   // Phase 8: Replace logo span (aria-label="BrowserGamesHQ" or "poki") with img + CSS
   result = result.replace(/<span[^>]*role="img"[^>]*aria-label="(?:BrowserGamesHQ|poki)"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="height:24px;width:auto;max-width:90px;object-fit:scale-down;vertical-align:middle;display:inline-block">');
-  result = result.replace('</head>', '<style>a[aria-label="BrowserGamesHQ"]{display:inline-flex!important;align-items:center!important}</style></head>');
+  result = result.replace('</head>', '<style>nav a[aria-label="BrowserGamesHQ"]{display:inline-flex!important;align-items:center!important;width:auto!important;padding:0;overflow:visible!important}footer a[aria-label="BrowserGamesHQ"]{display:inline-flex!important;align-items:center!important;width:auto!important;padding:0}footer button[aria-label*="company page"]{display:inline-flex!important;align-items:center!important;gap:8px!important}</style></head>');
 
   // Phase 8c: Client-side fix for React Helmet override — NO reference to "poki.com" in the script
   const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\'),d="' + config.domain + '",re=/https?:\\/\\/[^\\/]+/i;if(c&&!c.href.toLowerCase().includes(d))c.href=c.href.replace(re,"https://"+d);[].forEach.call(document.querySelectorAll(\'meta[content*="BrowserGamesHQ"],meta[content*="browsergameshq"]\'),function(m){var v=m.getAttribute("content");if(v&&v.indexOf("http")===0&&!v.toLowerCase().includes(d))m.setAttribute("content",v.replace(re,"https://"+d))})});</script>';
@@ -175,11 +175,9 @@ async function handlePageRequest(req, res) {
   const host = req.hostname || '';
   const sourceOrigin = SUBDOMAIN_SOURCE[host] || ROUTE_SOURCE[reqPath];
 
-  // Contact page — fetch real content from original source, fix branding + URL rewrite so SPA renders
-  const isContactPage = reqPath.match(/\/c\/contact/i);
   const sourcePath = reqPath;
 
-  const cacheKey = `html:${deviceType}:${isContactPage ? reqPath : sourcePath}:${host}`;
+  const cacheKey = `html:${deviceType}:${reqPath}:${host}`;
   const cached = cache.getHtml(cacheKey);
   if (cached) {
     res.set({
