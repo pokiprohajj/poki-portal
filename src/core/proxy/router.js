@@ -95,9 +95,13 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/hello\s*@\s*browsergameshq/i, 'hello@poki');
   result = result.replace(/hajjoutiforskype\s*@/i, 'hajjoutiforskype@');
 
-  // Phase 5: Restore window.context blocks
+  // Phase 5: Restore window.context blocks (also replace Poki branding in them, but keep domain=poki.com)
   result = result.replace(/___WINDOW_CTX_(\d+)___/g, (_, n) => {
-    return ctxBlocks[parseInt(n)];
+    let block = ctxBlocks[parseInt(n)];
+    block = block.replace(/Poki/gi, 'BrowserGamesHQ');
+    block = block.replace(/"domain"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain":"poki.com"');
+    block = block.replace(/"domain_title"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain_title":"Poki.com"');
+    return block;
   });
 
   // Phase 6: Replace social URLs with our brand handles (case-insensitive)
