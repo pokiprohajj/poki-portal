@@ -86,7 +86,10 @@ function cleanPokiBranding(html, sourcePath) {
         .replace(/"https?:\/\/(?:www\.)?trustpilot\.com[^"]*"/gi, (u) => u.replace(/poki\.com/gi, 'browsergameshq.com'))
         .replace(/"https?:\/\/(?:www\.)?crunchbase\.com[^"]*"/gi, (u) => u.replace(/poki/gi, 'BrowserGamesHQ'))
         .replace(/"https?:\/\/play\.google\.com[^"]*"/gi, (u) => u.replace(/poki/gi, 'BrowserGamesHQ'))
-      );
+      )
+      // Replace poki.com in @id and url fields (but NOT in CDN or game URLs)
+      .replace(/"@id":"https?:\/\/(?:www\.)?poki\.com([^"]*)"/gi, '"@id":"https://' + config.domain + '$1"')
+      .replace(/"url":"https?:\/\/(?:www\.)?poki\.com([^"]*)"/gi, '"url":"https://' + config.domain + '$1"');
   });
 
   // 2. Replace Poki brand in visible text content only (between tags, not in attributes/scripts)
