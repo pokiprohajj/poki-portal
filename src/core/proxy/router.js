@@ -145,9 +145,9 @@ function cleanPokiBranding(html, sourcePath) {
 
   result = result.replace('</body>', canonicalFix + '</body>');
 
-  // Phase 9: Intercept Poki text in API-loaded content via weak polling (avoids blocking React hydration)
-  // Runs once on load, then polls to catch SPA-dynamic content after navigation
-  const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){try{var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("Poki")>=0&&!v.match(/["\']/)&&!v.match(/\.(com|net|org|io)\b/i))n.currentNode.nodeValue=v.replace(r,function(m,i,t){var p=t.slice(Math.max(0,i-1),i),f=t.slice(i+m.length,i+m.length+5);return p.match(/[a-z._"\'=]/i)?m:f.match(/^\.(com|net|org|io)\b/i)?m:"BrowserGamesHQ"})}}catch(e){}}x();setInterval(function(){try{x()}catch(e){}},2000);window.addEventListener("popstate",function(){setTimeout(function(){try{x()}catch(e){}},100)})});</script>';
+  // Phase 9: Intercept Poki text in visible DOM content via light polling
+  // Replaces "Poki" with "BrowserGamesHQ" in text nodes (skips scripts/styles)
+  const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){try{var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("Poki")>=0)n.currentNode.nodeValue=v.replace(r,"BrowserGamesHQ")}}catch(e){}}x();setInterval(function(){try{x()}catch(e){}},1000);window.addEventListener("popstate",function(){setTimeout(function(){try{x()}catch(e){}},100)})});</script>';
   result = result.replace('</body>', domFix + '</body>');
 
   return result;
