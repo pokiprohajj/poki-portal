@@ -58,13 +58,9 @@ async function fetchSource(path, visitorUA, sourceOrigin) {
 }
 
 function cleanPokiBranding(html, sourcePath) {
-  // Phase 1: Replace "Poki" with "BrowserGamesHQ" OUTSIDE <script> tags only
-  // (Preserves INITIAL_STATE, JS identifiers, inline scripts for React hydration)
-  var parts = html.split(/(<script[\s>][\s\S]*?<\/script>)/gi);
-  for (var i = 0; i < parts.length; i += 2) {
-    parts[i] = parts[i].replace(/Poki/gi, 'BrowserGamesHQ');
-  }
-  var result = parts.join('');
+  // Phase 1: Replace ALL "Poki" with "BrowserGamesHQ" throughout the entire HTML
+  // (including script tags — Phase 3 restores functional references below)
+  var result = html.replace(/Poki/gi, 'BrowserGamesHQ');
 
   // Phase 3: Restore ONLY functional references that the Poki SPA needs to work
   // CDN domain (must stay as poki-cdn for assets to load)
@@ -146,8 +142,8 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace('</body>', canonicalFix + '</body>');
 
   // Phase 9: Client-side branding observer — replaces "Poki" with "BrowserGamesHQ" in
-  // visible text nodes + display attributes immediately after React renders them.
-  // Uses MutationObserver for instant response to React hydration + SPA navigation.
+  // visible text nodes + display attributes. MutationObserver catches dynamically loaded
+  // content from React hydration and SPA navigation.
   const domFix = '<script>(function(){var re=/Poki/gi;function rn(el){if(!el)return;var w=document.createTreeWalker(el,4,null,false);while(w.nextNode()){' +
   'var n=w.currentNode,p=n.parentNode;if(p&&(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))continue;' +
   'if(n.nodeValue&&n.nodeValue.indexOf("Poki")>=0)n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
@@ -155,18 +151,12 @@ function cleanPokiBranding(html, sourcePath) {
   'var q=el.querySelectorAll("["+a+"*=\\"Poki\\"]");for(var i=0;i<q.length;i++){' +
   'var v=q[i].getAttribute(a);if(v&&v.indexOf("Poki")>=0)q[i].setAttribute(a,v.replace(re,"BrowserGamesHQ"))}})}' +
   'rn(document.body);ra(document.body);' +
-  'try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){' +
-  'if(ms[i].type==="characterData"){var n=ms[i].target;' +
-  'if(n.nodeType===3&&n.parentNode){var p=n.parentNode;' +
-  'if(!(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))' +
-  'n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
-  'if(ms[i].type==="childList"){var ns=ms[i].addedNodes;' +
+  'try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
   'for(var j=0;j<ns.length;j++){var n=ns[j];' +
   'if(n.nodeType===3&&n.parentNode){var p=n.parentNode;' +
   'if(!(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))' +
   'n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}' +
-  'else if(n.nodeType===1){rn(n);ra(n)}}}}}).observe(document.body,{' +
-  'childList:true,subtree:true,characterData:true})' +
+  'else if(n.nodeType===1){rn(n);ra(n)}}}}}).observe(document.body,{childList:true,subtree:true})' +
   '}catch(e){}})();</script>';
   result = result.replace('</body>', domFix + '</body>');
 
