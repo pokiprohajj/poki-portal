@@ -68,39 +68,24 @@ function cleanPokiBranding(html, sourcePath) {
   // Phase 2: Replace ALL "Poki" with "BrowserGamesHQ" (case-insensitive)
   result = result.replace(/Poki/gi, 'BrowserGamesHQ');
 
-  // Phase 3: Restore functional references that were over-replaced
-  // CDN domain
-  result = result.replace(/BrowserGamesHQ-cdn/gi, 'poki-cdn');
-  // Chunk names (React lazy-loaded components)
-  result = result.replace(/app-components-contentTypes-BrowserGamesHQKids-tsx/gi, 'app-components-contentTypes-PokiKids-tsx');
-  // JS variable names (must stay as original for the Poki SPA)
+  // Phase 3: Restore ONLY functional references that the Poki SPA needs to work
+  // CDN domain (must stay as poki-cdn for assets to load)
+  result = result.replace(/BrowserGamesHQ-?cdn/gi, 'poki-cdn');
+  // Chunk names (React lazy-loaded components — must match actual CDN files)
+  result = result.replace(/BrowserGamesHQKids-tsx/gi, 'PokiKids-tsx');
+  // JS variable names (must stay original for the Poki SPA)
   result = result.replace(/isBrowserGamesHQAnalyticsEnabled/gi, 'isPokiAnalyticsEnabled');
   result = result.replace(/BrowserGamesHQGTM/gi, 'pokiGTM');
   result = result.replace(/__BrowserGamesHQData/gi, '__pokiData');
   result = result.replace(/BrowserGamesHQPlayground/gi, 'pokiPlayground');
-  result = result.replace(/BrowserGamesHQ\.com\//gi, 'poki.com/');
-  result = result.replace(/"BrowserGamesHQ\.com"/gi, '"poki.com"');
-  result = result.replace(/'BrowserGamesHQ\.com'/gi, "'poki.com'");
-  // Functional subdomain URLs (CDN, API, ads, etc.)
-  result = result.replace(/games\.browsergameshq/gi, 'games.poki');
-  result = result.replace(/api\.browsergameshq/gi, 'api.poki');
-  result = result.replace(/a\.browsergameshq/gi, 'a.poki');
-  result = result.replace(/ads\.browsergameshq/gi, 'ads.poki');
-  result = result.replace(/gdn\.browsergameshq/gi, 'gdn.poki');
-  result = result.replace(/devs-api\.browsergameshq/gi, 'devs-api.poki');
-  result = result.replace(/poki-auth\.browsergameshq/gi, 'poki-auth.poki');
-  result = result.replace(/user-vault\.browsergameshq/gi, 'user-vault.poki');
-  result = result.replace(/ay\.delivery/gi, 'ay.delivery');
-  // Legal name (Poki B.V. is the actual company — not our brand)
+  // Domain field in __pokiData JSON — must be poki.com for API calls
+  result = result.replace(/["\\"]domain["\\"]\s*:\s*["\\"]BrowserGamesHQ\.com["\\"]/gi, '"domain":"poki.com"');
+  result = result.replace(/["\\"]domain_title["\\"]\s*:\s*["\\"]BrowserGamesHQ\.com["\\"]/gi, '"domain_title":"Poki.com"');
+  // Functional subdomains (CDN, API, etc — must stay as poki for asset loading)
+  result = result.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
+  // Legal name (Poki B.V. is the actual company entity)
   result = result.replace(/BrowserGamesHQ\s*B\.\s*V\./gi, 'Poki B.V.');
   result = result.replace(/BrowserGamesHQ\.nl/gi, 'Poki.nl');
-  // Google Play store IDs
-  result = result.replace(/com\.browsergameshq\.playground/gi, 'com.poki.playground');
-  // Trustpilot & Crunchbase (third-party sites referencing Poki)
-  result = result.replace(/\/review\/browsergameshq\.com/gi, '/review/poki.com');
-  result = result.replace(/\/organization\/BrowserGamesHQ/gi, '/organization/poki');
-  // SimilarWeb
-  result = result.replace(/\/website\/browsergameshq\.com/gi, '/website/poki.com');
 
   // Phase 4: Fix email addresses
   result = result.replace(/hello\s*@\s*browsergameshq/i, 'hello@poki');
