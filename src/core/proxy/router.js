@@ -200,6 +200,8 @@ async function handlePageRequest(req, res) {
     if (isContactPage) {
       html = html.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
       html = html.replace(/<\/head>/i, '<meta name="robots" content="index, follow"></head>');
+      const contactHtml = '<div id="contact-content" style="max-width:800px;margin:40px auto;padding:0 24px;text-align:center"><h1 style="font-size:32px;margin-bottom:8px">Get in touch</h1><p style="font-size:18px;color:#a0a0c0;margin-bottom:24px">We\'d love to hear from you</p><a href="mailto:hello@browsergameshq.com" style="display:inline-block;font-size:28px;color:#6c5ce7;text-decoration:none;font-weight:700;margin-bottom:40px">hello@browsergameshq.com</a><div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap"><a href="/en/c/faq" style="padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none">Need help? FAQ</a><a href="https://developers.browsergameshq.com" style="padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none">For Developers</a><a href="https://jobs.browsergameshq.com" style="padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none">Join our team</a></div></div>';
+      html = html.replace('</body>', contactHtml + '</body>');
     }
 
     html = rewriteHtml(html, reqPath);
