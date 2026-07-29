@@ -58,8 +58,13 @@ async function fetchSource(path, visitorUA, sourceOrigin) {
 }
 
 function cleanPokiBranding(html, sourcePath) {
-  // Phase 1: Replace ALL "Poki" with "BrowserGamesHQ" (case-insensitive)
-  let result = html.replace(/Poki/gi, 'BrowserGamesHQ');
+  // Phase 1: Replace "Poki" with "BrowserGamesHQ" OUTSIDE <script> tags only
+  // (Preserves INITIAL_STATE, JS identifiers, inline scripts for React hydration)
+  var parts = html.split(/(<script[\s>][\s\S]*?<\/script>)/gi);
+  for (var i = 0; i < parts.length; i += 2) {
+    parts[i] = parts[i].replace(/Poki/gi, 'BrowserGamesHQ');
+  }
+  var result = parts.join('');
 
   // Phase 3: Restore ONLY functional references that the Poki SPA needs to work
   // CDN domain (must stay as poki-cdn for assets to load)
@@ -302,6 +307,37 @@ router.get('/sitemap.xml', async function (req, res) {
     res.send(xml);
   } catch (e) {
     res.status(502).type('text/plain').send('Sitemap unavailable');
+  }
+});
+
+router.get('/manifest.json', async function (req, res) {
+  try {
+    const response = await fetch('https://poki.com/manifest.json', {
+      headers: { 'User-Agent': getRandomUA() },
+      timeout: 10000,
+    });
+    let json = await response.text();
+    json = json.replace(/https:\/\/poki\.com/g, 'https://browsergameshq.com');
+    json = json.replace(/"Poki"/g, '"BrowserGamesHQ"');
+    res.set({
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=86400',
+    });
+    res.send(json);
+  } catch (e) {
+    // Fallback to a simple manifest
+    res.set({
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=86400',
+    });
+    res.send(JSON.stringify({
+      name: 'BrowserGamesHQ',
+      short_name: 'BrowserGamesHQ',
+      start_url: '/',
+      display: 'standalone',
+      background_color: '#0f0f23',
+      theme_color: '#6c5ce7',
+    }));
   }
 });
 
