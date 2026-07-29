@@ -201,6 +201,23 @@ function rewriteHtml(html, sourcePath) {
     }
   }
 
+  // Pass 9d-prime: Fix React Router SPA navigation — Poki sometimes calls pushState
+  // directly without triggering React Router navigation. This relays pushState
+  // to a popstate event so React Router's history listener picks up the change.
+  // Only fires for non-React-Router pushes (detected by state.idx convention).
+  if ($('head').length) {
+    $('head').append('<script>' +
+      '(function(){' +
+      'var ops=window.history.pushState;' +
+      'window.history.pushState=function(s,t,u){' +
+      'ops.call(this,s,t,u);' +
+      'if(!s||typeof s.idx!=="number"){' +
+      'window.dispatchEvent(new PopStateEvent("popstate",{state:s}))' +
+      '}};' +
+      '})();' +
+      '</script>');
+  }
+
   // Pass 9d: On ALL pages, inject iframe src interceptor (persists across SPA navigations)
   if ($('head').length) {
     $('head').append('<script id="portal-iframe-rw">' +
