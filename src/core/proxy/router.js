@@ -175,12 +175,9 @@ async function handlePageRequest(req, res) {
   const host = req.hostname || '';
   const sourceOrigin = SUBDOMAIN_SOURCE[host] || ROUTE_SOURCE[reqPath];
 
-  // Contact page — fetch homepage SSR (full content), rewrite URL to /en so SPA renders correctly
+  // Contact page — fetch real content from original source, fix branding + URL rewrite so SPA renders
   const isContactPage = reqPath.match(/\/c\/contact/i);
-  if (isContactPage) {
-    res.set('X-Contact-Route', 'rewritten-to-homepage');
-  }
-  const sourcePath = isContactPage ? '/en' : reqPath;
+  const sourcePath = reqPath;
 
   const cacheKey = `html:${deviceType}:${isContactPage ? reqPath : sourcePath}:${host}`;
   const cached = cache.getHtml(cacheKey);
@@ -203,8 +200,8 @@ async function handlePageRequest(req, res) {
     html = cleanPokiBranding(html, reqPath);
 
     if (isContactPage) {
-      html = html.replace('</head>', '<script>window.history.replaceState({},"","/en");</script></head>');
       html = html.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
+      html = html.replace(/<\/head>/i, '<meta name="robots" content="index, follow"></head>');
     }
 
     html = rewriteHtml(html, reqPath);
