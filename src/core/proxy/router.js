@@ -131,6 +131,11 @@ function cleanPokiBranding(html, sourcePath) {
 
   result = result.replace('</body>', canonicalFix + '</body>');
 
+  // Phase 9: Client-side mutation observer to replace Poki text loaded by SPA from API
+  const pokiRx = 'Poki';
+  const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("' + pokiRx + '")>=0&&!v.match(/["\']/)&&!v.match(/\.(com|net|org|io)\b/i))n.currentNode.nodeValue=v.replace(r,function(m,i,t){var p=t.slice(Math.max(0,i-1),i),f=t.slice(i+m.length,i+m.length+5);return p.match(/[a-z._"\'=]/i)?m:f.match(/^\.(com|net|org|io)\b/i)?m:"BrowserGamesHQ"})}}x();var o=new MutationObserver(x);o.observe(document.body,{childList:true,subtree:true,characterData:true});setTimeout(function(){o.disconnect()},3e4)});</script>';
+  result = result.replace('</body>', domFix + '</body>');
+
   return result;
 }
 
@@ -148,6 +153,7 @@ const SUBDOMAIN_SOURCE = {
 
 const ROUTE_SOURCE = {
   '/about': 'https://about.poki.com',
+  '/en/about-us': 'https://about.poki.com',
 };
 
 async function handlePageRequest(req, res) {
