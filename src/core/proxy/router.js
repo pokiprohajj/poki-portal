@@ -175,6 +175,7 @@ async function handlePageRequest(req, res) {
   const host = req.hostname || '';
   const sourceOrigin = SUBDOMAIN_SOURCE[host] || ROUTE_SOURCE[reqPath];
 
+  const isContactPage = reqPath.match(/\/c\/contact/i);
   const sourcePath = reqPath;
 
   const cacheKey = `html:${deviceType}:${reqPath}:${host}`;
