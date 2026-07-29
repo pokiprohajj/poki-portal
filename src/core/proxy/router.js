@@ -68,7 +68,12 @@ function cleanPokiBranding(html, sourcePath) {
       .replace(/"slogan":"[^"]*"/g, '"slogan":"Let the world play"')
       .replace(/"email":"[^"]*"/g, '"email":"hajjoutiforskype@gmail.com"')
       .replace(/"description":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"description":"' + b + 'BrowserGamesHQ' + a + '"')
-      .replace(/"name":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"name":"' + b + 'BrowserGamesHQ' + a + '"');
+      .replace(/"name":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"name":"' + b + 'BrowserGamesHQ' + a + '"')
+      // SameAs: replace social media handles and our domain URLs
+      .replace(/"sameAs":\[([^\]]+)\]/g, (s) => s
+        .replace(/"(https?:\/\/(?:www\.)?(?:facebook|twitter|youtube|tiktok|instagram|linkedin)\.com[^"]*?)poki([^"]*?)"/gi, '"$1BrowserGamesHQ$2"')
+        .replace(/"https?:\/\/([a-z0-9-]+\.)?poki\.com([^"]*?)"/gi, (u) => u.replace(/poki\.com/i, 'browsergameshq.com'))
+      );
   });
 
   // 2. Replace Poki brand in visible text content only (between tags, not in attributes/scripts)
@@ -77,11 +82,11 @@ function cleanPokiBranding(html, sourcePath) {
     // In non-script/style blocks: replace "Poki" brand text in visible elements
     blocks[i] = blocks[i]
       // Replace "Poki" brand word within visible text content (>text<)
-      .replace(/>[^<]*Poki[^<]*</g, (match) => match.replace(/Poki/g, 'BrowserGamesHQ'))
+      .replace(/>[^<]*Poki[^<]*</gi, (match) => match.replace(/Poki/gi, 'BrowserGamesHQ'))
       // Replace Poki in title, aria-label, alt attributes
-      .replace(/(title|aria-label|alt)="(.*?)Poki(.*?)"/g, (m, attr, b, a) => attr + '="' + b + 'BrowserGamesHQ' + a + '"')
-      // Replace Poki in social link hrefs
-      .replace(/href="(https?:\/\/(?:www\.)?(?:facebook|twitter|youtube|tiktok|instagram|linkedin)\.com\/.*?)Poki(.*?)"/gi, (m, b, a) => 'href="' + b + 'BrowserGamesHQ' + a + '"')
+      .replace(/(title|aria-label|alt)="(.*?)Poki(.*?)"/gi, (m, attr, b, a) => attr + '="' + b + 'BrowserGamesHQ' + a + '"')
+      // Replace Poki in social link hrefs (case-insensitive)
+      .replace(/(href="https?:\/\/(?:www\.)?(?:facebook|twitter|youtube|tiktok|instagram|linkedin)\.com[^"]*?)poki([^"]*")/gi, '$1BrowserGamesHQ$2')
       // Replace poki.com in canonical / og:url
       .replace(/(<link[^>]*rel="canonical"[^>]*href="[^"]*?)poki\.com([^"]*")/gi, '$1' + config.domain + '$2')
       .replace(/(<meta[^>]*property="og:url"[^>]*content="[^"]*?)poki\.com([^"]*")/gi, '$1' + config.domain + '$2')
