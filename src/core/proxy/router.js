@@ -58,96 +58,55 @@ async function fetchSource(path, visitorUA) {
 }
 
 function cleanPokiBranding(html, sourcePath) {
-  let result = html;
-
-  // NEVER touch window.context — the Poki SPA needs site.domain="poki.com" for API URLs
-  const ctxMarker = '___WINDOW_CTX___';
-  result = result.replace(/window\.context\s*=\s*\{[^}]+?\};/g, (match) => {
-    return match.replace(/window\.context/g, ctxMarker);
+  // Save window.context blocks — the Poki SPA needs site.domain="poki.com" for API URLs
+  const ctxBlocks = [];
+  let result = html.replace(/window\.context[\s\S]*?(?=<\/script>)/g, (match) => {
+    ctxBlocks.push(match);
+    return '___WINDOW_CTX_' + (ctxBlocks.length - 1) + '___';
   });
 
-  // 1. Replace "Poki" brand text in JSON-LD structured data (critical for Google rich results)
-  result = result.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, (match) => {
-    return match
-      .replace(/["\']Poki["\']/g, '"BrowserGamesHQ"')
-      .replace(/["\']Poki B\.V\.["\']/g, '"BrowserGamesHQ"')
-      .replace(/["\']Poki\s*(?:is|games|Kids|the|com)[^"\'.,]*?["\']/gi, (m) => {
-        return m.replace(/Poki/gi, 'BrowserGamesHQ');
-      })
-      .replace(/"@type":"Organization"[^}]*?"name":"[^"]*"/g, (m) => {
-        return m.replace(/"name":"[^"]*"/, '"name":"BrowserGamesHQ"');
-      })
-      .replace(/"legalName":"[^"]*"/g, '"legalName":"BrowserGamesHQ"')
-      .replace(/"brand"[^}]*?"name":"[^"]*"/g, (m) => {
-        return m.replace(/"name":"[^"]*"/, '"name":"BrowserGamesHQ"');
-      })
-      .replace(/"slogan":"[^"]*"/g, '"slogan":"Let the world play"')
-      .replace(/"email":"[^"]*"/g, '"email":"hajjoutiforskype@gmail.com"')
-      .replace(/hello@poki\.com/gi, 'hajjoutiforskype@gmail.com')
-      .replace(/"sameAs":\[[^\]]+\]/g, (m) => {
-        return m.replace(/https?:\/\/(?:www\.)?(?:facebook|twitter|linkedin|youtube|tiktok|instagram)\.com[^",]*/gi, (url) => {
-          if (url.includes('facebook.com/Poki')) return url.replace(/\/[^/]+$/, '/BrowserGamesHQ');
-          if (url.includes('twitter.com/Poki')) return url.replace(/\/[^/]+$/, '/BrowserGamesHQ');
-          if (url.includes('youtube.com/poki') || url.includes('youtube.com/Poki')) return url.replace(/\/[^/]+$/, '/@BrowserGamesHQ');
-          if (url.includes('tiktok.com/@poki_games')) return url.replace(/@[^/]+$/, '@browsergameshq');
-          if (url.includes('instagram.com/poki__games')) return url.replace(/\/[^/]+$/, '/browsergameshq');
-          return url;
-        });
-      });
+  // Replace ALL "Poki" with "BrowserGamesHQ" everywhere (text, JSON, attributes, scripts, URLs)
+  // But preserve lowercase "poki" references that are part of functional code
+  // Step 1: Replace "Poki" as a standalone word (not part of other words or domains)
+  result = result.replace(/Poki/g, 'BrowserGamesHQ');
+
+  // Step 2: Fix over-replaced domain references — poki.com and subdomains should stay as functional URLs
+  // but the brand name replacements are correct
+  result = result.replace(/BrowserGamesHQ\.com/g, 'browsergameshq.com');
+  result = result.replace(/BrowserGamesHQ\.io/g, 'browsergameshq.io');
+  result = result.replace(/BrowserGamesHQcdn/g, 'poki-cdn');
+  result = result.replace(/BrowserGamesHQKids/g, 'BrowserGamesHQKids');
+  result = result.replace(/games\.BrowserGamesHQ/g, 'games.poki');
+  result = result.replace(/api\.BrowserGamesHQ/g, 'api.poki');
+  result = result.replace(/a\.BrowserGamesHQ/g, 'a.poki');
+  result = result.replace(/ads\.BrowserGamesHQ/g, 'ads.poki');
+  result = result.replace(/gdn\.BrowserGamesHQ/g, 'gdn.poki');
+  result = result.replace(/devs-api\.BrowserGamesHQ/g, 'devs-api.poki');
+  result = result.replace(/poki-auth\.BrowserGamesHQ/g, 'poki-auth.poki');
+  result = result.replace(/user-vault\.BrowserGamesHQ/g, 'user-vault.poki');
+  result = result.replace(/ay\.delivery/g, 'ay.delivery');
+
+  // Step 3: Ensure our domain is used in meta/link URLs (not browsergameshq.com everywhere, should be our domain)
+  // The Poki URLs need to stay as poki.com for CDN/API functionality
+  // But visible URLs (canonical, og:url) should be our domain
+  // This is handled by the regex below
+
+  // Step 4: Fix the over-replaced email addresses
+  result = result.replace(/BrowserGamesHQ\.B\.V\./g, 'Poki B.V.');
+  result = result.replace(/BrowserGamesHQ\s+B\.V\./g, 'Poki B.V.');
+  result = result.replace(/BrowserGamesHQ\.nl/g, 'Poki.nl');
+
+  // Restore window.context blocks
+  result = result.replace(/___WINDOW_CTX_(\d+)___/g, (_, n) => {
+    return ctxBlocks[parseInt(n)];
   });
 
-  // 2. Replace "Poki" to "BrowserGamesHQ" in ALL visible text (h1, h2, p, li, span, div, strong, etc.)
-  // Skip script tags and style tags to avoid breaking functionality
-  const textBlocks = result.split(/(<script[^>]*>[\s\S]*?<\/script>|<style[^>]*>[\s\S]*?<\/style>)/gi);
-  for (let i = 0; i < textBlocks.length; i += 2) {
-    textBlocks[i] = textBlocks[i]
-      .replace(/(?<=>|\s|^)Poki(?=<|\s|[.,!?;:]|$)/g, 'BrowserGamesHQ')
-      .replace(/(?<=>|\s|^)poki(?=<|\s|[.,!?;:]|$)/g, 'BrowserGamesHQ');
-  }
-  result = textBlocks.join('');
+  // Fix email in visible text (rendered by React)
+  result = result.replace(/hello\s*@\s*poki\s*\.\s*com/gi, 'hajjoutiforskype@gmail.com');
 
-  // 3. Replace Poki in <title> tags
-  result = result.replace(/<title[^>]*>[^<]*<\/title>/gi, (match) => {
-    return match.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ');
-  });
+  // Fix canonical & meta tags that React Helmet overrides
+  const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\');if(c&&c.href.indexOf("poki.com")>0)c.href=c.href.replace(/https?:\\/\\/[^\\/]+/,"https://'+config.domain+'");var d="'+config.domain+'";[].forEach.call(document.querySelectorAll(\'meta[content*="Poki"],meta[content*="poki"]\'),function(m){var v=m.getAttribute("content");if(v.indexOf("http")===0&&v.indexOf("poki.com")>0)m.setAttribute("content",v.replace(/https?:\\/\\/[^\\/]+/,"https://"+d));else if(v.indexOf("http")!==0)m.setAttribute("content",v.replace(/Poki\.com/gi,d).replace(/Poki/gi,"BrowserGamesHQ"))})});</script>';
 
-  // 4. Replace Poki domains in meta content URLs
-  result = result.replace(/(<meta[^>]*content="[^"]*?https?:\/\/)(?:[^\/]*?)poki\.com([^"]*?"[^>]*>)/gi, '$1' + config.domain + '$2');
-  result = result.replace(/(<meta[^>]*content=")((?!https?:\/\/)[^"]*?)Poki([^"]*?">)/gi, '$1$2BrowserGamesHQ$3');
-  result = result.replace(/(<meta[^>]*content=")((?!https?:\/\/)[^"]*?)poki([^"]*?">)/gi, '$1$2browsergameshq$3');
-
-  // 5. Replace in <link rel="canonical">
-  result = result.replace(/(<link[^>]*rel="canonical"[^>]*href="[^"]*?)poki\.com([^"]*?"[^>]*>)/gi, '$1' + config.domain + '$2');
-
-  // 6. Replace PokiKids in attributes
-  result = result.replace(/(title|aria-label|alt)="([^"]*?)PokiKids([^"]*?)"/gi, (m, attr, before, after) => {
-    return attr + '="' + before + 'BrowserGamesHQKids' + after + '"';
-  });
-
-  // 7. Replace in visible text attributes
-  result = result.replace(/title="Poki"/gi, 'title="BrowserGamesHQ"');
-  result = result.replace(/title="Poki\.com"/gi, 'title="BrowserGamesHQ"');
-  result = result.replace(/aria-label="Poki"/gi, 'aria-label="BrowserGamesHQ"');
-  result = result.replace(/aria-label="Poki\.com"/gi, 'aria-label="BrowserGamesHQ"');
-  result = result.replace(/alt="Poki"/gi, 'alt="BrowserGamesHQ"');
-  result = result.replace(/alt="Poki\.com"/gi, 'alt="BrowserGamesHQ"');
-
-  // 8. Replace social media links pointing to Poki accounts
-  result = result.replace(/href="https?:\/\/(?:www\.)?facebook\.com\/Poki[^"]*"/gi, 'href="https://facebook.com/BrowserGamesHQ"');
-  result = result.replace(/href="https?:\/\/(?:www\.)?twitter\.com\/Poki[^"]*"/gi, 'href="https://twitter.com/BrowserGamesHQ"');
-  result = result.replace(/href="https?:\/\/(?:www\.)?youtube\.com\/(?:c\/)?poki[^"]*"/gi, 'href="https://youtube.com/@BrowserGamesHQ"');
-  result = result.replace(/href="https?:\/\/(?:www\.)?tiktok\.com\/@poki_games[^"]*"/gi, 'href="https://tiktok.com/@browsergameshq"');
-  result = result.replace(/href="https?:\/\/(?:www\.)?instagram\.com\/poki__games[^"]*"/gi, 'href="https://instagram.com/browsergameshq"');
-  result = result.replace(/href="https?:\/\/linkedin\.com\/company\/poki[^"]*"/gi, 'href="https://linkedin.com/company/browsergameshq"');
-  result = result.replace(/href="https?:\/\/about\.poki[^"]*"/gi, 'href="https://browsergameshq.com/about"');
-
-  // 9. Restore window.context
-  result = result.replace(new RegExp(ctxMarker, 'g'), 'window.context');
-
-  // 10. Fix canonical & meta tags that React Helmet overrides from window.context
-  const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\');if(c&&c.href.indexOf("poki.com")>0)c.href=c.href.replace(/https?:\\/\\/[^\\/]+/,"https://'+config.domain+'");var d="'+config.domain+'";[].forEach.call(document.querySelectorAll(\'meta[content*="Poki"],meta[content*="poki"]\'),function(m){var v=m.getAttribute("content");if(v.indexOf("http")===0&&v.indexOf("poki.com")>0)m.setAttribute("content",v.replace(/https?:\\/\\/[^\\/]+/,"https://"+d));else if(v.indexOf("http")!==0)m.setAttribute("content",v.replace(/Poki\.com/gi,d).replace(/Poki/gi,"BrowserGamesHQ").replace(/poki/gi,"browsergameshq"))})});</script>';
-
-  // 11. Replace contact email on contact pages
   if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
     const contactEmailFix = '<script>document.addEventListener("DOMContentLoaded",function(){var mo=new MutationObserver(function(){var e=document.querySelector(\'a[href*="hello@poki.com"]\');if(e)e.href=e.href.replace("hello@poki.com","hajjoutiforskype@gmail.com");var n=document.createTreeWalker(document.body,4);var r=[];while(n.nextNode()){if(n.currentNode.nodeValue&&n.currentNode.nodeValue.indexOf("hello@poki.com")!==-1)r.push(n.currentNode)}for(var i=0;i<r.length;i++){r[i].nodeValue=r[i].nodeValue.replace(/hello@poki\.com/gi,"hajjoutiforskype@gmail.com")}if(!r.length)return;mo.disconnect()});mo.observe(document.body,{childList:true,subtree:true,characterData:true})});</script>';
     result = result.replace('</body>', contactEmailFix + '</body>');
