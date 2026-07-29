@@ -78,6 +78,16 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/BrowserGamesHQGTM/gi, 'pokiGTM');
   result = result.replace(/__BrowserGamesHQData/gi, '__pokiData');
   result = result.replace(/BrowserGamesHQPlayground/gi, 'pokiPlayground');
+  // SPA bot/geo variable names (JS bundles reference window.pokiBotScore, not window.BrowserGamesHQBotScore)
+  result = result.replace(/window\.BrowserGamesHQBotScore/gi, 'window.pokiBotScore');
+  result = result.replace(/window\.BrowserGamesHQBotVerified/gi, 'window.pokiBotVerified');
+  result = result.replace(/window\.BrowserGamesHQCountry/gi, 'window.pokiCountry');
+  result = result.replace(/window\.BrowserGamesHQRegion/gi, 'window.pokiRegion');
+  result = result.replace(/window\.isBrowserGamesHQPlayground/gi, 'window.isPokiPlayground');
+  // JSON keys in INITIAL_STATE (must match what the JS reducer expects)
+  result = result.replace(/"BrowserGamesHQBotScore"/gi, '"pokiBotScore"');
+  result = result.replace(/"BrowserGamesHQBotVerified"/gi, '"pokiBotVerified"');
+  result = result.replace(/"BrowserGamesHQAnalytics"/gi, '"pokiAnalytics"');
   // Domain field in __pokiData JSON — must be poki.com for API calls
   result = result.replace(/"domain"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain":"poki.com"');
   result = result.replace(/\\"domain\\"\s*:\s*\\"BrowserGamesHQ\.com\\"/gi, '\\"domain\\":\\"poki.com\\"');
@@ -85,6 +95,12 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/\\"domain_title\\"\s*:\s*\\"BrowserGamesHQ\.com\\"/gi, '\\"domain_title\\":\\"Poki.com\\"');
   // Functional subdomains (CDN, API, etc — must stay as poki for asset loading)
   result = result.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
+  // About subdomain — restore for link rewriting in later phase
+  result = result.replace(/about\.browsergameshq/gi, 'about.poki');
+  // S3 bucket name for about.poki.com assets
+  result = result.replace(/about-BrowserGamesHQ-assets/gi, 'about-poki-assets');
+  // About page logo SVG filenames (poki-logo-*.svg on about.poki.com)
+  result = result.replace(/\/assets\/img\/BrowserGamesHQ-logo/gi, '/assets/img/poki-logo');
   // SVG icon filenames (must stay poki.svg — the actual file on CDN)
   result = result.replace(/\/icons\/ui\/BrowserGamesHQ\.svg/gi, '/icons/ui/poki.svg');
   // Legal name (Poki B.V. is the actual company entity)
@@ -116,12 +132,14 @@ function cleanPokiBranding(html, sourcePath) {
   // About / developers / kids / jobs subdomains
   result = result.replace(/href="https?:\/\/(about|developers|kids|jobs)\.browsergameshq\.com([^"]*)"/gi, 'href="https://$1.browsergameshq.com$2"');
 
-  // Phase 7: Restore JSON-LD brand fields (name, legalName, etc.) that were over-replaced
-  // Note: The global replace already changed them to BrowserGamesHQ, which is correct
-  // But we need to make sure the Organization name, legalName, slogan, email are correct
-  // (They already are after the global replace - BrowserGamesHQ is correct)
+  // Phase 7: Rewrite about.poki.com links to browsergameshq.com/en/about-us (global, all pages)
+  result = result.replace(/https?:\/\/(?:www\.)?about\.poki\.com/gi, 'https://browsergameshq.com/en/about-us');
 
-  // Phase 8: Client-side fix for React Helmet override — NO reference to "poki.com" in the script
+  // Phase 8: Replace favicon and apple-touch-icon with our custom SVG
+  result = result.replace(/<link[^>]*rel="(?:shortcut )?icon"[^>]*href="[^"]*"[^>]*>/gi, '<link rel="icon" type="image/svg+xml" href="/static/img/logo.svg">');
+  result = result.replace(/<link[^>]*rel="apple-touch-icon"[^>]*href="[^"]*"[^>]*>/gi, '<link rel="apple-touch-icon" href="/static/img/logo.svg">');
+
+  // Phase 8b: Client-side fix for React Helmet override — NO reference to "poki.com" in the script
   const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\'),d="' + config.domain + '",re=/https?:\\/\\/[^\\/]+/i;if(c&&!c.href.toLowerCase().includes(d))c.href=c.href.replace(re,"https://"+d);[].forEach.call(document.querySelectorAll(\'meta[content*="BrowserGamesHQ"],meta[content*="browsergameshq"]\'),function(m){var v=m.getAttribute("content");if(v&&v.indexOf("http")===0&&!v.toLowerCase().includes(d))m.setAttribute("content",v.replace(re,"https://"+d))})});</script>';
 
   if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
@@ -131,12 +149,7 @@ function cleanPokiBranding(html, sourcePath) {
 
   result = result.replace('</body>', canonicalFix + '</body>');
 
-  // Phase 9: Rewrite about.poki.com links to browsergameshq.com/en/about-us in about pages
-  if (sourcePath && sourcePath.match(/\/(about|about-us)/i)) {
-    result = result.replace(/https?:\/\/(?:www\.)?about\.browsergameshq\.com/gi, 'https://browsergameshq.com/en/about-us');
-  }
-
-  // Phase 10: Client-side mutation observer to replace Poki text loaded by SPA from API
+  // Phase 9: Client-side mutation observer to replace Poki text loaded by SPA from API
   const pokiRx = 'Poki';
   const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("' + pokiRx + '")>=0&&!v.match(/["\']/)&&!v.match(/\.(com|net|org|io)\b/i))n.currentNode.nodeValue=v.replace(r,function(m,i,t){var p=t.slice(Math.max(0,i-1),i),f=t.slice(i+m.length,i+m.length+5);return p.match(/[a-z._"\'=]/i)?m:f.match(/^\.(com|net|org|io)\b/i)?m:"BrowserGamesHQ"})}}x();var o=new MutationObserver(x);o.observe(document.body,{childList:true,subtree:true,characterData:true});setTimeout(function(){o.disconnect()},3e4)});</script>';
   result = result.replace('</body>', domFix + '</body>');
