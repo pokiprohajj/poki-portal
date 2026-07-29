@@ -131,7 +131,12 @@ function cleanPokiBranding(html, sourcePath) {
 
   result = result.replace('</body>', canonicalFix + '</body>');
 
-  // Phase 9: Client-side mutation observer to replace Poki text loaded by SPA from API
+  // Phase 9: Rewrite about.poki.com links to browsergameshq.com/en/about-us in about pages
+  if (sourcePath && sourcePath.match(/\/(about|about-us)/i)) {
+    result = result.replace(/https?:\/\/(?:www\.)?about\.browsergameshq\.com/gi, 'https://browsergameshq.com/en/about-us');
+  }
+
+  // Phase 10: Client-side mutation observer to replace Poki text loaded by SPA from API
   const pokiRx = 'Poki';
   const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("' + pokiRx + '")>=0&&!v.match(/["\']/)&&!v.match(/\.(com|net|org|io)\b/i))n.currentNode.nodeValue=v.replace(r,function(m,i,t){var p=t.slice(Math.max(0,i-1),i),f=t.slice(i+m.length,i+m.length+5);return p.match(/[a-z._"\'=]/i)?m:f.match(/^\.(com|net|org|io)\b/i)?m:"BrowserGamesHQ"})}}x();var o=new MutationObserver(x);o.observe(document.body,{childList:true,subtree:true,characterData:true});setTimeout(function(){o.disconnect()},3e4)});</script>';
   result = result.replace('</body>', domFix + '</body>');
@@ -284,6 +289,20 @@ router.get('/sitemap.xml', async function (req, res) {
     res.send(xml);
   } catch (e) {
     res.status(502).type('text/plain').send('Sitemap unavailable');
+  }
+});
+
+// Proxy about.poki.com static assets (CSS, JS, images) for /en/about-us
+router.get(['/assets/*', '/g/*'], async (req, res) => {
+  try {
+    const url = 'https://about.poki.com' + req.path + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+    const response = await fetch(url, { headers: { 'User-Agent': getRandomUA() }, timeout: 15000 });
+    const buffer = await response.buffer();
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    res.set({ 'Content-Type': contentType, 'Cache-Control': 'public, max-age=86400' });
+    res.send(buffer);
+  } catch (e) {
+    res.status(502).end();
   }
 });
 

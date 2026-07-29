@@ -476,18 +476,16 @@ function replaceGamePageAds($, sourcePath) {
 }
 
 function replacePokiLogo($) {
-  var logoUrl = '/static/img/logo.png';
+  var logoUrl = '/static/img/logo.svg';
   // 1. Set customLogo in INITIAL_STATE so the Logo React component uses our image
   $('script').each(function () {
     var text = $(this).html() || '';
     if (text.indexOf('INITIAL_STATE') === -1) return;
-    // Replace "customLogo":null with our logo URL (no inline style, so CSS handles responsive sizing)
     text = text.replace('"customLogo":null', '"customLogo":{"url":"' + logoUrl + '"}');
-    // Also update "customFavicon":null
     text = text.replace('"customFavicon":null', '"customFavicon":{"url":"' + logoUrl + '"}');
     $(this).html(text);
   });
-  // 2. Update visible branding on parent elements (not reverted by React since they're attributes)
+  // 2. Update visible branding on parent elements
   $('span[role="img"]').each(function () {
     var style = $(this).attr('style') || '';
     if (style.indexOf('poki.svg') === -1 && style.indexOf('BrowserGamesHQ.svg') === -1) return;
@@ -501,18 +499,18 @@ function replacePokiLogo($) {
       parentButton.attr('aria-label', 'BrowserGamesHQ');
     }
   });
-  // 3. Fix alt text on the logo img (server-rendered HTML)
-  $('img[src*="/static/img/logo.png"]').each(function () {
+  // 3. Fix alt text on the logo img
+  $('img[src*="/static/img/logo.svg"]').each(function () {
     if ($(this).attr('alt') && $(this).attr('alt').indexOf('Poki') !== -1) {
       $(this).attr('alt', 'BrowserGamesHQ');
     }
   });
-  // 4. Add responsive CSS for the custom logo (targets by unique image URL since React adds no class)
+  // 4. Add responsive CSS for the custom logo
   if ($('head').length && !$('#portal-logo-style').length) {
     $('head').append('<style id="portal-logo-style">' +
-      'img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block}' +
-      '@media(max-width:1024px){img[src*="/static/img/logo.png"]{height:28px}}' +
-      '@media(max-width:640px){img[src*="/static/img/logo.png"]{height:24px}}' +
+      'img[src*="/static/img/logo.svg"],img[src*="/static/img/logo.png"]{height:32px;width:auto;object-fit:contain;vertical-align:middle;display:inline-block}' +
+      '@media(max-width:1024px){img[src*="/static/img/logo.svg"],img[src*="/static/img/logo.png"]{height:28px}}' +
+      '@media(max-width:640px){img[src*="/static/img/logo.svg"],img[src*="/static/img/logo.png"]{height:24px}}' +
       '</style>');
   }
 }
