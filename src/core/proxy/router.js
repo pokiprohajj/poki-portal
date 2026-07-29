@@ -68,13 +68,24 @@ function cleanPokiBranding(html, sourcePath) {
       .replace(/"legalName":"[^"]*"/g, '"legalName":"BrowserGamesHQ"')
       .replace(/"slogan":"[^"]*"/g, '"slogan":"Let the world play"')
       .replace(/"email":"[^"]*"/g, '"email":"hajjoutiforskype@gmail.com"')
-      // WebSite/WebPage name/description that contain "Poki"
+      // WebSite/WebPage name/description/alternateName that contain "Poki"
       .replace(/"name":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"name":"' + b + 'BrowserGamesHQ' + a + '"')
+      .replace(/"alternateName":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"alternateName":"' + b + 'BrowserGamesHQ' + a + '"')
       .replace(/"description":"([^"]*)Poki([^"]*)"/gi, (_, b, a) => '"description":"' + b + 'BrowserGamesHQ' + a + '"')
-      // SameAs: replace social media handles case-insensitively + our domain
+      // SameAs: replace entire social URLs with correct handles
       .replace(/"sameAs":\[([^\]]*?poki[^\]]*)\]/gi, (sa) => sa
-        .replace(/"(https?:\/\/(?:www\.)?(?:facebook|twitter|youtube|tiktok|instagram|linkedin)\.com[^"]*?)poki([^"]*?)"/gi, '"$1BrowserGamesHQ$2"')
-        .replace(/"https?:\/\/([a-z0-9-]+\.)?poki\.com([^"]*?)"/gi, (u) => u.replace(/poki\.com/i, 'browsergameshq.com'))
+        .replace(/"https?:\/\/(?:www\.)?facebook\.com\/poki[^"]*"/gi, '"https://www.facebook.com/BrowserGamesHQ"')
+        .replace(/"https?:\/\/(?:www\.)?twitter\.com\/poki[^"]*"/gi, '"https://twitter.com/BrowserGamesHQ"')
+        .replace(/"https?:\/\/(?:www\.)?youtube\.com\/(?:c\/|@)?poki[^"]*"/gi, '"https://www.youtube.com/@BrowserGamesHQ"')
+        .replace(/"https?:\/\/(?:www\.)?tiktok\.com\/@poki[^"]*"/gi, '"https://www.tiktok.com/@browsergameshq"')
+        .replace(/"https?:\/\/(?:www\.)?instagram\.com\/poki[^"]*"/gi, '"https://www.instagram.com/browsergameshq"')
+        .replace(/"https?:\/\/linkedin\.com\/company\/poki[^"]*"/gi, '"https://linkedin.com/company/BrowserGamesHQ"')
+        .replace(/"https?:\/\/(?:www\.)?about\.poki\.com[^"]*"/gi, '"https://about.browsergameshq.com"')
+        .replace(/"https?:\/\/(?:www\.)?poki\.com\/blog[^"]*"/gi, '"https://browsergameshq.com/blog"')
+        .replace(/"https?:\/\/(?:www\.)?similarweb\.com[^"]*"/gi, (u) => u.replace(/poki\.com/gi, 'browsergameshq.com'))
+        .replace(/"https?:\/\/(?:www\.)?trustpilot\.com[^"]*"/gi, (u) => u.replace(/poki\.com/gi, 'browsergameshq.com'))
+        .replace(/"https?:\/\/(?:www\.)?crunchbase\.com[^"]*"/gi, (u) => u.replace(/poki/gi, 'BrowserGamesHQ'))
+        .replace(/"https?:\/\/play\.google\.com[^"]*"/gi, (u) => u.replace(/poki/gi, 'BrowserGamesHQ'))
       );
   });
 
@@ -87,8 +98,13 @@ function cleanPokiBranding(html, sourcePath) {
       .replace(/>[^<]*Poki[^<]*</gi, (match) => match.replace(/Poki/gi, 'BrowserGamesHQ'))
       // Replace Poki in title, aria-label, alt attributes
       .replace(/(title|aria-label|alt)="(.*?)Poki(.*?)"/gi, (m, attr, b, a) => attr + '="' + b + 'BrowserGamesHQ' + a + '"')
-      // Replace Poki in social link hrefs (case-insensitive)
-      .replace(/(href="https?:\/\/(?:www\.)?(?:facebook|twitter|youtube|tiktok|instagram|linkedin)\.com[^"]*?)poki([^"]*")/gi, '$1BrowserGamesHQ$2')
+      // Replace Poki social URLs with correct handles
+      .replace(/href="https?:\/\/(?:www\.)?facebook\.com\/poki[^"]*"/gi, 'href="https://www.facebook.com/BrowserGamesHQ"')
+      .replace(/href="https?:\/\/(?:www\.)?twitter\.com\/poki[^"]*"/gi, 'href="https://twitter.com/BrowserGamesHQ"')
+      .replace(/href="https?:\/\/(?:www\.)?youtube\.com\/(?:c\/|@)?poki[^"]*"/gi, 'href="https://www.youtube.com/@BrowserGamesHQ"')
+      .replace(/href="https?:\/\/(?:www\.)?tiktok\.com\/@poki[^"]*"/gi, 'href="https://www.tiktok.com/@browsergameshq"')
+      .replace(/href="https?:\/\/(?:www\.)?instagram\.com\/poki[^"]*"/gi, 'href="https://www.instagram.com/browsergameshq"')
+      .replace(/href="https?:\/\/linkedin\.com\/company\/poki[^"]*"/gi, 'href="https://linkedin.com/company/BrowserGamesHQ"')
       // Replace poki.com in canonical / og:url
       .replace(/(<link[^>]*rel="canonical"[^>]*href="[^"]*?)poki\.com([^"]*")/gi, '$1' + config.domain + '$2')
       .replace(/(<meta[^>]*property="og:url"[^>]*content="[^"]*?)poki\.com([^"]*")/gi, '$1' + config.domain + '$2')
