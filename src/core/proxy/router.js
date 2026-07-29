@@ -135,16 +135,9 @@ function cleanPokiBranding(html, sourcePath) {
   // Phase 7: Rewrite about.poki.com links to browsergameshq.com/en/about-us (global, all pages)
   result = result.replace(/https?:\/\/(?:www\.)?about\.poki\.com/gi, 'https://browsergameshq.com/en/about-us');
 
-  // Phase 8: Replace navigation logo span with img tag
-  result = result.replace(/<span[^>]*role="img"[^>]*aria-label="[^"]*"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="display:inline-block;height:22px;width:auto;max-width:80px;object-fit:contain;vertical-align:middle">');
-
-  // Phase 8b: Contact page — fetch homepage SSR (full content) + replaceState + contact card
-  if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
-    result = result.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
-    result = result.replace(/<script[^>]*>/i, '<script>window.history.replaceState({},"","/en");</script><script>');
-    const contactCard = '<div style="max-width:800px;margin:0 auto 60px;padding:40px;background:#1a1a2e;border-radius:16px;color:#fff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif"><h2 style="font-size:24px;margin:0 0 8px;color:#fff">Contact BrowserGamesHQ</h2><p style="font-size:15px;color:#a0a0c0;margin:0 0 20px;line-height:1.5">Reach out via email for support or inquiries.</p><a href="mailto:hajjoutiforskype@gmail.com" style="display:inline-block;padding:12px 24px;background:#6c5ce7;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Email Us</a><a href="/en" style="display:inline-block;margin-left:12px;padding:12px 24px;background:#2d2d44;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Browse Games</a></div>';
-    result = result.replace('</body>', contactCard + '</body>');
-  }
+  // Phase 8: Replace --icon-src URL with our logo + CSS override for wide logo fit
+  result = result.replace(/--icon-src:\s*url\([^)]*poki\.svg[^)]*\);/gi, "--icon-src: url('/static/img/logo.svg');background-size:contain;background-repeat:no-repeat;background-position:50% 50%");
+  result = result.replace('</head>', '<style>span[role="img"][aria-label="BrowserGamesHQ"]{width:auto!important;min-width:80px;max-width:120px;height:28px!important}</style></head>');
 
   // Phase 8c: Client-side fix for React Helmet override — NO reference to "poki.com" in the script
   const canonicalFix = '<script>document.addEventListener("DOMContentLoaded",function(){var c=document.querySelector(\'link[rel="canonical"]\'),d="' + config.domain + '",re=/https?:\\/\\/[^\\/]+/i;if(c&&!c.href.toLowerCase().includes(d))c.href=c.href.replace(re,"https://"+d);[].forEach.call(document.querySelectorAll(\'meta[content*="BrowserGamesHQ"],meta[content*="browsergameshq"]\'),function(m){var v=m.getAttribute("content");if(v&&v.indexOf("http")===0&&!v.toLowerCase().includes(d))m.setAttribute("content",v.replace(re,"https://"+d))})});</script>';
@@ -323,6 +316,16 @@ router.get(['/assets/*', '/g/*'], async (req, res) => {
   } catch (e) {
     res.status(502).end();
   }
+});
+
+// Static contact page (bypasses SPA which fails on our domain for contact routes)
+function generateContactPage() {
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Contact BrowserGamesHQ</title><meta name="description" content="Contact BrowserGamesHQ for support, partnerships, and inquiries"><link rel="canonical" href="https://browsergameshq.com/en/c/contact"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;background:#0f0f23;color:#fff;min-height:100vh}.nav{display:flex;align-items:center;padding:12px 24px;background:#1a1a2e;border-bottom:1px solid #2d2d44}.nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-size:18px;font-weight:700}.nav img{height:28px;width:auto}.nav span{font-size:15px;color:#a0a0c0}.container{max-width:800px;margin:80px auto;padding:0 24px}.card{background:#1a1a2e;border-radius:16px;padding:48px;text-align:center}.card h1{font-size:32px;margin-bottom:12px}.card p{font-size:16px;color:#a0a0c0;line-height:1.6;margin-bottom:32px}.btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;transition:background .2s}.btn-primary{background:#6c5ce7;color:#fff}.btn-primary:hover{background:#5a4bd1}.btn-secondary{background:#2d2d44;color:#fff}.btn-secondary:hover{background:#3d3d5c}.footer{margin-top:80px;padding:24px;text-align:center;border-top:1px solid #2d2d44;color:#666;font-size:13px}.footer a{color:#6c5ce7;text-decoration:none}</style></head><body><div class="nav"><a href="/en"><img src="/static/img/logo.svg" alt="BrowserGamesHQ"><span>BrowserGamesHQ</span></a></div><div class="container"><div class="card"><h1>Contact BrowserGamesHQ</h1><p>We\'d love to hear from you! Reach out via email for support, partnerships, or general inquiries. We typically respond within 24 hours.</p><div class="btns"><a href="mailto:hajjoutiforskype@gmail.com" class="btn btn-primary">Email Us</a><a href="/en/about-us" class="btn btn-secondary">About BrowserGamesHQ</a></div></div><div class="footer"><p>&copy; 2024 BrowserGamesHQ. All rights reserved. | <a href="/en">Home</a> | <a href="/en/about-us">About</a></p></div></div></body></html>';
+}
+
+router.get(['/en/c/contact', '/c/contact', '/contact'], function (req, res) {
+  res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=600', 'X-Robots-Tag': 'index, follow' });
+  res.send(generateContactPage());
 });
 
 router.get('*', handlePageRequest);
