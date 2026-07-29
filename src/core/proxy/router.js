@@ -140,13 +140,12 @@ function cleanPokiBranding(html, sourcePath) {
 
   result = result.replace('</body>', canonicalFix + '</body>');
 
-  // Phase 9: Client-side mutation observer to replace Poki text loaded by SPA from API
-  const pokiRx = 'Poki';
-  const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("' + pokiRx + '")>=0&&!v.match(/["\']/)&&!v.match(/\.(com|net|org|io)\b/i))n.currentNode.nodeValue=v.replace(r,function(m,i,t){var p=t.slice(Math.max(0,i-1),i),f=t.slice(i+m.length,i+m.length+5);return p.match(/[a-z._"\'=]/i)?m:f.match(/^\.(com|net|org|io)\b/i)?m:"BrowserGamesHQ"})}}x();var o=new MutationObserver(x);o.observe(document.body,{childList:true,subtree:true,characterData:true});setTimeout(function(){o.disconnect()},3e4)});</script>';
+  // Phase 9: Poll for Poki text loaded by SPA from API (light polling, no mutation observer)
+  const domFix = '<script>document.addEventListener("DOMContentLoaded",function(){var r=/Poki/gi;function x(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;var v=n.currentNode.nodeValue||"";if(v.indexOf("Poki")>=0&&!v.match(/["\']/)&&!v.match(/\.(com|net|org|io)\b/i))n.currentNode.nodeValue=v.replace(r,function(m,i,t){var p=t.slice(Math.max(0,i-1),i),f=t.slice(i+m.length,i+m.length+5);return p.match(/[a-z._"\'=]/i)?m:f.match(/^\.(com|net|org|io)\b/i)?m:"BrowserGamesHQ"})}}x();var t=setInterval(x,2000);setTimeout(function(){clearInterval(t)},10000)});</script>';
   result = result.replace('</body>', domFix + '</body>');
 
-  // Phase 9b: Fix email domains at runtime (@poki.com → @poki.pro) for SPA-loaded content
-  const emailFix = '<script>document.addEventListener("DOMContentLoaded",function(){var er=/(hello|press)(@)poki\\.com/gi;function ef(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;n.currentNode.nodeValue=(n.currentNode.nodeValue||"").replace(er,"$1$2poki.pro")}}ef();var eo=new MutationObserver(ef);eo.observe(document.body,{childList:true,subtree:true,characterData:true});setTimeout(function(){eo.disconnect()},3e4)});</script>';
+  // Phase 9b: Fix email domains at runtime (@poki.com → @poki.pro) — light polling
+  const emailFix = '<script>document.addEventListener("DOMContentLoaded",function(){var er=/(hello|press)(@)poki\\.com/gi;function ef(){var n=document.createTreeWalker(document.body,4);while(n.nextNode()){var e=n.currentNode.parentNode;if(e&&(e.nodeName==="SCRIPT"||e.nodeName==="STYLE"||e.nodeName==="TEXTAREA"))continue;n.currentNode.nodeValue=(n.currentNode.nodeValue||"").replace(er,"$1$2poki.pro")}}ef();var t=setInterval(ef,2000);setTimeout(function(){clearInterval(t)},10000)});</script>';
   result = result.replace('</body>', emailFix + '</body>');
 
   return result;
