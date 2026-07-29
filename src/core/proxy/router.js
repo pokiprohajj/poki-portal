@@ -135,15 +135,14 @@ function cleanPokiBranding(html, sourcePath) {
   // Phase 7: Rewrite about.poki.com links to browsergameshq.com/en/about-us (global, all pages)
   result = result.replace(/https?:\/\/(?:www\.)?about\.poki\.com/gi, 'https://browsergameshq.com/en/about-us');
 
-  // Phase 8: Replace navigation logo span with img tag using our custom SVG
-  result = result.replace(/<span[^>]*role="img"[^>]*aria-label="BrowserGamesHQ"[^>]*style="--icon-src:[^"]*"[^>]*><\/span>/gi, '<img src="/static/img/logo.svg" alt="BrowserGamesHQ" style="max-height:28px;max-width:100px;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:inline-block">');
+  // Phase 8: Replace navigation logo icon URL and fix sizing
+  result = result.replace(/--icon-src:\s*url\([^)]*poki\.svg[^)]*\);/gi, "--icon-src: url('/static/img/logo.svg');background-size:contain;background-repeat:no-repeat;background-position:center");
 
-  // Phase 8b: Force contact page to render homepage layout (SPA on our domain fails for contact route)
+  // Phase 8b: Force contact page to render homepage (SPA fails on our domain for /en/c/contact route)
   if (sourcePath && sourcePath.match(/\/c\/contact/i)) {
-    result = result.replace(/"pathname"\s*:\s*"[^"]*"/, '"pathname":"/en"');
-    result = result.replace(/"page"\s*:\s*\{[^}]*\}/, '"page":{}');
+    result = result.replace(/<script[^>]*>/i, '<script>window.history.replaceState({},"","/en");</script><script>');
     result = result.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
-    const contactCard = '<div style="max-width:800px;margin:0 auto 60px;padding:40px;background:#1a1a2e;border-radius:16px;color:#fff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif"><h2 style="font-size:24px;margin:0 0 8px;color:#fff">Contact BrowserGamesHQ</h2><p style="font-size:15px;color:#a0a0c0;margin:0 0 20px;line-height:1.5">Reach out via email for support or inquiries.</p><a href="mailto:hajjoutiforskype@gmail.com" style="display:inline-block;padding:12px 24px;background:#6c5ce7;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Email Us</a></div>';
+    const contactCard = '<div style="max-width:800px;margin:0 auto 60px;padding:40px;background:#1a1a2e;border-radius:16px;color:#fff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif"><h2 style="font-size:24px;margin:0 0 8px;color:#fff">Contact BrowserGamesHQ</h2><p style="font-size:15px;color:#a0a0c0;margin:0 0 20px;line-height:1.5">Reach out via email for support or inquiries.</p><a href="mailto:hajjoutiforskype@gmail.com" style="display:inline-block;padding:12px 24px;background:#6c5ce7;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Email Us</a><a href="/en" style="display:inline-block;margin-left:12px;padding:12px 24px;background:#2d2d44;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Browse Games</a></div>';
     result = result.replace('</body>', contactCard + '</body>');
   }
 
