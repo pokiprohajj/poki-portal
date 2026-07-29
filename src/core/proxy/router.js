@@ -95,6 +95,8 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/\\"domain_title\\"\s*:\s*\\"BrowserGamesHQ\.com\\"/gi, '\\"domain_title\\":\\"Poki.com\\"');
   // Functional subdomains (CDN, API, etc — must stay as poki for asset loading)
   result = result.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
+  // Also restore stand-alone games.browsergameshq.com URLs (sometimes the dot before subdomain is missing due to encoding)
+  result = result.replace(/games\.browsergameshq\.com/gi, 'games.poki.com');
   // About subdomain — restore for link rewriting in later phase
   result = result.replace(/about\.browsergameshq/gi, 'about.poki');
   // S3 bucket name for about.poki.com assets
@@ -120,6 +122,7 @@ function cleanPokiBranding(html, sourcePath) {
     block = block.replace(/Poki/gi, 'BrowserGamesHQ');
     block = block.replace(/"domain"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain":"poki.com"');
     block = block.replace(/"domain_title"\s*:\s*"BrowserGamesHQ\.com"/gi, '"domain_title":"Poki.com"');
+    block = block.replace(/(games|api|a|ads|gdn|devs-api|poki-auth|user-vault)\.browsergameshq/gi, '$1.poki');
     return block;
   });
 
@@ -328,6 +331,21 @@ router.get(['/assets/*', '/g/*'], async (req, res) => {
   }
 });
 
-router.get('*', handlePageRequest);
+router.get('*', function gamesSubdomainRoute(req, res, next) {
+  const host = req.hostname || '';
+  // If the request came from games.browsergameshq.com subdomain (from Phase 3 miss),
+  // rewrite to /game-proxy so the game embed loads correctly
+  if (host.match(/^games\./i)) {
+    req.url = '/game-proxy' + req.path + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+    return require('./game-proxy')(req, res, next);
+  }
+  // Catch other unhandled browsergameshq subdomains (api, a, ads, etc.) and proxy via media proxy
+  if (host.match(/\.browsergameshq\.com$/i) && !host.match(/^(games|about|developers|kids|jobs)\./i)) {
+    const targetUrl = 'https://' + host.replace(/\.browsergameshq\.com$/i, '.poki.com') + req.path;
+    req.url = '/proxy-media/?url=' + encodeURIComponent(targetUrl);
+    return require('./media')(req, res, next);
+  }
+  handlePageRequest(req, res);
+});
 
 module.exports = router;

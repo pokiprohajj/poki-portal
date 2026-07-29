@@ -232,6 +232,10 @@ function rewriteHtml(html, sourcePath) {
       'var mr=mirrorUrl(v);if(mr)return mr;' +
       'if(v.indexOf(gp)!==-1){return pp+v.replace(/https?:\\/\\/games\\.poki\\.com/,"")}' +
       'for(var i=0;i<sdp.length;i++){if(v.indexOf(sdp[i])!==-1){return ssp+v.replace(/https?:\\/\\//,"").replace(/^\\/\\//,"")}}' +
+      // If Phase 3 missed restoring games.BrowserGamesHQ.com back to games.poki.com, fix it client-side
+      'if(v.indexOf("games.browsergameshq.com")!==-1||v.indexOf("games.BrowserGamesHQ.com")!==-1){return pp+v.replace(/^https?:\\/\\/games\\.(?:BrowserGamesHQ|browsergameshq)\\.com/,"")}' +
+      // Catch-all for other browsergameshq subdomains not restored by Phase 3
+      'if(v.match(/https?:\\/\\/[^\\/]+\\.browsergameshq\\.com/i)){return v.replace(/https?:\\/\\/[^\\/]+\\.browsergameshq\\.com/i,window.location.origin)}' +
       'if(v.indexOf("poki.com")!==-1||v.indexOf("poki.io")!==-1||v.indexOf("poki-cdn.com")!==-1){return v.replace(/https?:\\/\\/(?:[^\\/]+\\.)*poki\\.(com|io|cdn\\.com)/,window.location.origin)}' +
       'return v}' +
       'var d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,"src");' +
