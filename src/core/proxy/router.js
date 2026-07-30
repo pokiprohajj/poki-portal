@@ -133,6 +133,8 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/href="https?:\/\/(?:www\.)?twitter\.com\/browsergameshq[^"]*"/gi, 'href="https://twitter.com/BrowserGamesHQ"');
   result = result.replace(/href="https?:\/\/(?:www\.)?youtube\.com\/(?:c\/|@)?browsergameshq[^"]*"/gi, 'href="https://www.youtube.com/@BrowserGamesHQ"');
   result = result.replace(/href="https?:\/\/(?:www\.)?tiktok\.com\/@browsergameshq[^"]*"/gi, 'href="https://www.tiktok.com/@browsergameshq"');
+  // Catch TikTok URLs Phase 3 restored to poki_games
+  result = result.replace(/href="https?:\/\/(?:www\.)?tiktok\.com\/@poki_?games[^"]*"/gi, 'href="https://www.tiktok.com/@BrowserGamesHQ"');
   result = result.replace(/href="https?:\/\/(?:www\.)?instagram\.com\/browsergameshq[^"]*"/gi, 'href="https://www.instagram.com/browsergameshq"');
   result = result.replace(/href="https?:\/\/linkedin\.com\/company\/browsergameshq[^"]*"/gi, 'href="https://linkedin.com/company/BrowserGamesHQ"');
   // About / developers / kids / jobs subdomains

@@ -396,8 +396,8 @@ function rewriteOpenGraph($, sourceDomain, targetDomain) {
     if (content.includes(sourceDomain)) {
       $(this).attr('content', content.replace(new RegExp(escapedSource, 'g'), targetDomain));
     }
-    if (content.includes('Poki') || content.includes('poki')) {
-      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
+    if ((content.includes('Poki') || content.includes('poki')) && !content.includes('poki-cdn')) {
+      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ'));
     }
   });
   if (!$('meta[property="og:image"]').length) {
@@ -407,13 +407,13 @@ function rewriteOpenGraph($, sourceDomain, targetDomain) {
 
 function rewriteTwitterCards($, sourceDomain, targetDomain) {
   const escapedSource = sourceDomain.replace('.', '\\.');
-  $('meta[name^="twitter:"]').each(function () {
+  $('meta[name^="twitter:"], meta[property^="twitter:"]').each(function () {
     const content = $(this).attr('content') || '';
     if (content.includes(sourceDomain)) {
       $(this).attr('content', content.replace(new RegExp(escapedSource, 'g'), targetDomain));
     }
-    if (content.includes('Poki') || content.includes('poki')) {
-      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
+    if ((content.includes('Poki') || content.includes('poki')) && !content.includes('poki-cdn')) {
+      $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ'));
     }
   });
 }
