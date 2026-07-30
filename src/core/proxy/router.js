@@ -58,9 +58,13 @@ async function fetchSource(path, visitorUA, sourceOrigin) {
 }
 
 function cleanPokiBranding(html, sourcePath) {
-  // Phase 1: Replace ALL "Poki" with "BrowserGamesHQ" throughout the entire HTML
-  // (including script tags — Phase 3 restores functional references below)
-  var result = html.replace(/Poki/gi, 'BrowserGamesHQ');
+  // Phase 1: Replace "Poki" with "BrowserGamesHQ" OUTSIDE <script> tags only
+  // (Preserves INITIAL_STATE, JS identifiers, inline scripts for React hydration)
+  var parts = html.split(/(<script[\s>][\s\S]*?<\/script>)/gi);
+  for (var i = 0; i < parts.length; i += 2) {
+    parts[i] = parts[i].replace(/Poki/gi, 'BrowserGamesHQ');
+  }
+  var result = parts.join('');
 
   // Phase 3: Restore ONLY functional references that the Poki SPA needs to work
   // CDN domain (must stay as poki-cdn for assets to load)
@@ -77,7 +81,7 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace(/window\.BrowserGamesHQBotVerified/gi, 'window.pokiBotVerified');
   result = result.replace(/window\.BrowserGamesHQCountry/gi, 'window.pokiCountry');
   result = result.replace(/window\.BrowserGamesHQRegion/gi, 'window.pokiRegion');
-  result = result.replace(/window\.isBrowserGamesHQPlayground/gi, 'window.isPokiPlayground');
+  result = result.replace(/window\.isBrowserGamesHQPlayground/gi, 'window.ispokiPlayground');
   // JSON keys in INITIAL_STATE (must match what the JS reducer expects)
   result = result.replace(/"BrowserGamesHQBotScore"/gi, '"pokiBotScore"');
   result = result.replace(/"BrowserGamesHQBotVerified"/gi, '"pokiBotVerified"');
@@ -142,8 +146,8 @@ function cleanPokiBranding(html, sourcePath) {
   result = result.replace('</body>', canonicalFix + '</body>');
 
   // Phase 9: Client-side branding observer — replaces "Poki" with "BrowserGamesHQ" in
-  // visible text nodes + display attributes. MutationObserver catches dynamically loaded
-  // content from React hydration and SPA navigation.
+  // visible text nodes + display attributes. Uses both MutationObserver (for new DOM nodes)
+  // and polling (for React in-place text updates that childList:true misses).
   const domFix = '<script>(function(){var re=/Poki/gi;function rn(el){if(!el)return;var w=document.createTreeWalker(el,4,null,false);while(w.nextNode()){' +
   'var n=w.currentNode,p=n.parentNode;if(p&&(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))continue;' +
   'if(n.nodeValue&&n.nodeValue.indexOf("Poki")>=0)n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
@@ -157,7 +161,9 @@ function cleanPokiBranding(html, sourcePath) {
   'if(!(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))' +
   'n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}' +
   'else if(n.nodeType===1){rn(n);ra(n)}}}}}).observe(document.body,{childList:true,subtree:true})' +
-  '}catch(e){}})();</script>';
+  '}catch(e){}' +
+  'var pc=0;var pi=setInterval(function(){if(pc++>30){clearInterval(pi);return}rn(document.body);ra(document.body)},500);' +
+  '})();</script>';
   result = result.replace('</body>', domFix + '</body>');
 
   return result;
