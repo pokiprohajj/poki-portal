@@ -194,10 +194,10 @@ app.use((err, req, res, _next) => {
 });
 
 const server = app.listen(config.port, () => {
-  console.log(`[Poki Portal] Running on port ${config.port}`);
-  console.log(`[Poki Portal] Domain: ${config.domain}`);
-  console.log(`[Poki Portal] Source: ${config.sourceDomain}`);
-  console.log(`[Poki Portal] Env: ${config.nodeEnv}`);
+  console.log(`[BrowserGamesHQ] Running on port ${config.port}`);
+  console.log(`[BrowserGamesHQ] Domain: ${config.domain}`);
+  console.log(`[BrowserGamesHQ] Source: ${config.sourceDomain}`);
+  console.log(`[BrowserGamesHQ] Env: ${config.nodeEnv}`);
 });
 
 server.on('error', (err) => {

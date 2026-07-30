@@ -121,6 +121,28 @@ function rewriteHtml(html, sourcePath) {
   rewriteOpenGraph($, sourceDomain, targetDomain);
   rewriteTwitterCards($, sourceDomain, targetDomain);
 
+  // Pass 8a: For homepage (root path), generate unique SEO metadata instead of Poki-derivative text
+  var isHomepage = !sourcePath || sourcePath === '/' || sourcePath === '';
+  if (isHomepage) {
+    var homeTitle = 'Free Online Games - Play 1500+ Browser Games Instantly | BrowserGamesHQ';
+    var homeDesc = 'Play thousands of free online browser games instantly at BrowserGamesHQ. No downloads, no sign-ups. Action, puzzle, racing, sports & more. Updated daily.';
+    $('title').text(homeTitle);
+    $('meta[name="description"]').attr('content', homeDesc);
+    $('meta[property="og:title"]').attr('content', 'Free Online Games | BrowserGamesHQ');
+    $('meta[property="og:description"]').attr('content', homeDesc);
+    $('meta[name="twitter:title"]').attr('content', 'Free Online Games | BrowserGamesHQ');
+    $('meta[name="twitter:description"]').attr('content', homeDesc);
+    if (!$('meta[property="og:image"]').length) {
+      $('head').append('<meta property="og:image" content="https://browsergameshq.com/static/img/og-image.png">');
+    }
+    if (!$('meta[name="twitter:card"]').length) {
+      $('head').append('<meta name="twitter:card" content="summary_large_image">');
+    }
+    if (!$('meta[name="twitter:site"]').length) {
+      $('head').append('<meta name="twitter:site" content="@BrowserGamesHQ">');
+    }
+  }
+
   // Pass 9: Replace Poki logo with custom logo (responsive for all devices)
   replacePokiLogo($);
 
@@ -134,6 +156,14 @@ function rewriteHtml(html, sourcePath) {
     $('head').append('<script>' +
       '!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};ttq.load("D9H295BC77UA1IJTIG30");ttq.page()}(window,document,"ttq");' +
     '</script>');
+  }
+
+  // Pass 9d-double: Ensure Twitter card meta tags exist on all pages
+  if (!$('meta[name="twitter:card"]').length) {
+    $('head').append('<meta name="twitter:card" content="summary_large_image">');
+  }
+  if (!$('meta[name="twitter:site"]').length) {
+    $('head').append('<meta name="twitter:site" content="@BrowserGamesHQ">');
   }
 
   // Pass 9e: Inject GSC verification + title suffix + JSON-LD schema
@@ -173,6 +203,9 @@ function rewriteHtml(html, sourcePath) {
       'name': 'BrowserGamesHQ',
       'url': siteUrl,
       'logo': 'https://i.imgur.com/YRRj3Hw.png',
+      'sameAs': [
+        'https://twitter.com/BrowserGamesHQ',
+      ],
     };
     $('head').append('<script type="application/ld+json">' + JSON.stringify(orgSchema) + '</script>');
     // VideoGame schema — only on game pages
@@ -367,6 +400,9 @@ function rewriteOpenGraph($, sourceDomain, targetDomain) {
       $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ').replace(/poki/gi, 'BrowserGamesHQ'));
     }
   });
+  if (!$('meta[property="og:image"]').length) {
+    $('head').append('<meta property="og:image" content="https://' + targetDomain + '/static/img/og-image.png">');
+  }
 }
 
 function rewriteTwitterCards($, sourceDomain, targetDomain) {

@@ -350,8 +350,10 @@ router.get('/manifest.json', async function (req, res) {
       timeout: 10000,
     });
     let json = await response.text();
-    json = json.replace(/https:\/\/poki\.com/g, 'https://browsergameshq.com');
+    json = json.replace(/https?:\/\/(?:www\.)?poki\.com/g, 'https://browsergameshq.com');
     json = json.replace(/"Poki"/g, '"BrowserGamesHQ"');
+    json = json.replace(/"poki"/g, '"browsergameshq"');
+    json = json.replace(/[Pp]oki(?=[.\s,;:!?"\])}])/g, 'BrowserGamesHQ');
     res.set({
       'Content-Type': 'application/json',
       'Cache-Control': 'public, max-age=86400',
