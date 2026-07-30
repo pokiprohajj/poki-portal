@@ -118,9 +118,7 @@ function cleanPokiBranding(html, sourcePath) {
   // Restore Poki SDK domain allow-list (all Poki TLDs used in SDK validation)
   result = result.replace(/BrowserGamesHQ\.(co\.(il|id|uk)|com\.br|cz|dk|fi|it|jp|nl|pt|be|by|ch|cn|at|no|se|pl|fr|es|de)/gi, 'poki.$1');
 
-  // Phase 4: Fix email addresses — change from browsergameshq.com to poki.pro
-  result = result.replace(/hello\s*@\s*browsergameshq\.com/gi, 'hello@poki.pro');
-  result = result.replace(/press\s*@\s*browsergameshq\.com/gi, 'press@poki.pro');
+  // Phase 4: Email addresses — keep browsergameshq.com domain
   result = result.replace(/hajjoutiforskype\s*@/i, 'hajjoutiforskype@');
 
   // Phase 5: Replace social URLs with our brand handles (case-insensitive)
@@ -145,24 +143,30 @@ function cleanPokiBranding(html, sourcePath) {
 
   result = result.replace('</body>', canonicalFix + '</body>');
 
-  // Phase 9: Client-side branding observer — replaces "Poki" with "BrowserGamesHQ" in
-  // visible text nodes + display attributes. Uses both MutationObserver (for new DOM nodes)
-  // and polling (for React in-place text updates that childList:true misses).
+  // Phase 9: Client-side branding — replaces "Poki" with "BrowserGamesHQ" in text nodes
+  // and display attributes after React hydrates. Uses MutationObserver (childList only to
+  // avoid characterData cycles) + polling fallback + SPA navigation hooks + console.error.
   const domFix = '<script>(function(){var re=/Poki/gi;function rn(el){if(!el)return;var w=document.createTreeWalker(el,4,null,false);while(w.nextNode()){' +
   'var n=w.currentNode,p=n.parentNode;if(p&&(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))continue;' +
-  'if(n.nodeValue&&n.nodeValue.indexOf("Poki")>=0)n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
-  'function ra(el){if(!el)return;["alt","title","placeholder","aria-label","value"].forEach(function(a){' +
-  'var q=el.querySelectorAll("["+a+"*=\\"Poki\\"]");for(var i=0;i<q.length;i++){' +
-  'var v=q[i].getAttribute(a);if(v&&v.indexOf("Poki")>=0)q[i].setAttribute(a,v.replace(re,"BrowserGamesHQ"))}})}' +
-  'rn(document.body);ra(document.body);' +
-  'try{new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var ns=ms[i].addedNodes;' +
-  'for(var j=0;j<ns.length;j++){var n=ns[j];' +
-  'if(n.nodeType===3&&n.parentNode){var p=n.parentNode;' +
-  'if(!(p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="TEXTAREA"))' +
-  'n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}' +
-  'else if(n.nodeType===1){rn(n);ra(n)}}}}}).observe(document.body,{childList:true,subtree:true})' +
-  '}catch(e){}' +
-  'var pc=0;var pi=setInterval(function(){if(pc++>30){clearInterval(pi);return}rn(document.body);ra(document.body)},500);' +
+  'if(n.nodeValue&&(n.nodeValue.toLowerCase().indexOf("poki")>=0))n.nodeValue=n.nodeValue.replace(re,"BrowserGamesHQ")}}' +
+  'function ra(el){if(!el)return;["alt","title","placeholder","aria-label","value","href"].forEach(function(a){' +
+  'var q=el.querySelectorAll("["+a+"*=\\"Poki\\" i]");for(var i=0;i<q.length;i++){' +
+  'var v=q[i].getAttribute(a);if(v&&(v.toLowerCase().indexOf("poki")>=0))q[i].setAttribute(a,v.replace(re,"BrowserGamesHQ"))}})}' +
+  'function rs(){var as=document.querySelectorAll("a[href]");for(var i=0;i<as.length;i++){' +
+  'var h=as[i].getAttribute("href");if(!h)continue;' +
+  'h=h.replace(/tiktok\\.com\\/@poki_?games/gi,"tiktok.com/@BrowserGamesHQ");' +
+  'h=h.replace(/instagram\\.com\\/poki__?games/gi,"instagram.com/BrowserGamesHQ");' +
+  'h=h.replace(/youtube\\.com\\/(?:c\\/|@)poki/gi,"youtube.com/@BrowserGamesHQ");' +
+  'h=h.replace(/mailto:hello@poki\\.com/gi,"mailto:hello@browsergameshq.com");' +
+  'as[i].setAttribute("href",h)}}' +
+  'function br(){try{rn(document.body);ra(document.body);rs()}catch(e){}}' +
+  'var pi=setInterval(br,1200);' +
+  'var mo=new MutationObserver(function(){br()});mo.observe(document.body,{childList:true,subtree:true});' +
+  'var _push=history.pushState;history.pushState=function(){_push.apply(this,arguments);br()};' +
+  'var _rep=history.replaceState;history.replaceState=function(){_rep.apply(this,arguments);br()};' +
+  'window.addEventListener("popstate",br);' +
+  'br();' +
+  '["error","warn"].forEach(function(m){var _c=console[m];console[m]=function(){var a=[];for(var i=0;i<arguments.length;i++){a.push(typeof arguments[i]==="string"?arguments[i].replace(re,"BrowserGamesHQ"):arguments[i])}return _c.apply(console,a)}});' +
   '})();</script>';
   result = result.replace('</body>', domFix + '</body>');
 
@@ -193,6 +197,10 @@ async function handlePageRequest(req, res) {
   const sourceOrigin = SUBDOMAIN_SOURCE[host] || ROUTE_SOURCE[reqPath];
 
   const isContactPage = reqPath.match(/\/c\/contact/i);
+  // Redirect bare /c/contact to /en/c/contact — Poki's SPA requires language prefix for correct rendering
+  if (reqPath.match(/^\/c\/contact$/i)) {
+    return res.redirect(301, '/en/c/contact');
+  }
   const sourcePath = reqPath;
 
   const cacheKey = `html:${deviceType}:${reqPath}:${host}`;
@@ -218,6 +226,7 @@ async function handlePageRequest(req, res) {
     if (isContactPage) {
       html = html.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
       html = html.replace(/<\/head>/i, '<meta name="robots" content="index, follow"></head>');
+      html = html.replace('</body>', '<script>document.addEventListener("DOMContentLoaded",function(){var s=document.createElement("section");s.id="contact-content";s.style.cssText="max-width:800px;margin:40px auto;padding:0 24px;text-align:center";var em="hello"+String.fromCharCode(64)+"browsergameshq.com";s.innerHTML="<h1 style=\'font-size:32px;margin-bottom:8px;color:#fff\'>Get in touch</h1><p style=\'font-size:18px;color:#a0a0c0;margin-bottom:8px\'>We\\u2019d love to hear from you</p><p style=\'font-size:26px;color:#6c5ce7;font-weight:700;margin-bottom:40px;cursor:pointer\' onclick=\'location.href=&quot;mailto:&quot;+em\'>"+em+"</p><div style=\'display:flex;gap:12px;justify-content:center;flex-wrap:wrap\'><a href=\'/en/c/faq\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>Need help? Check FAQ</a><a href=\'https://developers.browsergameshq.com\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>For Developers</a><a href=\'https://jobs.browsergameshq.com\' style=\'padding:12px 24px;background:#2d2d44;border-radius:10px;color:#fff;text-decoration:none;font-size:14px\'>Join our team</a></div>";var f=document.querySelector("footer");if(f)f.parentNode.insertBefore(s,f);else document.body.appendChild(s);var r=document.getElementById("app-root")||document.getElementById("root");if(r&&window.MutationObserver){new MutationObserver(function(){if(!document.getElementById("contact-content")){var s2=s.cloneNode(true);var f2=document.querySelector("footer");if(f2)f2.parentNode.insertBefore(s2,f2);else document.body.appendChild(s2)}}).observe(r,{childList:true,subtree:true})}});</script></body>');
     }
 
     html = rewriteHtml(html, reqPath);
