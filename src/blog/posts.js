@@ -1,3 +1,4 @@
+const pokiImport = require('./posts/poki-import');
 const original = require('./posts/original');
 const tips = require('./posts/tips');
 const lists = require('./posts/lists');
@@ -14,6 +15,6 @@ const pillar = require('./posts/pillar');
 const bulk7 = require('./posts/bulk7');
 const bulk7Extra = require('./posts/bulk7-extra');
 
-const all = [].concat(original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5, bulk6, pillar, bulk7, bulk7Extra);
+const all = [].concat(pokiImport, original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5, bulk6, pillar, bulk7, bulk7Extra);
 
 module.exports = all;
