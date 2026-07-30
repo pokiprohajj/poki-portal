@@ -18,19 +18,28 @@ const assetCache = new NodeCache({
 let currentSizeBytes = 0;
 const MAX_SIZE_BYTES = config.cache.maxCacheSizeMb * 1024 * 1024;
 
+function calcSize(value) {
+  if (typeof value === 'string') return Buffer.byteLength(value, 'utf8');
+  if (Buffer.isBuffer(value)) return value.length;
+  if (value && typeof value === 'object') {
+    let total = 0;
+    for (const v of Object.values(value)) total += calcSize(v);
+    return total;
+  }
+  return 0;
+}
+
 function trackSize(key, value, cache) {
   const prev = cache.get(key);
-  if (prev) {
-    currentSizeBytes -= (typeof prev === 'string' ? Buffer.byteLength(prev, 'utf8') : 0);
-  }
-  const size = typeof value === 'string' ? Buffer.byteLength(value, 'utf8') : 0;
+  if (prev) currentSizeBytes -= calcSize(prev);
+  const size = calcSize(value);
   currentSizeBytes += size;
 
   if (currentSizeBytes > MAX_SIZE_BYTES) {
     const keys = cache.keys().slice(0, 50);
     keys.forEach(k => {
       const v = cache.get(k);
-      if (v) currentSizeBytes -= Buffer.byteLength(v, 'utf8');
+      if (v) currentSizeBytes -= calcSize(v);
       cache.del(k);
     });
   }
@@ -51,6 +60,7 @@ module.exports = {
   },
 
   setAsset(key, value, ttl) {
+    trackSize(key, value, assetCache);
     assetCache.set(key, value, ttl || 86400);
   },
 

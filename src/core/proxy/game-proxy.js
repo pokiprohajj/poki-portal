@@ -1,8 +1,10 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const https = require('https');
 const config = require('../../config');
 const cache = require('../cache');
 
+const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 20 });
 const router = express.Router();
 
 const GAME_ORIGIN = 'https://games.poki.com';
@@ -235,6 +237,7 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
 
     const fetchOpts = {
       method: req.method,
+      agent: httpsAgent,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://poki.com/',
@@ -376,6 +379,7 @@ router.all('*', async (req, res) => {
     const url = `${GAME_ORIGIN}${gamePath}`;
     const fetchOpts = {
       method: req.method,
+      agent: httpsAgent,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://poki.com/',

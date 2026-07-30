@@ -1,7 +1,10 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const https = require('https');
 const config = require('../../config');
 const cache = require('../cache');
+
+const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 20 });
 
 const router = express.Router();
 
@@ -72,6 +75,7 @@ router.get('/', async (req, res) => {
 
   try {
     const response = await fetch(decodedUrl, {
+      agent: decodedUrl.startsWith('https') ? httpsAgent : undefined,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': '*/*',

@@ -1,9 +1,14 @@
 const express = require('express');
 const fetch = require('node-fetch');
+const http = require('http');
+const https = require('https');
 const config = require('../../config');
 const cache = require('../cache');
 const { rewriteHtml } = require('../rewriter');
 const { injectAds } = require('../ads/injector');
+
+const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 20 });
+const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 20 });
 
 const router = express.Router();
 
@@ -19,12 +24,14 @@ function normalizeGamePath(path) {
   return path;
 }
 
-async function fetchSource(path, visitorUA, sourceOrigin) {
+async function fetchSource(path, visitorUA, sourceOrigin, fetchOpts) {
   const normalizedPath = (!path || path === '/') ? '/' : normalizeGamePath(path);
   const url = `${sourceOrigin || config.sourceOrigin}${normalizedPath}`;
   const userAgent = visitorUA || getRandomUA();
 
   const response = await fetch(url, {
+    agent: url.startsWith('https') ? httpsAgent : httpAgent,
+    ...(fetchOpts || {}),
     headers: {
       'User-Agent': userAgent,
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -318,6 +325,7 @@ router.get('/ads.txt', function (req, res) {
 router.get('/sitemap.xml', async function (req, res) {
   try {
     const response = await fetch('https://poki.com/sitemap.xml', {
+      agent: httpsAgent,
       headers: { 'User-Agent': getRandomUA() },
       timeout: 15000,
     });
@@ -337,6 +345,7 @@ router.get('/sitemap.xml', async function (req, res) {
 router.get('/manifest.json', async function (req, res) {
   try {
     const response = await fetch('https://poki.com/manifest.json', {
+      agent: httpsAgent,
       headers: { 'User-Agent': getRandomUA() },
       timeout: 10000,
     });
@@ -365,15 +374,15 @@ router.get('/manifest.json', async function (req, res) {
   }
 });
 
-// Proxy about.poki.com static assets (CSS, JS, images) for /en/about-us
+// Proxy about.poki.com static assets (CSS, JS, images) for /en/about-us — streamed, not buffered
 router.get(['/assets/*', '/g/*'], async (req, res) => {
   try {
     const url = 'https://about.poki.com' + req.path + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
-    const response = await fetch(url, { headers: { 'User-Agent': getRandomUA() }, timeout: 15000 });
-    const buffer = await response.buffer();
+    const response = await fetch(url, { agent: httpsAgent, headers: { 'User-Agent': getRandomUA() }, timeout: 15000 });
+    if (!response.ok) return res.status(response.status).end();
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     res.set({ 'Content-Type': contentType, 'Cache-Control': 'public, max-age=86400' });
-    res.send(buffer);
+    response.body.pipe(res);
   } catch (e) {
     res.status(502).end();
   }
