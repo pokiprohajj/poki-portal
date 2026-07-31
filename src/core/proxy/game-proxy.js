@@ -208,6 +208,7 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
     }
 
     const url = new URL(`https://${fullPath}`);
+    const isPokiHost = url.hostname.includes('poki.') || url.hostname.includes('poki-');
 
     // user-vault.poki.com: return mock user profile instead of proxying
     if (url.hostname === 'user-vault.poki.com') {
@@ -248,6 +249,14 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       compress: false,
     };
 
+    // Third-party mirror hosts hotlink-protect their assets against foreign
+    // Referers. For non-Poki mirrors, impersonate the mirror's own origin so
+    // images/audio/scripts load normally (poki.com referer would be rejected).
+    if (!isPokiHost) {
+      fetchOpts.headers['Referer'] = 'https://' + url.hostname + '/';
+      fetchOpts.headers['Origin'] = 'https://' + url.hostname;
+    }
+
     // Forward request body and content-type for POST/PUT/etc
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       if (req.headers['content-type']) fetchOpts.headers['Content-Type'] = req.headers['content-type'];
@@ -267,13 +276,16 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
     });
 
     // For HTML responses from gdn.poki.com, also bypass anti-embedding checks
-    // and inject the GAME_INTERCEPTOR (catches PokiSDK checks in inner game HTML)
+    // and inject the GAME_INTERCEPTOR (catches PokiSDK checks in inner game HTML).
+    // Only for Poki hosts — third-party mirrors must pass through byte-for-byte
+    // or the injected Poki-specific script/document.write overrides break them.
     if (isGet && contentType.includes('text/html')) {
       let html = body.toString('utf-8');
 
       // Strip Content-Security-Policy from upstream to prevent frame-ancestors blocking
       res.removeHeader('Content-Security-Policy');
 
+      if (isPokiHost) {
       // Strip meta refresh tags that redirect to poki.com before JS runs
       html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');
       html = html.replace(/<meta[^>]*content\s*=\s*["'][^"']*url\s*=[^"']*poki\.[^"']*["'][^>]*>/gi, '');
@@ -329,10 +341,13 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       try { cache.setAsset(cacheKey, { body: Buffer.from(html).toString('base64'), contentType }, 86400); } catch(e) {}
       res.set({ 'Content-Security-Policy': "form-action 'self'" });
       return res.send(html);
+      }
     }
 
     // For JavaScript responses (Poki SDK core), apply anti-embedding bypass
-    if (isGet && (contentType.includes('javascript') || contentType.includes('application/x-javascript') || contentType.includes('text/javascript') || req.path.endsWith('.js'))) {
+    // Only rewrite JS served from Poki domains — third-party mirrors (e.g.
+    // mathplayground) must pass through byte-for-byte or their code breaks.
+    if (isGet && isPokiHost && (contentType.includes('javascript') || contentType.includes('application/x-javascript') || contentType.includes('text/javascript') || req.path.endsWith('.js'))) {
       let js = body.toString('utf-8');
       js = js.replace(/if\s*\(\s*((?:window\.)?(?:top|self))\s*(={2,3}|!==?)\s*((?:window\.)?(?:self|top))/g, function(m, a, op, b) {
         return op === '!==' || op === '!=' ? 'if(false' : 'if(true';
