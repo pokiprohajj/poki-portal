@@ -106,7 +106,7 @@ const render = (req, res) => {
   <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
   <link rel="dns-prefetch" href="//www.googletagmanager.com">
   <link rel="preload" as="image" href="${HERO_GAME.thumb}" fetchpriority="high">
-  <link rel="stylesheet" href="/static/css/home.css">
+  <link rel="stylesheet" href="/static/css/home.css?v=20260731">
   <script async src="https://www.googletagmanager.com/gtag/js?id=${config.ga4Id || ''}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -252,7 +252,7 @@ const render = (req, res) => {
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.ads.adsenseClientId}" crossorigin="anonymous"></script>
   <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  <script src="/static/js/home.js"></script>
+  <script src="/static/js/home.js?v=20260731"></script>
 </body>
 </html>`;
 
