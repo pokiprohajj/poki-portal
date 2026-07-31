@@ -1,0 +1,48 @@
+﻿// Curated homepage games - 40 verified games with real Poki CDN thumbnails
+// Source: live scrape of poki.com homepage tiles (all /en/g/[slug] URLs verified HTTP 200)
+
+const GAMES = [
+  { slug: 'gobattle2', title: 'GoBattle 2', category: 'Multiplayer', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/c6072a590069bb5591c46d7bb932be8b/gobattle2-logo.png' },
+  { slug: 'hide-and-paint', title: 'Hide and Paint', category: 'Casual', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/c0075ef792c1ba8c8ce3f856a76a6c3b/hide-and-paint-logo.png' },
+  { slug: 'tag', title: 'Tag', category: 'Casual', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/32d2b1401c7a86c61fae5afeed977b37/tag-logo.png' },
+  { slug: 'subway-surfers', title: 'Subway Surfers', category: 'Action', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/1c920b9279c2bedec567c1b58129ae8f/subway-surfers-logo.png' },
+  { slug: 'minefun-io', title: 'MineFun.io', category: '.io', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/b83ce290d7809f913cffaf9a4e172cd3/minefun-io-logo.png' },
+  { slug: 'drift-boss', title: 'Drift Boss', category: 'Racing', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/baf55f009fd63dd63c760a5dcfe79615/drift-boss-logo.png' },
+  { slug: 'retro-bowl', title: 'Retro Bowl', category: 'Sports', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/ee9ca3764ef4289a48a1ebf457ef605441ed1f35a0f2eb12707a70d609e53686/retro-bowl-logo.png' },
+  { slug: 'stickman-hook', title: 'Stickman Hook', category: 'Action', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/99e090d154caf30f3625df7e456d5984/stickman-hook-logo.png' },
+  { slug: 'monkey-mart', title: 'Monkey Mart', category: 'Casual', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/93142510b4eb8a5b81fc264e31c00b88/monkey-mart-logo.png' },
+  { slug: 'blocky-blast-puzzle', title: 'Blocky Blast Puzzle', category: 'Puzzle', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/291aaf2dcf5c1322558a9c038b3c5251/blocky-blast-puzzle-logo.png' },
+  { slug: 'level-devil', title: 'Level Devil', category: 'Action', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/583f6a1667663da327166e637dfd60e6.png' },
+  { slug: 'soccer-real', title: 'Soccer REAL', category: 'Sports', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/10b4b66ce61404b3a9ed0bed1526e16e.png' },
+  { slug: 'my-perfect-hotel', title: 'My Perfect Hotel', category: 'Casual', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/f39e22538799cae88cf1a630492c2e7b/my-perfect-hotel-logo.png' },
+  { slug: 'penalty-shooters-2', title: 'Penalty Shooters 2', category: 'Sports', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/9f6353ca87481b7f34db483fcf480ae5/penalty-shooters-2-logo.jfif' },
+  { slug: 'beauty-salon', title: 'Beauty Salon', category: 'Casual', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/9ed4bc217ce6575d89ff7592fe0d1d1f/beauty-salon-logo.png' },
+  { slug: 'tictactoe', title: 'TicTacToe', category: 'Multiplayer', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/b72f31aa574acaa5cbf6b6c69104c988/tictactoe-logo.png' },
+  { slug: 'car-circle', title: 'Car Circle', category: 'Racing', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/3eff14e8aeb7da4c543cc32e24b78297/car-circle-logo.png' },
+  { slug: 'vortellas-dress-up', title: 'Vortella\'s Dress Up', category: 'Dress Up', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/fc33f9c50f2f54e45161a24033cd3d9b/vortellas-dress-up-logo.png' },
+  { slug: 'fashion-legends', title: 'Fashion Legends', category: 'Dress Up', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/f61cc7b269d9fb5439cc56aabff691b7.jfif' },
+  { slug: 'talking-tom-gold-run', title: 'Talking Tom Gold Run', category: 'Action', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/643674f9752ef044320a39facdbe37ac/talking-tom-gold-run-logo.png' },
+  { slug: 'temple-of-boom', title: 'Temple of Boom', category: 'Adventure', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/d710fe8830d731072485a582881605ea/temple-of-boom-logo.png' },
+  { slug: 'murder', title: 'Murder', category: 'Multiplayer', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/baccf9660bfb476fe2c8ae9f5a2ec4d2/murder-logo.png' },
+  { slug: 'hill-climb-racing-lite', title: 'Hill Climb Racing Lite', category: 'Racing', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/b87616bb88c0e3cb4c150c59fdc767fa/hill-climb-racing-lite-logo.png' },
+  { slug: 'drive-mad', title: 'Drive Mad', category: 'Racing', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/fb51b7a3920196f313f2d1b081a98e2e/drive-mad-logo.png' },
+  { slug: 'tunnel-rush', title: 'Tunnel Rush', category: 'Action', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/2094926076b7aa8264cace220ce5decc/tunnel-rush-logo.png' },
+  { slug: 'merge-solitaire', title: 'Merge Solitaire', category: 'Puzzle', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/c0f64fe098080242cbaf97c618524802/merge-solitaire-logo.png' },
+  { slug: 'master-chess', title: 'Master Chess', category: 'Strategy', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/505695b9-1b21-47fd-a8e1-93345afb57de/master-chess-logo.png' },
+  { slug: 'dress-up-party', title: 'Dress Up Party', category: 'Dress Up', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/11501e857587182d854e2746dece5b1b/dress-up-party-logo.png' },
+  { slug: 'fruit-ninja', title: 'Fruit Ninja', category: 'Action', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/c4dc286c30b8fbde45a0b5d4fe6f2146/fruit-ninja-logo.png' },
+  { slug: 'soccer-skills-2-world-cup', title: 'Soccer Skills 2 World Cup', category: 'Sports', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/6b27f703d619014b37c7895f50f963d9/soccer-skills-2-world-cup-logo.png' },
+  { slug: 'combat-online-2', title: 'Combat Online 2', category: 'Multiplayer', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/8173955448d8681bbebb8908a503de88/combat-online-2-logo.jfif' },
+  { slug: 'war-master', title: 'War Master', category: 'Strategy', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/4bf90fce7a7f0326d06663ff5fd8c772/war-master-logo.png' },
+  { slug: 'super-liquid-soccer', title: 'Super Liquid Soccer', category: 'Sports', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/17788bea90fd61ae9b76916383514aa2/super-liquid-soccer-logo.png' },
+  { slug: 'escape-from-school', title: 'Escape From School', category: 'Adventure', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/ec21d1b93d3e81cfe0dbe28c439c84b4/escape-from-school-logo.png' },
+  { slug: 'tank-stars', title: 'Tank Stars', category: 'Multiplayer', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/16b55f8555672385fe26077067f75da6/tank-stars-logo.png' },
+  { slug: 'flick-goal', title: 'Flick Goal', category: 'Sports', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/08389842f44d065d3ddb24483865e159/flick-goal-logo.jfif' },
+  { slug: 'eggy-car', title: 'Eggy Car', category: 'Racing', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/31c77e068ee7affb4b077adb88f4435c/eggy-car-logo.png' },
+  { slug: 'animal-obby', title: 'Animal Obby', category: 'Adventure', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/5125c133f5d93257996a5061daa8d4eb/animal-obby-logo.png' },
+  { slug: 'mr-bullet', title: 'Mr Bullet', category: 'Action', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/d499967bc8e1634c9ffa5d83d8cc4a49/mr-bullet-logo.png' },
+  { slug: 'polytrack', title: 'PolyTrack', category: 'Racing', thumb: 'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/1f03e11a55d301fbaab4408e8ec721e0/polytrack-logo.png' },
+];
+
+module.exports = GAMES;
+

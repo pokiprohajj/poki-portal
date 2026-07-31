@@ -12,6 +12,13 @@ const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 20 });
 
 const router = express.Router();
 
+// Custom branded homepage (served instead of proxying poki.com/ to eliminate
+// duplicate-content with the source site). Only intercepts the root path.
+router.get('/', function homepageRoute(req, res) {
+  const homepage = require('../../frontend/homepage');
+  homepage.render(req, res);
+});
+
 function getRandomUA() {
   return config.userAgents[Math.floor(Math.random() * config.userAgents.length)];
 }
