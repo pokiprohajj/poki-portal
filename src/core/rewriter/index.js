@@ -570,6 +570,35 @@ function replacePokiLogo($) {
       '@media(max-width:640px){img[src*="/static/img/logo.svg"],img[src*="/static/img/logo.png"]{height:24px}}' +
       '</style>');
   }
+  // 5. Force the logo click to hard-navigate to "/" (our custom homepage).
+  // The Poki SPA intercepts the logo <a> click via React Router and renders the
+  // ORIGINAL Poki home route client-side, which hides the custom homepage.
+  // Intercept in capture phase, stop React Router, and do a full page load so
+  // the server serves our homepage at "/".
+  if ($('head').length && !$('#portal-logo-home').length) {
+    $('head').append('<script id="portal-logo-home">' +
+      '(function(){' +
+      'function isLogoLink(a){' +
+      'if(!a||a.tagName!=="A")return false;' +
+      'var title=a.getAttribute("title")||"";' +
+      'var label=a.getAttribute("aria-label")||"";' +
+      'if(title==="BrowserGamesHQ"||label==="BrowserGamesHQ")return true;' +
+      'if(a.getAttribute("href")!=="/")return false;' +
+      'return !!a.querySelector("img[src*=\'/static/img/logo\']")' +
+      '}' +
+      'function onClick(e){' +
+      'var t=e.target;' +
+      'var a=t&&t.closest?t.closest("a"):null;' +
+      'if(!isLogoLink(a))return;' +
+      'if(window.location.pathname==="/")return;' +
+      'e.preventDefault();' +
+      'e.stopPropagation();' +
+      'window.location.href="/"' +
+      '}' +
+      'document.addEventListener("click",onClick,true);' +
+      '})();' +
+      '</script>');
+  }
 }
 
 function rewriteGameInitState($, sourcePath) {
