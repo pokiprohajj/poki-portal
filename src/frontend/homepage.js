@@ -11,9 +11,7 @@ const MOBILE_SLUGS = ['subway-surfers', 'talking-tom-gold-run', 'drift-boss', 'h
 
 const CAROUSELS = [
   { id: 'trending', title: 'Trending Now', slug: null, games: GAMES.slice(0, 16) },
-  { id: 'editors', title: "Editor's Picks", slug: null, games: pick(FEATURED_SLUGS) },
-  { id: 'mostplayed', title: 'Most Played', slug: null, games: GAMES.slice(16, 30) },
-  { id: 'quickplay', title: 'Quick Play', slug: null, games: pick(QUICKPLAY_SLUGS) },
+  { id: 'popular', title: 'Popular', slug: '/en/popular', games: GAMES.slice(16, 30) },
   { id: 'action', title: 'Action', slug: '/en/action', games: byCat('Action').slice(0, 12) },
   { id: 'puzzle', title: 'Puzzle', slug: '/en/puzzle', games: byCat('Puzzle').slice(0, 12) },
   { id: 'racing', title: 'Racing', slug: '/en/racing', games: byCat('Racing').slice(0, 12) },
@@ -21,6 +19,8 @@ const CAROUSELS = [
   { id: 'multiplayer', title: 'Multiplayer', slug: '/en/multiplayer', games: byCat('Multiplayer').slice(0, 12) },
   { id: 'dressup', title: 'Dress Up', slug: '/en/dress-up', games: byCat('Dress Up').slice(0, 12) },
   { id: 'family', title: 'Family Games', slug: null, games: GAMES.filter((g) => g.family).slice(0, 12) },
+  { id: 'quickplay', title: 'Quick Play', slug: null, games: pick(QUICKPLAY_SLUGS) },
+  { id: 'editors', title: "Editor's Picks", slug: null, games: pick(FEATURED_SLUGS) },
   { id: 'mobile', title: 'Mobile Favorites', slug: null, games: pick(MOBILE_SLUGS) },
 ];
 
@@ -199,15 +199,16 @@ const render = (req, res) => {
       </div>
     </section>
 
-    ${CAROUSELS.map(carouselBlock).join('')}
+    ${CAROUSELS.map((c, i) => (i === 0 ? carouselBlock(c) + '\n    <section class="carousel-section continue-slot reveal" id="continueSection" hidden></section>' : carouselBlock(c))).join('')}
 
     <section class="why-section reveal">
       <div class="section-header"><h2>Why BrowserGamesHQ?</h2></div>
+      <p class="why-lead">Thousands of free games. No downloads. No sign-ups. Just click and play.</p>
       <div class="why-grid">
-        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Play in Seconds</h3><p>Every game launches straight in your browser. No installs, no waiting.</p></article>
-        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></div><h3>Mobile Ready</h3><p>Plays beautifully on phone, tablet, and desktop — wherever you are.</p></article>
-        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>Always Free</h3><p>Every game is 100% free to play. No subscriptions, no hidden costs.</p></article>
-        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><polyline points="21 3 21 9 15 9"/></svg></div><h3>Fresh Daily</h3><p>The catalog grows every day with new titles and player favorites.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Play in Seconds</h3><p>Every game launches straight in your browser.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></div><h3>Mobile Ready</h3><p>Plays beautifully on any device.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>Always Free</h3><p>100% free. No subscriptions, no paywalls.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><polyline points="21 3 21 9 15 9"/></svg></div><h3>Fresh Daily</h3><p>New titles added to the catalog.</p></article>
       </div>
     </section>
   </main>
