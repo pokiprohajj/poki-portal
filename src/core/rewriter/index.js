@@ -12,6 +12,7 @@ const MIRRORS = {
   'murder': 'https://html5.gamedistribution.com/rvvASMiM/5e7acf55e50b4723afef834449b82bce/index.html',
   'apple-worm': 'https://apple-worm.com/appleworm/index.html',
   'drive-mad': 'https://play.fancade.com/5F084A0BCE06B710?max_w=999999&max_h=9999999&istart=1',
+  'drift-boss': '/game-proxy/gdn-proxy/www.mathplayground.com/drift-boss-v3/index.html',
   'monster-tracks': 'https://games.playtropolis.com/monster-tracks/',
 };
 
