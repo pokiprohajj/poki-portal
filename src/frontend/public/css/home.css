@@ -413,6 +413,13 @@ ul, ol { list-style: none; }
   min-height: 320px;
 }
 
+.hero-copy, .hero-art {
+  transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-out);
+}
+
+.hero-section.is-rotating .hero-copy { opacity: 0; transform: translateY(10px); }
+.hero-section.is-rotating .hero-art { opacity: 0; transform: scale(0.985); }
+
 /* Eyebrow */
 .hero-eyebrow {
   display: inline-flex;
@@ -770,6 +777,21 @@ ul, ol { list-style: none; }
 .game-card-thumb img.loaded { opacity: 1; }
 .game-card:hover .game-card-thumb img { transform: scale(1.07); filter: saturate(1.1) brightness(1.05); }
 
+/* Hover video preview (like Poki) — plays over the thumb on hover */
+.card-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+.game-card:hover .card-video { opacity: 1; }
+
 /* Skeleton shimmer — stays BEHIND the loaded image */
 .game-card-thumb::after {
   content: '';
@@ -1102,6 +1124,7 @@ ul, ol { list-style: none; }
   .game-card:active { transform: scale(0.97); }
   .game-card.touch-open .game-card-overlay { opacity: 1; }
   .game-card.touch-open .card-play { transform: scale(1) rotate(0deg); }
+  .card-video { display: none; }
 }
 
 /* ---------- 12. REDUCED MOTION ---------- */

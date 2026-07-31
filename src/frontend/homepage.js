@@ -8,6 +8,7 @@ const HERO_GAME = (() => {
 const FEATURED_SLUGS = ['retro-bowl', 'gobattle2', 'drift-boss', 'stickman-hook', 'fruit-ninja', 'murder', 'minefun-io', 'talking-tom-gold-run'];
 const QUICKPLAY_SLUGS = ['tag', 'hide-and-paint', 'tictactoe', 'eggy-car', 'car-circle', 'blocky-blast-puzzle', 'monkey-mart', 'tunnel-rush'];
 const MOBILE_SLUGS = ['subway-surfers', 'talking-tom-gold-run', 'drift-boss', 'hill-climb-racing-lite', 'fruit-ninja', 'blocky-blast-puzzle', 'my-perfect-hotel', 'tunnel-rush'];
+const HERO_SLUGS = ['subway-surfers', 'drift-boss', 'retro-bowl', 'stickman-hook', 'fruit-ninja', 'gobattle2', 'tunnel-rush', 'monkey-mart', 'hill-climb-racing-lite', 'my-perfect-hotel'];
 
 const CAROUSELS = [
   { id: 'trending', title: 'Trending Now', slug: null, games: GAMES.slice(0, 16) },
@@ -40,9 +41,13 @@ function byCat(cat) {
 function gameCard(game, opts) {
   const o = opts || {};
   const size = o.size || 'm';
+  const video = game.video
+    ? `<video class="card-video" src="${game.video}" muted loop playsinline preload="none" poster="${game.thumb}" aria-hidden="true"></video>`
+    : '';
   return `<a class="game-card game-card-${size}" href="/en/g/${encodeURIComponent(game.slug)}" data-title="${game.title}" data-category="${game.category}" data-slug="${game.slug}">
   <div class="game-card-thumb">
     <img src="${game.thumb}" alt="${game.title} - play free online at BrowserGamesHQ" loading="lazy" width="314" height="314">
+    ${video}
     <span class="card-chip">${game.category}</span>
     <span class="card-fav" role="button" aria-label="Add ${game.title} to favorites"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
     <div class="game-card-overlay">
@@ -103,10 +108,11 @@ const render = (req, res) => {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://img.poki-cdn.com">
+  <link rel="preconnect" href="https://v.poki-cdn.com">
   <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
   <link rel="dns-prefetch" href="//www.googletagmanager.com">
   <link rel="preload" as="image" href="${HERO_GAME.thumb}" fetchpriority="high">
-  <link rel="stylesheet" href="/static/css/home.css?v=20260731b">
+  <link rel="stylesheet" href="/static/css/home.css?v=20260731c">
   <script async src="https://www.googletagmanager.com/gtag/js?id=${config.ga4Id || ''}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -167,7 +173,7 @@ const render = (req, res) => {
   </header>
 
   <main>
-    <section class="hero-section" aria-label="Featured game">
+    <section class="hero-section" aria-label="Featured game" id="heroSection" data-rotate='${JSON.stringify(pick(HERO_SLUGS).map((g) => ({ slug: g.slug, title: g.title, category: g.category, thumb: g.thumb, video: g.video || '' })))}'>
       <div class="hero-lights"></div>
       <div class="hero-grain"></div>
       <div class="hero-content">
@@ -191,7 +197,7 @@ const render = (req, res) => {
         <div class="hero-art">
           <div class="hero-art-halo"></div>
           <div class="hero-art-frame">
-            <img src="${HERO_GAME.thumb}" alt="${HERO_GAME.title} featured artwork" width="314" height="314" fetchpriority="high">
+            <img src="${HERO_GAME.thumb}" alt="${HERO_GAME.title} featured artwork" width="314" height="314" fetchpriority="high" id="heroArt">
           </div>
           <div class="hero-tile tile-1"><img src="${tileGame(1)}" alt="" aria-hidden="true" loading="lazy"></div>
           <div class="hero-tile tile-2"><img src="${tileGame(2)}" alt="" aria-hidden="true" loading="lazy"></div>
@@ -252,7 +258,7 @@ const render = (req, res) => {
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.ads.adsenseClientId}" crossorigin="anonymous"></script>
   <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  <script src="/static/js/home.js?v=20260731"></script>
+  <script src="/static/js/home.js?v=20260731c"></script>
 </body>
 </html>`;
 

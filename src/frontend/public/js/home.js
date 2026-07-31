@@ -92,9 +92,13 @@
   /* ---------- Continue Playing rail (client-side, honest) ---------- */
   function cardFor(game) {
     var g = game || {};
+    var video = g.video
+      ? '<video class="card-video" src="' + g.video + '" muted loop playsinline preload="none" aria-hidden="true"></video>'
+      : '';
     return '<a class="game-card game-card-m" href="/en/g/' + encodeURIComponent(g.slug || '') + '" data-title="' + (g.title || '') + '" data-category="' + (g.category || '') + '" data-slug="' + (g.slug || '') + '">' +
       '<div class="game-card-thumb">' +
       '<img src="' + (g.thumb || '') + '" alt="' + (g.title || '') + '" loading="lazy" width="314" height="314">' +
+      video +
       '<span class="card-chip">' + (g.category || '') + '</span>' +
       '<span class="card-fav" role="button" aria-label="Remove from continue playing" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>' +
       '<div class="game-card-overlay"><span class="card-play"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>' +
@@ -119,6 +123,7 @@
     var wrap = section.querySelector('.carousel-wrap');
     if (wrap) initCarouselWrap(wrap);
     initSkeletons(section);
+    initCardVideos(section);
     section.classList.add('in-view');
   }
 
@@ -127,10 +132,12 @@
     var title = card.getAttribute('data-title');
     var category = card.getAttribute('data-category');
     var img = card.querySelector('img');
+    var video = card.querySelector('.card-video');
     var thumb = img ? img.getAttribute('src') : '';
+    var videoUrl = video ? video.getAttribute('src') : '';
     if (!slug) return;
     var list = readStore().filter(function (g) { return g.slug !== slug; });
-    list.unshift({ slug: slug, title: title, category: category, thumb: thumb });
+    list.unshift({ slug: slug, title: title, category: category, thumb: thumb, video: videoUrl });
     writeStore(list);
   }
 
@@ -208,6 +215,78 @@
     });
   }
 
+  /* ---------- Card hover video (like Poki, desktop only) ---------- */
+  function initCardVideos(root) {
+    if (REDUCED || (window.matchMedia && window.matchMedia('(hover: none)').matches)) return;
+    (root || document).querySelectorAll('.game-card').forEach(function (card) {
+      var video = card.querySelector('.card-video');
+      if (!video) return;
+      var enter = function () {
+        if (!video.getAttribute('data-primed')) {
+          video.setAttribute('data-primed', '1');
+          var p = video.play();
+          if (p) p.catch(function () {});
+        } else {
+          video.play().catch(function () {});
+        }
+      };
+      var leave = function () { video.pause(); video.currentTime = 0; };
+      card.addEventListener('mouseenter', enter);
+      card.addEventListener('mouseleave', leave);
+    });
+  }
+
+  /* ---------- Hero rotation ---------- */
+  function initHeroRotation() {
+    var section = document.getElementById('heroSection');
+    if (!section || REDUCED) return;
+    var raw = section.getAttribute('data-rotate');
+    if (!raw) return;
+    var games;
+    try { games = JSON.parse(raw); } catch (e) { return; }
+    if (!games || games.length < 2) return;
+
+    var idx = 0;
+    var eyebrow = section.querySelector('.hero-eyebrow');
+    var title = section.querySelector('h1');
+    var playBtn = section.querySelector('.hero-cta .btn-primary');
+    var art = document.getElementById('heroArt');
+    var preload = new Image();
+
+    function apply(g) {
+      if (eyebrow) eyebrow.innerHTML = '<span class="dot"></span>Featured · ' + g.category;
+      if (title) title.textContent = g.title;
+      if (playBtn) playBtn.setAttribute('href', '/en/g/' + encodeURIComponent(g.slug));
+      if (art) {
+        art.src = g.thumb;
+        art.alt = g.title + ' featured artwork';
+        preload.src = g.thumb;
+      }
+    }
+
+    var timer = null;
+    function next() {
+      idx = (idx + 1) % games.length;
+      section.classList.add('is-rotating');
+      setTimeout(function () {
+        apply(games[idx]);
+        section.classList.remove('is-rotating');
+      }, 550);
+    }
+
+    function start() { if (!timer) timer = setInterval(next, 7000); }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+    var root = document.documentElement;
+    section.addEventListener('mouseenter', stop);
+    section.addEventListener('mouseleave', start);
+    root.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else start();
+    });
+
+    start();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initSkeletons();
     initHeader();
@@ -217,6 +296,8 @@
     initSearch();
     initFavorites();
     initTouchReveal();
+    initCardVideos();
+    initHeroRotation();
     initShortcuts();
   });
 })();
