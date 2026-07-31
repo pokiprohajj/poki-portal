@@ -28,6 +28,11 @@ function pick(slugs) {
   return slugs.map((s) => GAMES.find((g) => g.slug === s)).filter(Boolean);
 }
 
+function tileGame(n) {
+  const game = n === 1 ? GAMES.find((g) => g.slug === 'drift-boss') : GAMES.find((g) => g.slug === 'retro-bowl');
+  return game ? game.thumb : HERO_GAME.thumb;
+}
+
 function byCat(cat) {
   return GAMES.filter((g) => g.category === cat);
 }
@@ -38,32 +43,33 @@ function gameCard(game, opts) {
   return `<a class="game-card game-card-${size}" href="/en/g/${encodeURIComponent(game.slug)}" data-title="${game.title}" data-category="${game.category}" data-slug="${game.slug}">
   <div class="game-card-thumb">
     <img src="${game.thumb}" alt="${game.title} - play free online at BrowserGamesHQ" loading="lazy" width="314" height="314">
+    <span class="card-chip">${game.category}</span>
+    <span class="card-fav" role="button" aria-label="Add ${game.title} to favorites"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
     <div class="game-card-overlay">
-      <span class="card-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-      <span class="card-instant">Instant Play</span>
+      <span class="card-play"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
     </div>
-    <span class="card-fav" role="button" aria-label="Add ${game.title} to favorites"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
   </div>
   <div class="game-card-info">
     <div class="game-card-title">${game.title}</div>
     <div class="game-card-category">${game.category}</div>
+    <div class="card-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>Instant Play</div>
   </div>
 </a>`;
 }
 
 function carouselBlock(c) {
-  const seeAll = c.slug ? `<a href="${c.slug}" class="see-all">See All</a>` : '';
-  return `<section class="carousel-section" id="${c.id}">
+  const seeAll = c.slug ? `<a href="${c.slug}" class="see-all">See All <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>` : '';
+  return `<section class="carousel-section reveal" id="${c.id}">
   <div class="section-header">
     <h2>${c.title}</h2>
     ${seeAll}
   </div>
   <div class="carousel-wrap">
-    <button class="carousel-arrow carousel-prev" aria-label="Scroll ${c.title} left" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="carousel-arrow carousel-prev" aria-label="Scroll ${c.title} left" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div class="carousel-track" data-carousel="${c.id}">
       ${c.games.map((g) => gameCard(g)).join('')}
     </div>
-    <button class="carousel-arrow carousel-next" aria-label="Scroll ${c.title} right" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    <button class="carousel-arrow carousel-next" aria-label="Scroll ${c.title} right" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
   </div>
 </section>`;
 }
@@ -139,14 +145,11 @@ const render = (req, res) => {
   </script>
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header" id="siteHeader">
     <div class="header-inner">
       <a href="/" class="logo" aria-label="BrowserGamesHQ home">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="9" fill="#6c5ce7"/>
-          <text x="16" y="22" text-anchor="middle" fill="white" font-size="18" font-weight="bold" font-family="Inter">G</text>
-        </svg>
-        <span>BrowserGamesHQ</span>
+        <span class="logo-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v2.6a1 1 0 0 1-.3.7L13.4 12l5.3 4.7a1 1 0 0 1 .3.7V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-2.6a1 1 0 0 1 .3-.7L10.6 12 5.3 7.3a1 1 0 0 1-.3-.7V4a1 1 0 0 1 1-1z"/></svg></span>
+        <span class="logo-text">BrowserGamesHQ</span>
       </a>
       <nav class="nav-links" aria-label="Main navigation">
         <a href="/" class="nav-link active">Home</a>
@@ -165,48 +168,53 @@ const render = (req, res) => {
 
   <main>
     <section class="hero-section" aria-label="Featured game">
-      <div class="hero-bg-glow"></div>
+      <div class="hero-lights"></div>
+      <div class="hero-grain"></div>
       <div class="hero-content">
         <div class="hero-copy">
-          <span class="hero-badge">Featured · ${HERO_GAME.category}</span>
+          <span class="hero-eyebrow"><span class="dot"></span>Featured · ${HERO_GAME.category}</span>
           <h1>${HERO_GAME.title}</h1>
           <p class="hero-sub">Jump into one of the most played browser games in the world — free, no download, no sign-up. Just open and play.</p>
           <div class="hero-cta">
-            <a href="/en/g/${encodeURIComponent(HERO_GAME.slug)}" class="cta-primary">
+            <a href="/en/g/${encodeURIComponent(HERO_GAME.slug)}" class="btn btn-primary">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               Play Now
             </a>
-            <a href="#trending" class="cta-secondary">Explore Games</a>
+            <a href="#trending" class="btn btn-secondary">Explore Games</a>
           </div>
           <div class="hero-tags">
-            <span>Instant Play</span>
-            <span>Free Forever</span>
-            <span>Any Device</span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>Instant Play</span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Free Forever</span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg>Any Device</span>
           </div>
         </div>
         <div class="hero-art">
-          <img src="${HERO_GAME.thumb}" alt="${HERO_GAME.title} featured artwork" width="600" height="600" fetchpriority="high">
-          <div class="hero-art-glow"></div>
+          <div class="hero-art-halo"></div>
+          <div class="hero-art-frame">
+            <img src="${HERO_GAME.thumb}" alt="${HERO_GAME.title} featured artwork" width="314" height="314" fetchpriority="high">
+          </div>
+          <div class="hero-tile tile-1"><img src="${tileGame(1)}" alt="" aria-hidden="true" loading="lazy"></div>
+          <div class="hero-tile tile-2"><img src="${tileGame(2)}" alt="" aria-hidden="true" loading="lazy"></div>
         </div>
       </div>
     </section>
 
     ${CAROUSELS.map(carouselBlock).join('')}
 
-    <section class="why-section">
+    <section class="why-section reveal">
       <div class="section-header"><h2>Why BrowserGamesHQ?</h2></div>
       <div class="why-grid">
-        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Play in Seconds</h3><p>Every game launches straight in your browser. No installs, no waiting.</p></article>
-        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></div><h3>Mobile Ready</h3><p>Plays beautifully on phone, tablet, and desktop — wherever you are.</p></article>
-        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>Always Free</h3><p>Every game is 100% free to play. No subscriptions, no hidden costs.</p></article>
-        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><polyline points="21 3 21 9 15 9"/></svg></div><h3>Fresh Daily</h3><p>The catalog grows every day with new titles and player favorites.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Play in Seconds</h3><p>Every game launches straight in your browser. No installs, no waiting.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></div><h3>Mobile Ready</h3><p>Plays beautifully on phone, tablet, and desktop — wherever you are.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>Always Free</h3><p>Every game is 100% free to play. No subscriptions, no hidden costs.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><polyline points="21 3 21 9 15 9"/></svg></div><h3>Fresh Daily</h3><p>The catalog grows every day with new titles and player favorites.</p></article>
       </div>
     </section>
   </main>
 
   <div id="noResults" class="no-results" style="display:none">No games match your search. Try another keyword or browse <a href="/en/all-games">all games</a>.</div>
 
-  <footer class="site-footer">
+  <footer class="site-footer reveal">
     <div class="footer-inner">
       <div class="footer-brand">
         <span class="footer-logo">BrowserGamesHQ</span>
