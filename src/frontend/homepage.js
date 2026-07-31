@@ -1,37 +1,71 @@
 const config = require('../config');
 const GAMES = require('./games-data');
 
-const CATEGORIES = [
-  { name: 'Action', slug: '/en/action', desc: 'Fast-paced reflex games, run-and-jump challenges, and action-packed combat.' },
-  { name: 'Puzzle', slug: '/en/puzzle', desc: 'Brain teasers, logic puzzles, and clever challenges that test your thinking.' },
-  { name: 'Racing', slug: '/en/racing', desc: 'High-speed car, bike, and drift racing games with no download required.' },
-  { name: 'Sports', slug: '/en/sports', desc: 'Soccer, basketball, penalty shootouts, and more sports games to play online.' },
-  { name: 'Multiplayer', slug: '/en/multiplayer', desc: 'Play with friends or other players in competitive online browser games.' },
-  { name: 'Strategy', slug: '/en/strategy', desc: 'Plan, build, and outsmart your opponents in deep strategic games.' },
-  { name: 'Dress Up', slug: '/en/dress-up', desc: 'Create outfits, style characters, and run your own fashion makeover.' },
-  { name: 'Adventure', slug: '/en/adventure', desc: 'Explore new worlds, solve quests, and survive exciting adventures.' },
-  { name: 'Car', slug: '/en/car', desc: 'Stunt driving, city driving, and car customization games for car lovers.' },
-  { name: '2 Player', slug: '/en/two-player', desc: 'Two-player games to challenge a friend on the same device.' },
-  { name: '.io Games', slug: '/en/io', desc: 'Lightweight multiplayer .io games you can jump into and play instantly.' },
-  { name: 'All Games', slug: '/en/all-games', desc: 'Browse the complete collection of free online games at BrowserGamesHQ.' },
+const HERO_GAME = (() => {
+  return GAMES.find((g) => g.slug === 'subway-surfers') || GAMES[0];
+})();
+
+const FEATURED_SLUGS = ['retro-bowl', 'gobattle2', 'drift-boss', 'stickman-hook', 'fruit-ninja', 'murder', 'minefun-io', 'talking-tom-gold-run'];
+const QUICKPLAY_SLUGS = ['tag', 'hide-and-paint', 'tictactoe', 'eggy-car', 'car-circle', 'blocky-blast-puzzle', 'monkey-mart', 'tunnel-rush'];
+const MOBILE_SLUGS = ['subway-surfers', 'talking-tom-gold-run', 'drift-boss', 'hill-climb-racing-lite', 'fruit-ninja', 'blocky-blast-puzzle', 'my-perfect-hotel', 'tunnel-rush'];
+
+const CAROUSELS = [
+  { id: 'trending', title: 'Trending Now', slug: null, games: GAMES.slice(0, 16) },
+  { id: 'editors', title: "Editor's Picks", slug: null, games: pick(FEATURED_SLUGS) },
+  { id: 'mostplayed', title: 'Most Played', slug: null, games: GAMES.slice(16, 30) },
+  { id: 'quickplay', title: 'Quick Play', slug: null, games: pick(QUICKPLAY_SLUGS) },
+  { id: 'action', title: 'Action', slug: '/en/action', games: byCat('Action').slice(0, 12) },
+  { id: 'puzzle', title: 'Puzzle', slug: '/en/puzzle', games: byCat('Puzzle').slice(0, 12) },
+  { id: 'racing', title: 'Racing', slug: '/en/racing', games: byCat('Racing').slice(0, 12) },
+  { id: 'sports', title: 'Sports', slug: '/en/sports', games: byCat('Sports').slice(0, 12) },
+  { id: 'multiplayer', title: 'Multiplayer', slug: '/en/multiplayer', games: byCat('Multiplayer').slice(0, 12) },
+  { id: 'dressup', title: 'Dress Up', slug: '/en/dress-up', games: byCat('Dress Up').slice(0, 12) },
+  { id: 'family', title: 'Family Games', slug: null, games: GAMES.filter((g) => g.family).slice(0, 12) },
+  { id: 'mobile', title: 'Mobile Favorites', slug: null, games: pick(MOBILE_SLUGS) },
 ];
 
-const FEATURED = GAMES.filter((g) =>
-  ['subway-surfers', 'retro-bowl', 'gobattle2', 'drift-boss', 'stickman-hook', 'minefun-io', 'fruit-ninja', 'talking-tom-gold-run', 'murder', 'tunnel-rush'].includes(g.slug)
-);
+function pick(slugs) {
+  return slugs.map((s) => GAMES.find((g) => g.slug === s)).filter(Boolean);
+}
 
-function gameCard(game) {
-  return `<a class="game-card" href="/en/g/${encodeURIComponent(game.slug)}" data-title="${game.title}" data-category="${game.category}" data-slug="${game.slug}">
-  <div class="game-card-thumb"><img src="${game.thumb}" alt="${game.title} - play free online at BrowserGamesHQ" loading="lazy" width="314" height="314"></div>
-  <div class="game-card-info"><div class="game-card-title">${game.title}</div><div class="game-card-category">${game.category}</div></div>
+function byCat(cat) {
+  return GAMES.filter((g) => g.category === cat);
+}
+
+function gameCard(game, opts) {
+  const o = opts || {};
+  const size = o.size || 'm';
+  return `<a class="game-card game-card-${size}" href="/en/g/${encodeURIComponent(game.slug)}" data-title="${game.title}" data-category="${game.category}" data-slug="${game.slug}">
+  <div class="game-card-thumb">
+    <img src="${game.thumb}" alt="${game.title} - play free online at BrowserGamesHQ" loading="lazy" width="314" height="314">
+    <div class="game-card-overlay">
+      <span class="card-play-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+      <span class="card-instant">Instant Play</span>
+    </div>
+    <span class="card-fav" role="button" aria-label="Add ${game.title} to favorites"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+  </div>
+  <div class="game-card-info">
+    <div class="game-card-title">${game.title}</div>
+    <div class="game-card-category">${game.category}</div>
+  </div>
 </a>`;
 }
 
-function categoryCard(cat) {
-  return `<a class="category-card" href="${cat.slug}">
-  <div class="category-card-name">${cat.name}</div>
-  <div class="category-card-desc">${cat.desc}</div>
-</a>`;
+function carouselBlock(c) {
+  const seeAll = c.slug ? `<a href="${c.slug}" class="see-all">See All</a>` : '';
+  return `<section class="carousel-section" id="${c.id}">
+  <div class="section-header">
+    <h2>${c.title}</h2>
+    ${seeAll}
+  </div>
+  <div class="carousel-wrap">
+    <button class="carousel-arrow carousel-prev" aria-label="Scroll ${c.title} left" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="carousel-track" data-carousel="${c.id}">
+      ${c.games.map((g) => gameCard(g)).join('')}
+    </div>
+    <button class="carousel-arrow carousel-next" aria-label="Scroll ${c.title} right" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+</section>`;
 }
 
 const render = (req, res) => {
@@ -65,6 +99,7 @@ const render = (req, res) => {
   <link rel="preconnect" href="https://img.poki-cdn.com">
   <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
   <link rel="dns-prefetch" href="//www.googletagmanager.com">
+  <link rel="preload" as="image" href="${HERO_GAME.thumb}" fetchpriority="high">
   <link rel="stylesheet" href="/static/css/home.css">
   <script async src="https://www.googletagmanager.com/gtag/js?id=${config.ga4Id || ''}"></script>
   <script>
@@ -100,121 +135,82 @@ const render = (req, res) => {
   {"@context":"https://schema.org","@type":"Organization","name":"BrowserGamesHQ","url":"${siteUrl}","logo":"${siteUrl}/static/img/logo.svg","sameAs":["https://twitter.com/BrowserGamesHQ","https://www.facebook.com/BrowserGamesHQ","https://www.youtube.com/@BrowserGamesHQ"]}
   </script>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"CollectionPage","name":"Free Online Games - BrowserGamesHQ","description":"Play thousands of free online browser games instantly. No downloads, no sign-ups.","url":"${siteUrl}/","mainEntity":{"@type":"ItemList","itemListElement":[${FEATURED.map((g, i) => `{"@type":"ListItem","position":${i + 1},"name":"${g.title}","url":"${siteUrl}/en/g/${g.slug}"}`).join(',')}]}}
+  {"@context":"https://schema.org","@type":"CollectionPage","name":"Free Online Games - BrowserGamesHQ","description":"Play thousands of free online browser games instantly. No downloads, no sign-ups.","url":"${siteUrl}/","mainEntity":{"@type":"ItemList","itemListElement":[${GAMES.slice(0, 20).map((g, i) => `{"@type":"ListItem","position":${i + 1},"name":"${g.title}","url":"${siteUrl}/en/g/${g.slug}"}`).join(',')}]}}
   </script>
 </head>
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <a href="/" class="logo">
+      <a href="/" class="logo" aria-label="BrowserGamesHQ home">
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#6c5ce7"/>
+          <rect width="32" height="32" rx="9" fill="#6c5ce7"/>
           <text x="16" y="22" text-anchor="middle" fill="white" font-size="18" font-weight="bold" font-family="Inter">G</text>
         </svg>
         <span>BrowserGamesHQ</span>
       </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/" class="nav-link active">Home</a>
+        <a href="/en/popular" class="nav-link">Popular</a>
+        <a href="/en/all-games" class="nav-link">All Games</a>
+        <a href="/blog" class="nav-link">Blog</a>
+      </nav>
       <div class="search-bar">
         <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         <input type="text" placeholder="Search games..." id="searchInput" aria-label="Search games">
       </div>
-      <nav class="nav-links">
-        <a href="/" class="nav-link active">Home</a>
-        <a href="/en/popular" class="nav-link">Popular</a>
-        <a href="/en/all-games" class="nav-link">All Games</a>
-      </nav>
     </div>
   </header>
 
-  <section class="hero-section">
-    <div class="hero-content">
-      <h1>Play <span class="gradient-text">Free Online Games</span> Instantly</h1>
-      <p class="hero-sub">BrowserGamesHQ is your home for free browser games. No downloads, no installs, no sign-ups — every game runs right in your browser and you can start playing in seconds.</p>
-      <div class="hero-cta">
-        <a href="#games" class="cta-primary">Play Now</a>
-        <a href="#categories" class="cta-secondary">Browse Categories</a>
+  <main>
+    <section class="hero-section" aria-label="Featured game">
+      <div class="hero-bg-glow"></div>
+      <div class="hero-content">
+        <div class="hero-copy">
+          <span class="hero-badge">Featured · ${HERO_GAME.category}</span>
+          <h1>${HERO_GAME.title}</h1>
+          <p class="hero-sub">Jump into one of the most played browser games in the world — free, no download, no sign-up. Just open and play.</p>
+          <div class="hero-cta">
+            <a href="/en/g/${encodeURIComponent(HERO_GAME.slug)}" class="cta-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              Play Now
+            </a>
+            <a href="#trending" class="cta-secondary">Explore Games</a>
+          </div>
+          <div class="hero-tags">
+            <span>Instant Play</span>
+            <span>Free Forever</span>
+            <span>Any Device</span>
+          </div>
+        </div>
+        <div class="hero-art">
+          <img src="${HERO_GAME.thumb}" alt="${HERO_GAME.title} featured artwork" width="600" height="600" fetchpriority="high">
+          <div class="hero-art-glow"></div>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="stats-bar" aria-label="Site highlights">
-    <div class="stat-item"><div class="stat-value">1500+</div><div class="stat-label">Free Games</div></div>
-    <div class="stat-item"><div class="stat-value">100%</div><div class="stat-label">Free to Play</div></div>
-    <div class="stat-item"><div class="stat-value">0</div><div class="stat-label">Downloads</div></div>
-    <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">Game Categories</div></div>
-  </section>
+    ${CAROUSELS.map(carouselBlock).join('')}
 
-  <section class="intro-section" id="about">
-    <div class="intro-inner">
-      <h2>What is BrowserGamesHQ?</h2>
-      <p>BrowserGamesHQ is a free online gaming platform that brings together thousands of browser games in one place. Whether you love fast action games, tricky puzzles, competitive racing, or relaxing dress-up games, you will find something to play — without ever installing an app.</p>
-      <p>Every game on BrowserGamesHQ is playable directly in your web browser on desktop, tablet, and mobile. There is nothing to download and no account to create, so you can go from browsing to playing in a single click. New games are added regularly, and our popular games section makes it easy to discover what players enjoy most right now.</p>
-      <p>Our catalog spans action, puzzle, racing, sports, strategy, multiplayer, dress up, adventure, car games, and more. Pick a category below or use the search bar to find a specific game.</p>
-    </div>
-  </section>
-
-  <section class="category-section" id="categories">
-    <div class="section-header">
-      <h2>Browse Games by Category</h2>
-      <a href="/en/all-games" class="see-all">See All Games</a>
-    </div>
-    <div class="category-grid">
-      ${CATEGORIES.map(categoryCard).join('')}
-    </div>
-  </section>
-
-  <section class="games-section" id="games">
-    <div class="section-header">
-      <h2>Popular Games</h2>
-      <a href="/en/all-games" class="see-all">See All Games</a>
-    </div>
-    <div class="category-bar">
-      <div class="category-scroll">
-        <button class="cat-pill active" data-cat="all">All</button>
-        <button class="cat-pill" data-cat="Action">Action</button>
-        <button class="cat-pill" data-cat="Puzzle">Puzzle</button>
-        <button class="cat-pill" data-cat="Racing">Racing</button>
-        <button class="cat-pill" data-cat="Sports">Sports</button>
-        <button class="cat-pill" data-cat="Multiplayer">Multiplayer</button>
-        <button class="cat-pill" data-cat="Strategy">Strategy</button>
-        <button class="cat-pill" data-cat="Dress Up">Dress Up</button>
-        <button class="cat-pill" data-cat="Adventure">Adventure</button>
-        <button class="cat-pill" data-cat=".io">.io</button>
+    <section class="why-section">
+      <div class="section-header"><h2>Why BrowserGamesHQ?</h2></div>
+      <div class="why-grid">
+        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Play in Seconds</h3><p>Every game launches straight in your browser. No installs, no waiting.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></div><h3>Mobile Ready</h3><p>Plays beautifully on phone, tablet, and desktop — wherever you are.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>Always Free</h3><p>Every game is 100% free to play. No subscriptions, no hidden costs.</p></article>
+        <article class="why-card"><div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><polyline points="21 3 21 9 15 9"/></svg></div><h3>Fresh Daily</h3><p>The catalog grows every day with new titles and player favorites.</p></article>
       </div>
-    </div>
-    <div class="games-grid" id="gamesGrid">
-      ${GAMES.map(gameCard).join('')}
-    </div>
-    <div id="noResults" class="no-results" style="display:none">No games match your search. Try another keyword or browse all games.</div>
-  </section>
+    </section>
+  </main>
 
-  <div class="sidebar-ad-area">
-    <div id="portal-ad-sidebar-home" class="portal-ad-slot">
-      <ins class="adsbygoogle"
-           style="display:inline-block;width:300px;height:250px"
-           data-ad-client="${config.ads.adsenseClientId}"
-           data-ad-slot="${config.ads.slotRectangle}"></ins>
-    </div>
-  </div>
-
-  <section class="why-section">
-    <div class="section-header">
-      <h2>Why Play at BrowserGamesHQ?</h2>
-    </div>
-    <div class="why-grid">
-      <div class="why-card"><div class="why-icon">⚡</div><h3>Play Instantly</h3><p>Every game starts in your browser in seconds. No waiting, no installs.</p></div>
-      <div class="why-card"><div class="why-icon">📱</div><h3>Works Everywhere</h3><p>Games run on desktop, tablet, and mobile — whenever you are, however you play.</p></div>
-      <div class="why-card"><div class="why-icon">🆓</div><h3>Always Free</h3><p>All games on BrowserGamesHQ are free to play. No subscriptions, no hidden costs.</p></div>
-      <div class="why-card"><div class="why-icon">🔄</div><h3>Updated Daily</h3><p>New games are added regularly so there is always something fresh to try.</p></div>
-    </div>
-  </section>
+  <div id="noResults" class="no-results" style="display:none">No games match your search. Try another keyword or browse <a href="/en/all-games">all games</a>.</div>
 
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
         <span class="footer-logo">BrowserGamesHQ</span>
-        <p>Free online browser games played instantly. No downloads, no sign-ups — just click and play.</p>
+        <p>Free online browser games, played instantly. No downloads, no sign-ups — just click and play.</p>
       </div>
       <div class="footer-links">
         <h4>Categories</h4>
@@ -226,11 +222,12 @@ const render = (req, res) => {
         <a href="/en/all-games">All Games</a>
       </div>
       <div class="footer-links">
-        <h4>Popular</h4>
+        <h4>Discover</h4>
         <a href="/en/popular">Popular Games</a>
         <a href="/en/categories">Categories</a>
+        <a href="/en/dress-up">Dress Up</a>
+        <a href="/en/car">Car Games</a>
         <a href="/blog">Blog</a>
-        <a href="/blog/popular">Popular Articles</a>
       </div>
       <div class="footer-links">
         <h4>Info</h4>
