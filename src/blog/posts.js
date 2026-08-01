@@ -22,4 +22,14 @@ const seo5 = require('./posts/seo5');
 
 const all = [].concat(pokiImport, original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5, bulk6, pillar, bulk7, bulk7Extra, seo1, seo2, seo3, seo4, seo5);
 
-module.exports = all;
+// Deduplicate by slug — keep first occurrence, drop later duplicates.
+// Duplicate slugs waste crawl budget and create sitemap/canonical confusion.
+const seen = new Set();
+const deduped = [];
+for (const p of all) {
+  if (seen.has(p.slug)) continue;
+  seen.add(p.slug);
+  deduped.push(p);
+}
+
+module.exports = deduped;

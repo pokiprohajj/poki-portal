@@ -1,5 +1,23 @@
 const config = require('../../config');
 const cheerio = require('cheerio');
+const blogPosts = require('../../blog/posts');
+
+// Map game slug -> related blog guide slugs (complete-guide, pro-tips-and-tricks,
+// review, best-games-like, unblocked). Used for the on-page related-guides strip.
+const RELATED_GUIDES = {};
+for (const p of blogPosts) {
+  const m = p.slug.match(/^(.+)-(complete-guide|pro-tips-and-tricks|review|best-games-like|unblocked)$/);
+  if (m) {
+    (RELATED_GUIDES[m[1]] = RELATED_GUIDES[m[1]] || []).push(p.slug);
+  }
+}
+
+// Map game slug -> video URL (Poki mp4) for VideoObject schema (video rich results)
+const gamesData = require('../../frontend/games-data');
+const GAME_VIDEOS = {};
+for (const g of gamesData) {
+  if (g.slug && g.video) GAME_VIDEOS[g.slug] = g.video;
+}
 
 // Map of game slugs to their mirror replacement URLs
 const MIRRORS = {
@@ -232,6 +250,52 @@ function rewriteHtml(html, sourcePath) {
         'playMode': 'SinglePlayer',
       };
       $('head').append('<script type="application/ld+json">' + JSON.stringify(gameSchema) + '</script>');
+
+      var gameSlug = (sourcePath.match(/\/g\/([^/]+)/) || [])[1] || '';
+
+      // VideoObject schema — enables video rich results using the game's Poki mp4
+      var gameVideo = GAME_VIDEOS[gameSlug] || '';
+      if (gameVideo) {
+        var videoSchema = {
+          '@context': 'https://schema.org',
+          '@type': 'VideoObject',
+          'name': gameTitle,
+          'description': gameDesc,
+          'thumbnailUrl': ogImage || gameVideo,
+          'uploadDate': '2026-01-01',
+          'contentUrl': gameVideo,
+          'embedUrl': gameUrl,
+          'duration': 'PT30S',
+          'publisher': { '@type': 'Organization', 'name': 'BrowserGamesHQ' },
+        };
+        $('head').append('<script type="application/ld+json">' + JSON.stringify(videoSchema) + '</script>');
+      }
+
+      // Related guides strip — internal links from game page to its blog guides.
+      // Injected as a fixed-position widget via head script so Poki's React DOM
+      // (gameplay iframe + hydration) stays byte-for-byte untouched.
+      var guides = RELATED_GUIDES[gameSlug] || [];
+      if (guides.length) {
+        var links = guides.map(function (s) {
+          return 'https://browsergameshq.com/blog/' + s;
+        });
+        $('head').append('<script id="portal-related-guides">' +
+          '(function(){var links=' + JSON.stringify(links) + ';' +
+          'function mount(){var wrap=document.createElement("div");' +
+          'wrap.id="portal-guides";wrap.setAttribute("style","position:fixed;right:12px;bottom:12px;z-index:2147483647;background:#111;color:#fff;border-radius:10px;padding:12px 14px;font:13px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;max-width:230px;box-shadow:0 4px 20px rgba(0,0,0,.45);display:none");' +
+          'var t=document.createElement("div");t.setAttribute("style","font-weight:700;margin-bottom:6px;font-size:13px");t.textContent="Guides & Tips";' +
+          'var ul=document.createElement("ul");ul.setAttribute("style","list-style:none;margin:0;padding:0");' +
+          'for(var i=0;i<links.length;i++){var li=document.createElement("li");li.setAttribute("style","margin:4px 0");' +
+          'var a=document.createElement("a");a.href=links[i];a.setAttribute("style","color:#6ee7ff;text-decoration:none;font-weight:500");' +
+          'a.textContent=links[i].split("/").pop().replace(/-/g," ").replace(/\\b\\w/g,function(c){return c.toUpperCase()});' +
+          'li.appendChild(a);ul.appendChild(li);}' +
+          'wrap.appendChild(t);wrap.appendChild(ul);' +
+          'var btn=document.createElement("button");btn.textContent="Guides";btn.setAttribute("style","position:fixed;right:12px;bottom:12px;z-index:2147483647;background:#6ee7ff;color:#111;border:none;border-radius:20px;padding:9px 16px;font:600 13px -apple-system,Segoe UI,Roboto,sans-serif;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.3)");' +
+          'btn.onclick=function(){var s=wrap.style.display;s==="none"?(wrap.style.display="block",btn.style.display="none"):(wrap.style.display="none",btn.style.display="block")};' +
+          '(document.body||document.documentElement).appendChild(btn);(document.body||document.documentElement).appendChild(wrap);}' +
+          'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",mount)}else{mount()}' +
+          '})();</script>');
+      }
     }
   }
 

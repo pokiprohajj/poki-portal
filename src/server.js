@@ -159,6 +159,15 @@ app.get('/sitemap.xml', (req, res) => {
     `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
+  // Individual game pages — 147 verified live game URLs (priority 0.9)
+  const games = require('./frontend/games-data');
+  const gamePageUrls = games
+    .map(g => g.slug)
+    .filter((s, i, arr) => arr.indexOf(s) === i)
+    .map(s =>
+      `  <url>\n    <loc>https://${config.domain}/en/g/${s}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>`
+    ).join('\n');
+
   const posts = require('./blog/posts');
   const blogUrls = posts.map(p =>
     `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <lastmod>${p.date || today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
@@ -168,7 +177,7 @@ app.get('/sitemap.xml', (req, res) => {
     `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${blogCatUrls}\n${blogUrls}\n</urlset>`);
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${gamePageUrls}\n${blogCatUrls}\n${blogUrls}\n</urlset>`);
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
