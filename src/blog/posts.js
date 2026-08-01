@@ -14,7 +14,12 @@ const bulk6 = require('./posts/bulk6');
 const pillar = require('./posts/pillar');
 const bulk7 = require('./posts/bulk7');
 const bulk7Extra = require('./posts/bulk7-extra');
+const seo1 = require('./posts/seo1');
+const seo2 = require('./posts/seo2');
+const seo3 = require('./posts/seo3');
+const seo4 = require('./posts/seo4');
+const seo5 = require('./posts/seo5');
 
-const all = [].concat(pokiImport, original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5, bulk6, pillar, bulk7, bulk7Extra);
+const all = [].concat(pokiImport, original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5, bulk6, pillar, bulk7, bulk7Extra, seo1, seo2, seo3, seo4, seo5);
 
 module.exports = all;
