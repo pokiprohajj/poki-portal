@@ -399,6 +399,20 @@ router.get(['/assets/*', '/g/*'], async (req, res) => {
   }
 });
 
+// Local trust pages (privacy, contact, terms) — served directly, no proxy.
+// Registered before the catch-all so they never touch homepage or game routes.
+const trustPages = require('../../frontend/trust-pages');
+router.get(['/privacy-policy', '/contact', '/terms-of-service'], function trustPageRoute(req, res) {
+  const html = trustPages.render(req.path);
+  if (!html) return res.status(404).send(generate404Page());
+  res.set({
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'public, max-age=3600',
+    'X-Robots-Tag': 'index, follow',
+  });
+  res.send(html);
+});
+
 router.get('*', function gamesSubdomainRoute(req, res, next) {
   const host = req.hostname || '';
   // If the request came from games.browsergameshq.com subdomain (from Phase 3 miss),

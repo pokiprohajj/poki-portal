@@ -115,6 +115,18 @@ app.get('/robots.txt', (req, res) => {
 
 app.get('/llms.txt', (req, res) => {
   res.type('text/markdown');
+  const games = require('./frontend/games-data');
+  const gameLines = games
+    .map(g => `- [${g.title}](https://browsergameshq.com/en/g/${g.slug}) — ${g.category} game, playable free in the browser`)
+    .join('\n');
+
+  const posts = require('./blog/posts');
+  const topGuides = posts
+    .filter(p => p.slug.endsWith('complete-guide'))
+    .slice(0, 40)
+    .map(p => `- [${p.title}](https://browsergameshq.com/blog/${p.slug})`)
+    .join('\n');
+
   res.send(`# BrowserGamesHQ
 
 > Play free online games instantly in your browser. No downloads, no hassle — just fun.
@@ -137,6 +149,18 @@ BrowserGamesHQ is a free online gaming platform featuring thousands of games acr
 - [Puzzle Games](https://browsergameshq.com/en/puzzle-games)
 - [Racing Games](https://browsergameshq.com/en/racing-games)
 - [Sitemap](https://browsergameshq.com/sitemap.xml)
+
+## Popular Game Guides
+${topGuides}
+
+## All Games (${games.length})
+${gameLines}
+
+## Trust Pages
+- [About](https://browsergameshq.com/about)
+- [Contact](https://browsergameshq.com/contact)
+- [Privacy Policy](https://browsergameshq.com/privacy-policy)
+- [Terms of Service](https://browsergameshq.com/terms-of-service)
 `);
 });
 
@@ -177,7 +201,12 @@ app.get('/sitemap.xml', (req, res) => {
     `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${gamePageUrls}\n${blogCatUrls}\n${blogUrls}\n</urlset>`);
+  // Trust pages (local static — indexable, low priority)
+  const trustPageUrls = ['/privacy-policy', '/contact', '/terms-of-service', '/about'].map(p =>
+    `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.2</priority>\n  </url>`
+  ).join('\n');
+
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${gamePageUrls}\n${blogCatUrls}\n${blogUrls}\n${trustPageUrls}\n</urlset>`);
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
