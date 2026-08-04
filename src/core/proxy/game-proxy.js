@@ -306,6 +306,10 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       return response.body.pipe(res);
     }
 
+    // Text responses (game embed HTML + Poki SDK JS) are buffered and rewritten.
+    // Bound concurrency — these bodies are multi-MB and rewriting many at once
+    // spikes memory past Railway's limit.
+    await pageLimiter(async () => {
     const body = await response.buffer();
 
     res.set({
@@ -410,6 +414,7 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
       try { cache.setAsset(cacheKey, { body: body.toString('base64'), contentType }, 86400); } catch(e) {}
     }
     res.send(body);
+    });
   } catch (err) {
     console.error(`[GDN PROXY ERROR] ${req.method} ${req.path}: ${err.message}`);
     res.status(502).send('Asset temporarily unavailable.');
@@ -484,6 +489,7 @@ router.all('*', async (req, res) => {
       return response.body.pipe(res);
     }
 
+    await pageLimiter(async () => {
     const body = await response.buffer();
 
     const cacheControl = isGet ? 'public, max-age=600' : 'no-store';
@@ -575,6 +581,7 @@ router.all('*', async (req, res) => {
       try { cache.setAsset(cacheKey, { body: body.toString('base64'), contentType: upstreamContentType }, 86400); } catch(e) {}
     }
     res.send(body);
+    });
   } catch (err) {
     console.error(`[GAME PROXY ERROR] ${req.method} ${gamePath}: ${err.message}`);
     res.status(502).send('Game temporarily unavailable.');

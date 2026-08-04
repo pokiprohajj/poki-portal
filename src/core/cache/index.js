@@ -83,8 +83,16 @@ function startWatchdog() {
     try {
       const rssMb = process.memoryUsage().rss / 1024 / 1024;
       const heapMb = process.memoryUsage().heapUsed / 1024 / 1024;
+      const heapTotal = process.memoryUsage().heapTotal / 1024 / 1024;
+      const externMb = process.memoryUsage().external / 1024 / 1024;
+      // Log every ~60s to build a memory profile in production logs
+      const now = Math.floor(Date.now() / 1000);
+      if (!global.__memLogLast || now - global.__memLogLast >= 60) {
+        global.__memLogLast = now;
+        console.log(`[MEM] rss=${rssMb.toFixed(0)}MB heap=${heapMb.toFixed(0)}/${heapTotal.toFixed(0)} external=${externMb.toFixed(0)} cache=${(currentSizeBytes / 1024 / 1024).toFixed(1)}MB`);
+      }
       if (rssMb > MEMORY_THRESHOLD_BYTES) {
-        console.log(`[MEMORY] RSS ${rssMb.toFixed(0)}MB > threshold — flushing caches`);
+        console.log(`[MEMORY] RSS ${rssMb.toFixed(0)}MB > threshold ${MEMORY_THRESHOLD_BYTES}MB — flushing caches`);
         flushAll();
         if (global.gc) {
           try { global.gc(); } catch (e) {}
