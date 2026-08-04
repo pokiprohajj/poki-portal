@@ -63,8 +63,9 @@ function trackSize(key, value, cache) {
 
 // Memory-pressure watchdog: if the Node process RSS approaches the container
 // limit, aggressively flush caches to avoid Railway OOM crashes. Checks every
-// 15s. Threshold defaults to ~70% of 512MB (Railway hobby) unless overridden.
-const MEMORY_THRESHOLD_BYTES = parseInt(process.env.MEMORY_THRESHOLD_MB, 10) || 358; // ~0.7 * 512MB
+// 5s (fast enough to react to traffic bursts). Threshold defaults to ~60% of
+// 512MB (Railway hobby) unless overridden.
+const MEMORY_THRESHOLD_BYTES = parseInt(process.env.MEMORY_THRESHOLD_MB, 10) || 300; // ~0.6 * 512MB
 
 function flushAll() {
   const hk = htmlCache.keys();
@@ -90,7 +91,7 @@ function startWatchdog() {
         }
       }
     } catch (e) {}
-  }, 15000);
+  }, 5000);
 }
 startWatchdog();
 

@@ -3,9 +3,15 @@ const fetch = require('node-fetch');
 const https = require('https');
 const config = require('../../config');
 const cache = require('../cache');
+const { createLimiter } = require('../concurrency');
 
 const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 20 });
 const router = express.Router();
+
+// Limit concurrent buffered HTML/JS fetch+parse (cheerio-free here, but the
+// HTML bodies can be multi-MB). Binary assets stream separately and are not
+// limited — they cost no heap.
+const pageLimiter = createLimiter(4);
 
 const GAME_ORIGIN = 'https://games.poki.com';
 

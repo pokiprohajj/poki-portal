@@ -4,7 +4,7 @@
   "description": "Dynamic gaming portal - reverse proxy platform inspired by Poki",
   "main": "src/server.js",
   "scripts": {
-    "start": "node --expose-gc --max-old-space-size=448 src/server.js",
+    "start": "node --expose-gc --max-old-space-size=300 src/server.js",
     "dev": "node --watch src/server.js",
     "lint": "eslint src/",
     "test": "node src/tests/run.js",

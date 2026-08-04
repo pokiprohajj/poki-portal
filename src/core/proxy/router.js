@@ -6,6 +6,11 @@ const config = require('../../config');
 const cache = require('../cache');
 const { rewriteHtml } = require('../rewriter');
 const { injectAds } = require('../ads/injector');
+const { createLimiter } = require('../concurrency');
+
+// Bound concurrent page fetches+cheerio parses — full Poki pages are multi-MB
+// and parsing many at once spikes memory past Railway's limit.
+const pageLimiter = createLimiter(4);
 
 const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 20 });
 const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 20 });
@@ -231,33 +236,36 @@ async function handlePageRequest(req, res) {
   }
 
   try {
-    let html = await fetchSource(sourcePath, req.headers['user-agent'], sourceOrigin);
+    // Bound concurrent heavy page fetches/parses to avoid memory spikes.
+    await pageLimiter(async () => {
+      let html = await fetchSource(sourcePath, req.headers['user-agent'], sourceOrigin);
 
-    // Strip meta refresh tags that redirect to poki.com before JS runs
-    html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');
-    html = html.replace(/<meta[^>]*content\s*=\s*["'][^"']*url\s*=[^"']*poki\.[^"']*["'][^>]*>/gi, '');
+      // Strip meta refresh tags that redirect to poki.com before JS runs
+      html = html.replace(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, '');
+      html = html.replace(/<meta[^>]*content\s*=\s*["'][^"']*url\s*=[^"']*poki\.[^"']*["'][^>]*>/gi, '');
 
-    html = cleanPokiBranding(html, reqPath);
+      html = cleanPokiBranding(html, reqPath);
 
-    if (isContactPage) {
-      html = html.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
-      html = html.replace(/<\/head>/i, '<meta name="robots" content="index, follow"></head>');
-      html = html.replace('</body>', '<style>a[href^="mailto:"]{font-size:16px!important;display:block!important;text-align:center!important}@media(max-width:600px){a[href^="mailto:"]{font-size:14px!important}}</style></body>');
-    }
+      if (isContactPage) {
+        html = html.replace(/<title[^>]*>[^<]*<\/title>/, '<title>Contact BrowserGamesHQ</title>');
+        html = html.replace(/<\/head>/i, '<meta name="robots" content="index, follow"></head>');
+        html = html.replace('</body>', '<style>a[href^="mailto:"]{font-size:16px!important;display:block!important;text-align:center!important}@media(max-width:600px){a[href^="mailto:"]{font-size:14px!important}}</style></body>');
+      }
 
-    html = rewriteHtml(html, reqPath);
+      html = rewriteHtml(html, reqPath);
 
-    html = injectAds(html);
+      html = injectAds(html);
 
-    cache.setHtml(cacheKey, html);
+      cache.setHtml(cacheKey, html);
 
-    res.set({
-      'Content-Type': 'text/html; charset=utf-8',
-      'X-Cache': 'MISS',
-      'Cache-Control': 'public, max-age=600',
-      'X-Robots-Tag': 'index, follow',
+      res.set({
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-Cache': 'MISS',
+        'Cache-Control': 'public, max-age=600',
+        'X-Robots-Tag': 'index, follow',
+      });
+      res.send(html);
     });
-    res.send(html);
   } catch (err) {
     console.error(`[PROXY ERROR] ${sourcePath}: ${err.message}`);
 
