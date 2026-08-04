@@ -29,21 +29,70 @@ function calcSize(value) {
   return 0;
 }
 
+// Evict enough keys (oldest first) to drop current size back under the cap.
+function enforceSizeLimit() {
+  if (currentSizeBytes <= MAX_SIZE_BYTES) return;
+  // Evict oldest keys across both caches until we're under the limit
+  const htmlKeys = htmlCache.keys();
+  const assetKeys = assetCache.keys();
+  let guard = 0;
+  while (currentSizeBytes > MAX_SIZE_BYTES && (htmlKeys.length || assetKeys.length) && guard++ < 2000) {
+    if (htmlKeys.length) {
+      const k = htmlKeys.shift();
+      const v = htmlCache.get(k);
+      if (v !== undefined) currentSizeBytes -= calcSize(v);
+      htmlCache.del(k);
+    }
+    if (assetKeys.length) {
+      const k = assetKeys.shift();
+      const v = assetCache.get(k);
+      if (v !== undefined) currentSizeBytes -= calcSize(v);
+      assetCache.del(k);
+    }
+  }
+}
+
 function trackSize(key, value, cache) {
   const prev = cache.get(key);
   if (prev) currentSizeBytes -= calcSize(prev);
   const size = calcSize(value);
   currentSizeBytes += size;
 
-  if (currentSizeBytes > MAX_SIZE_BYTES) {
-    const keys = cache.keys().slice(0, 50);
-    keys.forEach(k => {
-      const v = cache.get(k);
-      if (v) currentSizeBytes -= calcSize(v);
-      cache.del(k);
-    });
-  }
+  enforceSizeLimit();
 }
+
+// Memory-pressure watchdog: if the Node process RSS approaches the container
+// limit, aggressively flush caches to avoid Railway OOM crashes. Checks every
+// 15s. Threshold defaults to ~70% of 512MB (Railway hobby) unless overridden.
+const MEMORY_THRESHOLD_BYTES = parseInt(process.env.MEMORY_THRESHOLD_MB, 10) || 358; // ~0.7 * 512MB
+
+function flushAll() {
+  const hk = htmlCache.keys();
+  hk.forEach(k => htmlCache.del(k));
+  const ak = assetCache.keys();
+  ak.forEach(k => assetCache.del(k));
+  currentSizeBytes = 0;
+}
+
+let watchdogStarted = false;
+function startWatchdog() {
+  if (watchdogStarted) return;
+  watchdogStarted = true;
+  setInterval(() => {
+    try {
+      const rssMb = process.memoryUsage().rss / 1024 / 1024;
+      const heapMb = process.memoryUsage().heapUsed / 1024 / 1024;
+      if (rssMb > MEMORY_THRESHOLD_BYTES) {
+        console.log(`[MEMORY] RSS ${rssMb.toFixed(0)}MB > threshold — flushing caches`);
+        flushAll();
+        if (global.gc) {
+          try { global.gc(); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  }, 15000);
+}
+startWatchdog();
 
 module.exports = {
   getHtml(key) {
@@ -66,6 +115,10 @@ module.exports = {
 
   invalidate(pattern) {
     htmlCache.keys().filter(k => k.includes(pattern)).forEach(k => htmlCache.del(k));
+  },
+
+  flush() {
+    flushAll();
   },
 
   getStats() {

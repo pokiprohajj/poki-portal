@@ -266,6 +266,38 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
     const response = await fetch(url, fetchOpts);
 
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const isHtml = isGet && contentType.includes('text/html');
+    const isJs = isGet && isPokiHost && (contentType.includes('javascript') || contentType.includes('application/x-javascript') || contentType.includes('text/javascript') || req.path.endsWith('.js'));
+    const isCacheableText = isHtml || isJs;
+
+    // Streaming fast-path for large binary game assets (videos, wasm, images,
+    // audio, fonts). Streaming avoids buffering the whole asset into RAM — the
+    // root cause of Railway OOM crashes under concurrent gameplay.
+    if (!isCacheableText) {
+      const cacheKey = `gdn:${fullPath}`;
+      if (isGet) {
+        const cached = cache.getAsset(cacheKey);
+        if (cached) {
+          res.set({ 'X-Cache': 'HIT', 'Access-Control-Allow-Origin': '*', 'Content-Type': cached.contentType });
+          return res.send(Buffer.from(cached.body, 'base64'));
+        }
+      }
+      res.removeHeader('Content-Security-Policy');
+      res.set({
+        'Content-Type': contentType,
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': isGet ? 'public, max-age=86400' : 'no-store',
+        'X-Cache': 'STREAM',
+      });
+      // For GETs under 1MB, cache for reuse; larger assets always stream.
+      if (isGet && Number(response.headers.get('content-length') || 0) < 1024 * 1024) {
+        const small = await response.buffer();
+        try { cache.setAsset(cacheKey, { body: small.toString('base64'), contentType }, 86400); } catch (e) {}
+        return res.send(small);
+      }
+      return response.body.pipe(res);
+    }
+
     const body = await response.buffer();
 
     res.set({
@@ -415,6 +447,33 @@ router.all('*', async (req, res) => {
     const response = await fetch(url, fetchOpts);
 
     const upstreamContentType = response.headers.get('content-type') || 'application/octet-stream';
+
+    // Streaming fast-path for non-HTML assets from games.poki.com (JS, images,
+    // JSON, videos) — avoids buffering whole files into RAM.
+    const isHtml = isGet && upstreamContentType.includes('text/html');
+    if (!isHtml) {
+      if (isGet) {
+        const cachedAsset = cache.getAsset(cacheKey);
+        if (cachedAsset) {
+          res.set({ 'Content-Type': cachedAsset.contentType, 'Access-Control-Allow-Origin': '*', 'X-Cache': 'HIT', 'Cache-Control': 'public, max-age=600' });
+          return res.send(Buffer.from(cachedAsset.body, 'base64'));
+        }
+      }
+      res.set({
+        'Content-Type': upstreamContentType,
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': isGet ? 'public, max-age=600' : 'no-store',
+        'X-Cache': 'STREAM',
+      });
+      // Cache small responses (<1MB) for reuse; larger assets always stream.
+      if (isGet && Number(response.headers.get('content-length') || 0) < 1024 * 1024) {
+        const small = await response.buffer();
+        try { cache.setAsset(cacheKey, { body: small.toString('base64'), contentType: upstreamContentType }, 86400); } catch (e) {}
+        return res.send(small);
+      }
+      return response.body.pipe(res);
+    }
+
     const body = await response.buffer();
 
     const cacheControl = isGet ? 'public, max-age=600' : 'no-store';

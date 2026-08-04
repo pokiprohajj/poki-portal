@@ -20,7 +20,8 @@ const config = {
   cache: {
     ttl: parseInt(process.env.CACHE_TTL, 10) || 600,
     checkPeriod: parseInt(process.env.CACHE_CHECK_PERIOD, 10) || 60,
-    maxCacheSizeMb: parseInt(process.env.MAX_CACHE_SIZE_MB, 10) || 200,
+    // Keep the in-memory cache small — Railway hobby containers have ~512MB RAM.
+    maxCacheSizeMb: parseInt(process.env.MAX_CACHE_SIZE_MB, 10) || 64,
   },
 
   rateLimit: {
