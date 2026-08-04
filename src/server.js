@@ -24,7 +24,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 app.use(morgan(config.nodeEnv === 'production' ? 'combined' : 'dev'));
-app.use(session({
+
+// Session is ONLY needed for the /admin dashboard. Mounting it globally with the
+// default MemoryStore leaked one in-memory session per visitor (no cleanup for 24h)
+// — the root cause of Railway OOM after hours of production traffic.
+app.use('/admin', session({
   secret: process.env.SESSION_SECRET || 'p0k1_p0rt4l_s3ss10n_s3cr3t',
   resave: false,
   saveUninitialized: false,

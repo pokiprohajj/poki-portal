@@ -301,6 +301,8 @@ router.all('/gdn-proxy/:subdomain(*)', async (req, res) => {
         try { cache.setAsset(cacheKey, { body: small.toString('base64'), contentType }, 86400); } catch (e) {}
         return res.send(small);
       }
+      response.body.on('error', () => { try { res.end(); } catch (e) {} });
+      res.on('close', () => { try { response.body.destroy(); } catch (e) {} });
       return response.body.pipe(res);
     }
 
@@ -477,6 +479,8 @@ router.all('*', async (req, res) => {
         try { cache.setAsset(cacheKey, { body: small.toString('base64'), contentType: upstreamContentType }, 86400); } catch (e) {}
         return res.send(small);
       }
+      response.body.on('error', () => { try { res.end(); } catch (e) {} });
+      res.on('close', () => { try { response.body.destroy(); } catch (e) {} });
       return response.body.pipe(res);
     }
 

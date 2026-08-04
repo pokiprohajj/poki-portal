@@ -95,6 +95,22 @@ function startWatchdog() {
 }
 startWatchdog();
 
+// NodeCache deletes keys on TTL expiry but doesn't report it — our manual byte
+// counter would drift upward forever and never reclaim. Recompute periodically.
+setInterval(() => {
+  let total = 0;
+  for (const k of htmlCache.keys()) {
+    const v = htmlCache.get(k);
+    if (v !== undefined) total += calcSize(v);
+  }
+  for (const k of assetCache.keys()) {
+    const v = assetCache.get(k);
+    if (v !== undefined) total += calcSize(v);
+  }
+  currentSizeBytes = total;
+  enforceSizeLimit();
+}, 60000);
+
 module.exports = {
   getHtml(key) {
     return htmlCache.get(key);
