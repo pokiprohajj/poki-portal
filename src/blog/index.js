@@ -70,7 +70,7 @@ function ctaSection() {
   return `<div class="blog-cta"><div class="cta-inner"><h3>Ready to Play?</h3><p>Jump into hundreds of free browser games — no download, no sign-up, just click and play.</p><a href="/" class="cta-btn">Play Games Now →</a></div></div>`;
 }
 
-function pageHtml(listHtml, hasMore, page, cat) {
+function pageHtml(listHtml, hasMore, page, cat, pageNum) {
   const isCat = cat && CAT_CLASS[cat];
   const loadMoreHtml = hasMore
     ? `<div class="load-more-wrap"><button class="load-more-btn" data-page="${page}"${isCat ? ' data-cat="' + (CAT_CLASS[cat] || '') + '"' : ''} onclick="loadMore(this)"><span class="spinner"></span><span class="btn-text">Load More Articles</span></button></div>`
@@ -78,8 +78,11 @@ function pageHtml(listHtml, hasMore, page, cat) {
   const pageTitle = isCat ? `${CAT_H1[CAT_CLASS[cat]]} - BrowserGamesHQ` : 'Blog - BrowserGamesHQ';
   const pageDesc = isCat ? CAT_DESC[CAT_CLASS[cat]] : 'Game guides, tips, and lists at BrowserGamesHQ. Learn how to master your favorite browser games.';
   const catSchema = isCat ? categorySchema(cat) : '';
+  const indexSchema = isCat ? '' : blogIndexSchema();
+  const introHtml = isCat ? '' : blogIntroHtml();
   const breadcrumbHtml = isCat ? `<div class="breadcrumbs"><a href="/blog">Blog</a><span class="sep">/</span><span class="current">${cat}</span></div>` : '';
   const canonicalUrl = isCat ? `https://browsergameshq.com/blog/category/${CAT_CLASS[cat]}/` : 'https://browsergameshq.com/blog/';
+  const pagination = paginationHtml(pageNum || 1, cat ? totalForCat(cat) : posts.length, 12, cat);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -91,6 +94,7 @@ function pageHtml(listHtml, hasMore, page, cat) {
   <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
   ${webSiteSchema()}
   ${catSchema}
+  ${indexSchema}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.ADSENSE_CLIENT_ID || 'ca-pub-7128312414229788'}" crossorigin="anonymous"></script>
   <!-- Meta Pixel Code -->
   <script>
@@ -133,7 +137,9 @@ ${isCat ? `<div class="badge">${CAT_EMOJI[cat] || '🎮'} ${cat}</div><h1>${CAT_
 </section>
 <div class="blog-container">
 ${breadcrumbHtml}
+${introHtml}
 <div id="post-list">${listHtml}</div>
+${pagination}
 ${loadMoreHtml}
 ${ctaSection()}
 </div>
@@ -180,6 +186,10 @@ function loadMore(btn){
 </html>`;
 }
 
+function totalForCat(cat) {
+  return posts.filter(p => p.category === cat).length;
+}
+
 function renderPostList(pagePosts, page, total, cat) {
   const perPage = 12;
   const totalPages = Math.ceil(total / perPage);
@@ -195,7 +205,7 @@ function renderPostList(pagePosts, page, total, cat) {
     listHtml = `<div class="post-grid">${cards}</div>`;
   }
 
-  return pageHtml(listHtml, hasMore, page + 1, cat);
+  return pageHtml(listHtml, hasMore, page + 1, cat, page);
 }
 
 function renderPostJson(pagePosts, page, total) {
@@ -287,6 +297,40 @@ function categorySchema(cat) {
   const cls = CAT_CLASS[cat] || 'guides';
   const desc = CAT_DESC[cls] || 'Browser game guides and tips';
   return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"${CAT_H1[cls]} - BrowserGamesHQ","description":"${desc}","url":"https://browsergameshq.com/blog/category/${cls}","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Blog","item":"https://browsergameshq.com/blog"},{"@type":"ListItem","position":2,"name":"${cat}","item":"https://browsergameshq.com/blog/category/${cls}"}]},"mainEntity":{"@type":"ItemList","itemListElement":[${posts.filter(p => p.category === cat).slice(0, 10).map((p, i) => `{"@type":"ListItem","position":${i + 1},"url":"https://browsergameshq.com/blog/${p.slug}"}`).join(',')}]}}</script>`;
+}
+
+function blogIndexSchema() {
+  const featured = posts.slice(0, 20);
+  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"BrowserGamesHQ Blog","url":"https://browsergameshq.com/blog/","description":"Game guides, pro tips, reviews, and curated lists for free browser games.","publisher":{"@type":"Organization","name":"BrowserGamesHQ","url":"https://browsergameshq.com"},"blogPost":[${featured.map(p => `{"@type":"BlogPosting","headline":${JSON.stringify(p.title)},"url":"https://browsergameshq.com/blog/${p.slug}","datePublished":"${p.date}"}`).join(',')}]}</script>`;
+}
+
+function blogIntroHtml() {
+  return `<section class="blog-intro">
+<h2>Your Hub for Free Browser Game Guides, Tips and Reviews</h2>
+<p>Welcome to the <strong>BrowserGamesHQ blog</strong> — the go-to resource for players who love free browser games. Every week we publish in-depth <a href="/blog/category/guides">game guides</a>, <a href="/blog/category/lists">curated lists</a>, honest <a href="/blog/category/comparisons">comparisons</a>, and fresh <a href="/blog/category/articles">articles</a> about the best HTML5 games you can play instantly in your browser.</p>
+<p>From action-packed shooters and physics sandboxes to io games, racing sims, dress-up titles, and brain-bending puzzles, our writers break down how to play, master the controls, and win. Whether you are a casual player looking for something fun to play at school or a competitive gamer chasing high scores, you will find step-by-step tutorials and expert-level tips to level up your sessions.</p>
+<p>All of the games we cover are <strong>100% free</strong>, run in any modern browser, and need no download or installation — so you can start playing in seconds. Bookmark this page and check back often: new guides are added every single day.</p>
+<div class="blog-cat-nav">
+<a href="/blog/category/guides" class="cat-nav-link guides">🎮 Guides</a>
+<a href="/blog/category/lists" class="cat-nav-link lists">📋 Lists</a>
+<a href="/blog/category/comparisons" class="cat-nav-link comparisons">⚖️ Comparisons</a>
+<a href="/blog/category/articles" class="cat-nav-link articles">📝 Articles</a>
+</div>
+</section>`;
+}
+
+function paginationHtml(page, total, perPage, cat) {
+  const totalPages = Math.ceil(total / perPage);
+  if (totalPages <= 1) return '';
+  const base = cat ? `/blog/category/${CAT_CLASS[cat]}` : '/blog';
+  const prev = page > 1 ? `<a class="pg-prev" href="${base}?page=${page - 1}">‹ Prev</a>` : '';
+  const next = page < totalPages ? `<a class="pg-next" href="${base}?page=${page + 1}">Next ›</a>` : '';
+  const nums = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === page) nums.push(`<span class="pg-num current">${i}</span>`);
+    else nums.push(`<a class="pg-num" href="${base}?page=${i}">${i}</a>`);
+  }
+  return `<nav class="pagination" aria-label="Blog pages">${prev}${nums.join('')}${next}</nav>`;
 }
 
 function peopleAlsoAsk(post) {
