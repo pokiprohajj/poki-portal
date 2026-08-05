@@ -292,6 +292,11 @@ a:hover{color:var(--accent-dark);text-decoration:underline}
 .cat-nav-link.lists{background:#c62828;color:#fce4ec}
 .cat-nav-link.comparisons{background:#1565c0;color:#e3f2fd}
 .cat-nav-link.articles{background:#2e7d32;color:#e8f5e9}
+.blog-editorial{margin:1.6rem 0 .4rem;padding:1.4rem 1.5rem;border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--radius-sm);background:var(--bg-card)}
+.blog-editorial h3{font-size:1.15rem;font-weight:800;color:var(--text-primary);margin-bottom:.7rem}
+.blog-editorial p{color:var(--text-secondary);line-height:1.7;margin-bottom:.8rem;font-size:.95rem}
+.blog-editorial em{font-style:italic}
+.pg-ellipsis{color:var(--text-secondary);padding:0 .2rem;align-self:center}
 
 /* === PAGINATION === */
 .pagination{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.35rem;margin:2rem 0 .5rem}

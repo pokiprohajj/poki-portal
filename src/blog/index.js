@@ -82,6 +82,7 @@ function pageHtml(listHtml, hasMore, page, cat, pageNum) {
   const introHtml = isCat ? '' : blogIntroHtml();
   const breadcrumbHtml = isCat ? `<div class="breadcrumbs"><a href="/blog">Blog</a><span class="sep">/</span><span class="current">${cat}</span></div>` : '';
   const canonicalUrl = isCat ? `https://browsergameshq.com/blog/category/${CAT_CLASS[cat]}/` : 'https://browsergameshq.com/blog/';
+  const robotsTag = pageNum > 1 ? '<meta name="robots" content="noindex,follow">\n' : '';
   const pagination = paginationHtml(pageNum || 1, cat ? totalForCat(cat) : posts.length, 12, cat);
   return `<!DOCTYPE html>
 <html lang="en">
@@ -90,7 +91,7 @@ function pageHtml(listHtml, hasMore, page, cat, pageNum) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${pageTitle}</title>
 <meta name="description" content="${pageDesc}">
-<link rel="canonical" href="${canonicalUrl}">
+${robotsTag}<link rel="canonical" href="${canonicalUrl}">
   <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
   ${webSiteSchema()}
   ${catSchema}
@@ -243,6 +244,16 @@ function addHeadingIds(content) {
   });
 }
 
+// Replace broken img.poki-cdn.com/placeholder-*.png URLs (HTTP 403) with working
+// placehold.co equivalents so article images actually render. Blog content only.
+function fixBrokenImages(content, category) {
+  const colors = { guides: '5f3dc4/ede9fe', lists: 'c62828/fce4ec', comparisons: '1565c0/e3f2fd', articles: '2e7d32/e8f5e9' };
+  const cls = CAT_CLASS[category] || 'guides';
+  return content.replace(/https:\/\/img\.poki-cdn\.com\/cdn-cgi\/image\/[^"']*?placeholder-([a-z0-9-]+)\.png/g, (m, name) => {
+    return 'https://placehold.co/800x400/' + colors[cls] + '?text=' + encodeURIComponent(name.split('-').slice(0, 2).join(' '));
+  });
+}
+
 function socialShareButtons(slug, title) {
   const url = 'https://browsergameshq.com/blog/' + slug;
   const encodedUrl = encodeURIComponent(url);
@@ -286,7 +297,8 @@ function articleSchema(post) {
 }
 
 function breadcrumbSchema(post) {
-  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Blog","item":"https://browsergameshq.com/blog"},{"@type":"ListItem","position":2,"name":"${post.category}","item":"https://browsergameshq.com/blog"},{"@type":"ListItem","position":3,"name":${JSON.stringify(post.title)},"item":"https://browsergameshq.com/blog/${post.slug}"}]}</script>`;
+  const cls = CAT_CLASS[post.category] || 'guides';
+  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Blog","item":"https://browsergameshq.com/blog"},{"@type":"ListItem","position":2,"name":"${post.category}","item":"https://browsergameshq.com/blog/category/${cls}"},{"@type":"ListItem","position":3,"name":${JSON.stringify(post.title)},"item":"https://browsergameshq.com/blog/${post.slug}"}]}</script>`;
 }
 
 function webSiteSchema() {
@@ -316,6 +328,11 @@ function blogIntroHtml() {
 <a href="/blog/category/comparisons" class="cat-nav-link comparisons">⚖️ Comparisons</a>
 <a href="/blog/category/articles" class="cat-nav-link articles">📝 Articles</a>
 </div>
+<div class="blog-editorial">
+<h3>Why Trust Our Guides</h3>
+<p>Every guide on BrowserGamesHQ is written by people who actually play the game, test the controls, and verify what works on a standard keyboard, mouse, and touchscreen. We do not copy-paste specs from other sites — we focus on the things that matter to a real player: <strong>how to start quickly, which controls actually work, and what habits make you improve fastest</strong>. Where a game changes, we update the guide so you are never reading stale advice.</p>
+<p>If you are new here, the fastest way to get value is to open the guide for any game you are curious about and jump straight to the <em>controls</em> section — then look for the <em>pro tips</em> inside each guide before you play your first round. Curious which games other readers keep coming back to? Browse the <a href="/blog/popular">most popular articles</a>, or filter by what you feel like playing today.</p>
+</div>
 </section>`;
 }
 
@@ -326,8 +343,17 @@ function paginationHtml(page, total, perPage, cat) {
   const prev = page > 1 ? `<a class="pg-prev" href="${base}?page=${page - 1}">‹ Prev</a>` : '';
   const next = page < totalPages ? `<a class="pg-next" href="${base}?page=${page + 1}">Next ›</a>` : '';
   const nums = [];
+  const win = [];
+  const push = i => {
+    if (win.length && win[win.length - 1] === i - 1) { if (win[win.length - 1] !== i) win.push(i); }
+    else { if (win[win.length - 1] !== i - 1 && win.length) win.push('…'); win.push(i); }
+  };
   for (let i = 1; i <= totalPages; i++) {
-    if (i === page) nums.push(`<span class="pg-num current">${i}</span>`);
+    if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) push(i);
+  }
+  for (const i of win) {
+    if (i === '…') nums.push('<span class="pg-ellipsis">…</span>');
+    else if (i === page) nums.push(`<span class="pg-num current">${i}</span>`);
     else nums.push(`<a class="pg-num" href="${base}?page=${i}">${i}</a>`);
   }
   return `<nav class="pagination" aria-label="Blog pages">${prev}${nums.join('')}${next}</nav>`;
@@ -358,7 +384,7 @@ function renderPostPage(post, allPosts) {
       ).join('')}</div></div>`
     : '';
   const toc = tableOfContents(post.content);
-  const contentWithIds = addHeadingIds(post.content);
+  const contentWithIds = fixBrokenImages(addHeadingIds(post.content), post.category);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -374,6 +400,7 @@ function renderPostPage(post, allPosts) {
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://browsergameshq.com/blog/${post.slug}">
 <meta property="og:image" content="${cardImgUrl(post.slug, post.category)}">
+<meta property="og:site_name" content="BrowserGamesHQ">
 <meta property="article:published_time" content="${post.date}">
 <meta property="article:modified_time" content="${post.date}">
 <meta property="article:author" content="BrowserGamesHQ">
@@ -381,6 +408,8 @@ function renderPostPage(post, allPosts) {
 <meta property="article:tag" content="browser games">
 <meta property="article:tag" content="free online games">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${post.title}">
+<meta name="twitter:description" content="${post.excerpt}">
 <meta name="twitter:image" content="${cardImgUrl(post.slug, post.category)}">
   <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
   ${faqSchema(post)}
@@ -499,6 +528,7 @@ function blogRouter(req, res) {
     }
     const pageTitle = 'Popular Articles - BrowserGamesHQ';
     const pageDesc = 'The most popular and comprehensive browser game guides, tips, and articles on BrowserGamesHQ.';
+    const popRobotsTag = page > 1 ? '<meta name="robots" content="noindex,follow">\n' : '';
     const breadcrumbHtml = '<div class="breadcrumbs"><a href="/blog">Blog</a><span class="sep">/</span><span class="current">Popular</span></div>';
     const loadMoreHtml = hasMore ? `<div class="load-more-wrap"><button class="load-more-btn" data-page="${page + 1}" data-popular="1" onclick="loadMore(this)"><span class="spinner"></span><span class="btn-text">Load More Articles</span></button></div>` : '';
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -509,7 +539,7 @@ function blogRouter(req, res) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${pageTitle}</title>
 <meta name="description" content="${pageDesc}">
-<link rel="canonical" href="https://browsergameshq.com/blog/popular">
+${popRobotsTag}<link rel="canonical" href="https://browsergameshq.com/blog/popular">
   <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
   ${webSiteSchema()}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.ADSENSE_CLIENT_ID || 'ca-pub-7128312414229788'}" crossorigin="anonymous"></script>
