@@ -174,7 +174,7 @@ app.get('/sitemap.xml', (req, res) => {
   res.type('application/xml');
   const today = new Date().toISOString().split('T')[0];
 
-  const pages = ['', 'games', 'categories', 'blog/popular'].map(p =>
+  const pages = ['', 'games', 'categories'].map(p =>
     `  <url>\n    <loc>https://${config.domain}/${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`
   ).join('\n');
 
