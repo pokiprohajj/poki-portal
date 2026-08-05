@@ -2,6 +2,7 @@ const posts = require('./posts');
 const { enhanceContent } = require('./posts/generator');
 
 function needsEnhancement(post) {
+  if (post.enhanced) return false;
   return !post.content.includes('<h3>') || !post.content.includes('<strong>') || !post.content.includes('<img');
 }
 
@@ -283,7 +284,7 @@ function faqSchema(post) {
   for (const part of parts) {
     const qm = part.match(/<h2>(.+?)<\/h2>/);
     const am = part.match(/<p>(.+?)<\/p>/);
-    if (qm && am) {
+    if (qm && am && qm[1].replace(/<[^>]+>/g, '').trim().endsWith('?')) {
       qas.push({ question: qm[1].replace(/<[^>]+>/g, ''), answer: am[1].replace(/<[^>]+>/g, '') });
     }
   }
@@ -293,7 +294,9 @@ function faqSchema(post) {
 
 function articleSchema(post) {
   const img = cardImgUrl(post.slug, post.category);
-  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":${JSON.stringify(post.title)},"description":${JSON.stringify(post.excerpt)},"image":${JSON.stringify(img)},"datePublished":"${post.date}","dateModified":"${post.date}","author":{"@type":"Organization","name":"BrowserGamesHQ","url":"https://browsergameshq.com"},"publisher":{"@type":"Organization","name":"BrowserGamesHQ","url":"https://browsergameshq.com","logo":{"@type":"ImageObject","url":"https://browsergameshq.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://browsergameshq.com/blog/${post.slug}"}}</script>`;
+  const authorName = post.author || 'BrowserGamesHQ';
+  const modified = post.lastUpdated || post.date;
+  return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":${JSON.stringify(post.title)},"description":${JSON.stringify(post.excerpt)},"image":${JSON.stringify(img)},"datePublished":"${post.date}","dateModified":"${modified}","author":{"@type":"Organization","name":${JSON.stringify(authorName)},"url":"https://browsergameshq.com"},"publisher":{"@type":"Organization","name":"BrowserGamesHQ","url":"https://browsergameshq.com","logo":{"@type":"ImageObject","url":"https://browsergameshq.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://browsergameshq.com/blog/${post.slug}"}}</script>`;
 }
 
 function breadcrumbSchema(post) {
@@ -365,13 +368,20 @@ function peopleAlsoAsk(post) {
   for (const part of parts) {
     const qm = part.match(/<h2>(.+?)<\/h2>/);
     const am = part.match(/<p>(.+?)<\/p>/);
-    if (qm && am) {
+    if (qm && am && qm[1].replace(/<[^>]+>/g, '').trim().endsWith('?')) {
       qas.push({ q: qm[1].replace(/<[^>]+>/g, ''), a: am[1].replace(/<[^>]+>/g, '') });
     }
   }
   if (!qas.length) return '';
   const items = qas.slice(0, 4).map(qa => `<div class="paq-item"><details><summary>${qa.q}</summary><p>${qa.a}</p></details></div>`).join('');
   return `<div class="paq-section"><h3>People Also Ask</h3>${items}</div>`;
+}
+
+function monthYear(d) {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const parts = String(d).split('-');
+  const m = parseInt(parts[1], 10) - 1;
+  return (months[m] || '') + ' ' + (parts[0] || '');
 }
 
 function renderPostPage(post, allPosts) {
@@ -402,8 +412,8 @@ function renderPostPage(post, allPosts) {
 <meta property="og:image" content="${cardImgUrl(post.slug, post.category)}">
 <meta property="og:site_name" content="BrowserGamesHQ">
 <meta property="article:published_time" content="${post.date}">
-<meta property="article:modified_time" content="${post.date}">
-<meta property="article:author" content="BrowserGamesHQ">
+<meta property="article:modified_time" content="${post.lastUpdated || post.date}">
+<meta property="article:author" content="${post.author || 'BrowserGamesHQ'}">
 <meta property="article:tag" content="${post.category}">
 <meta property="article:tag" content="browser games">
 <meta property="article:tag" content="free online games">
@@ -469,6 +479,11 @@ BrowserGamesHQ
 <span class="dot"></span>
 <span>${post.readingTime || 3} min read</span>
 </div>
+${post.author ? `<div class="article-byline">
+<span class="ab-author">By ${post.author}</span>
+${post.lastUpdated ? `<span class="ab-sep">·</span><span class="ab-updated">Last updated ${monthYear(post.lastUpdated)}</span>` : ''}
+<span class="ab-sep">·</span><span class="ab-reviewed">Edited &amp; fact-checked</span>
+</div>` : ''}
 </div>
 <div class="article-body">${toc}${contentWithIds}</div>
 ${socialShareButtons(post.slug, post.title)}

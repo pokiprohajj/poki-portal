@@ -1,3 +1,7 @@
+const phase1A = require('./posts/phase1-a');
+const phase1B = require('./posts/phase1-b');
+const phase1C = require('./posts/phase1-c');
+const phase1D = require('./posts/phase1-d');
 const pokiImport = require('./posts/poki-import');
 const original = require('./posts/original');
 const tips = require('./posts/tips');
@@ -21,7 +25,7 @@ const seo4 = require('./posts/seo4');
 const seo5 = require('./posts/seo5');
 const seo6 = require('./posts/seo6');
 
-const all = [].concat(pokiImport, original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5, bulk6, pillar, bulk7, bulk7Extra, seo1, seo2, seo3, seo4, seo5, seo6);
+const all = [].concat(phase1A, phase1B, phase1C, phase1D, pokiImport, original, tips, lists, comparisons, evergreen, challenges, bulk, bulk2, bulk3, bulk4, bulk5, bulk6, pillar, bulk7, bulk7Extra, seo1, seo2, seo3, seo4, seo5, seo6);
 
 // Deduplicate by slug — keep first occurrence, drop later duplicates.
 // Duplicate slugs waste crawl budget and create sitemap/canonical confusion.
