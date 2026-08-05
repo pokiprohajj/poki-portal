@@ -20,7 +20,6 @@ module.exports = [
 <li><strong>Platform:</strong> Windows, Mac, Linux, Chromebook, Android, iOS</li>
 <li><strong>Best for:</strong> Quick sessions, low-storage devices, school and work computers</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A browser tab showing a game ready to play with no install prompt</p>
 <h2>What "No Download" Actually Means</h2>
 <p>When a game runs without a download, the code is not stored on your machine. The page streams the game to your browser over the internet, and your browser runs it using open web standards — HTML5 for structure, JavaScript for logic, and WebGL or WebGPU for graphics. Nothing permanent is written to your hard drive. Close the tab and the game is gone; reopen it and you start fresh, usually right where a saved session put you.</p>
 <h3>Instant Play Is the Whole Model</h3>
@@ -105,7 +104,6 @@ module.exports = [
 <li><strong>Session size:</strong> 2–15 minutes per puzzle</li>
 <li><strong>Best for:</strong> Quick mental breaks and daily brain workouts</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A puzzle game grid mid-solve, showing a nearly complete board</p>
 <h2>What Makes a Great Browser Puzzle Game</h2>
 <p>The best puzzle games share three traits regardless of genre. They teach their rule in the first ten seconds instead of a tutorial wall. They give instant feedback when you are wrong, so failing is educational rather than frustrating. And they scale difficulty smoothly enough that you always feel one step away from a breakthrough. A browser puzzler that hits those three notes will hold you longer than most story-driven games.</p>
 <h2>Logic and Physics Puzzlers</h2>
@@ -178,7 +176,6 @@ module.exports = [
 <li><strong>Session size:</strong> 5–30 minutes</li>
 <li><strong>Best for:</strong> Friends who want zero-friction sessions</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A split-screen browser match with two players mid-round</p>
 <h2>Why Browser Multiplayer Finally Works</h2>
 <p>Multiplayer used to be the browser genre's weak spot — lag, matchmaking walls, and clunky lobbies. Modern browser games solved this by keeping lobbies lightweight and rooms link-based. You create a room, send the link, and friends join from a phone, a Chromebook, or a desktop with nothing but a browser. There is no barrier to entry and no penalty for playing badly, which is exactly what party gaming needs.</p>
 <h2>Best for Two Friends Going Head-to-Head</h2>
@@ -252,7 +249,6 @@ module.exports = [
 <li><strong>Time to fix:</strong> 1–5 minutes in most cases</li>
 <li><strong>Best for:</strong> Anyone whose game shows a blank screen, spinner, or error</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A browser tab showing an error page next to the working game page</p>
 <h2>The Five-Minute Reset Checklist</h2>
 <p>Before anything clever, do the boring stuff — it genuinely fixes most cases:</p>
 <ol>
@@ -310,7 +306,6 @@ module.exports = [
 <li><strong>Why it works:</strong> Games stream and scale to your hardware</li>
 <li><strong>Best for:</strong> Old laptops, work machines, Chromebooks, budget desktops</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A lightweight game running smoothly on an older laptop</p>
 <h2>Why Browser Games Fit Low-End Hardware</h2>
 <p>Three reasons make browser games the natural home for weak machines. First, they scale — most titles detect your hardware and lower their detail automatically, something few installers bother with. Second, they are light by design, because developers know browsers run on everything from phones to workstations. Third, they leave nothing running when you stop: no background services, no updaters chewing your RAM in the tray. Close the tab and your system is exactly as free as before.</p>
 <h3>What to Look For</h3>

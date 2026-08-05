@@ -21,7 +21,6 @@ module.exports = [
 <li><strong>Session size:</strong> 5–30 minutes, anytime</li>
 <li><strong>Best for:</strong> Grandparents, older relatives, and anyone who prefers unhurried play</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A senior playing a calm puzzle game on a tablet</p>
 <h2>What Makes a Game Senior-Friendly</h2>
 <p>Four things separate a good game for older players from a frustrating one. Simple controls — ideally one tap, click, or swipe. No timer pressure, or at least a pause button that actually works. Readable text and generous spacing. And a difficulty curve that rewards patience instead of punishing slowness. Games that match those criteria are the ones seniors finish, enjoy, and ask to play again — and they are also, not coincidentally, the gentlest way to stay mentally active.</p>
 <h2>The Best Games to Start With</h2>
@@ -80,7 +79,6 @@ module.exports = [
 <li><strong>Platform:</strong> Any modern browser</li>
 <li><strong>Best for:</strong> Weak home networks, mobile hotspots, and unstable connections</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A lightweight browser game loading on a weak connection meter</p>
 <h2>Why Some Games Survive Slow Connections</h2>
 <p>Two things decide whether a game plays on a weak connection: how much it has to download and whether it streams more later. Games with small asset files load quickly even on slow links, because they pull everything they need up front. Games that stream — videos, live multiplayer, huge texture packs — keep needing bandwidth after the page opens, which is why they stutter and freeze. The safest titles are the ones that fit in a small download and never ask for more.</p>
 <h2>What to Look For in a Slow-Connection Game</h2>
@@ -151,7 +149,6 @@ module.exports = [
 <li><strong>Session size:</strong> 5–30 minutes</li>
 <li><strong>Best for:</strong> Settling who is actually better, once and for all</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A head-to-head browser match with a live scoreboard</p>
 <h2>The Three Competitive Formats</h2>
 <p>Every great rivalry fits one of three formats. Head-to-head duels decide a winner in one direct match. Score challenges compare the same run and crown the best score, which works even for single-player games. Elimination brackets stretch a group into a proper tournament. Choose the format before the game — it decides which titles below fit your session.</p>
 <h2>Best for Head-to-Head Duels</h2>
@@ -220,9 +217,8 @@ module.exports = [
 <li><strong>Cost:</strong> Free, with optional purchases</li>
 <li><strong>Best for:</strong> Players chasing high scores and world-tour collectibles</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A Subway Surfers run mid-flight with a hoverboard active</p>
 <h2>Subway Surfers at a Glance</h2>
-<p>You play as a young graffiti artist sprinting through subway tunnels, swiping to switch lanes, jumping, and sliding to dodge oncoming trains and barriers. Coins litter the track, and collecting them funds characters, hoverboards, and upgrades. Every few weeks the game ships a new world-tour update with a fresh location, character, and event. The core loop has stayed the same for a decade, and it is still the best-known endless runner in the world — the <a href="/blog/subway-surfers-complete-guide">complete Subway Surfers guide</a> covers the full game in detail.</p>
+<p>You play as a young graffiti artist sprinting through subway tunnels, swiping to switch lanes, jumping, and sliding to dodge oncoming trains and barriers. Coins litter the track, and collecting them funds characters, hoverboards, and upgrades. Every few weeks the game ships a new world-tour update with a fresh location, character, and event. The core loop has stayed the same for a decade, and it is still the best-known endless runner in the world — the <a href="/blog/subway-surfers-complete-guide">complete Subway Surfers guide</a> covers the full game in detail. The browser build keeps the full feature set — characters, hoverboards, and world tours included — with no install and no storage footprint, so a quick session is always one tab away.</p>
 <h2>Frequently Asked Questions</h2>
 <h2>Is Subway Surfers free to play?</h2>
 <p>Yes, Subway Surfers is completely free with optional in-app purchases. The entire game is playable without spending anything — purchases are convenience and cosmetics, not requirements. The browser version on BrowserGamesHQ is free with no download needed.</p>
@@ -268,7 +264,6 @@ module.exports = [
 <li><strong>Cost:</strong> Free, with optional purchases</li>
 <li><strong>Best for:</strong> Players who like building a franchise, not just playing a game</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> The Retro Bowl roster screen with player ratings and salary</p>
 <h2>Retro Bowl at a Glance</h2>
 <p>You are both head coach and general manager. On the field you call plays and throw passes in a simplified arcade engine; off the field you draft players, manage the salary cap, upgrade facilities, and keep your roster healthy. The balance between the two is the game — a stacked roster with no budget discipline collapses, and a frugal roster with no playmakers never wins. Seasons run as a full schedule of games, and between them the offseason turns into a management round of drafting, signing, and facility upgrades that decides whether the next championship is plausible or a fantasy. The <a href="/blog/retro-bowl-complete-guide">complete Retro Bowl guide</a> goes deep on the full management loop.</p>
 <h2>Frequently Asked Questions</h2>

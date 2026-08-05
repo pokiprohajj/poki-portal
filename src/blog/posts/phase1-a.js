@@ -22,7 +22,6 @@ module.exports = [
 <li><strong>Estimated play time:</strong> 3–6 minutes per run</li>
 <li><strong>Best for:</strong> Players who want dense coin trails and score chasing</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> Holi Festival starting area with colored powder lining the track</p>
 <h2>What the Holi Event Changes (and What Stays the Same)</h2>
 <p>The controls and core loop are identical to the base game. Swipe to turn, swipe up to jump, swipe down to slide, and tilt on mobile to steer through the air. What the event reworks is the <strong>level generation</strong>: the coin strings are built on longer, loftier arcs and the hazard groups fire off in faster succession. The practical upshot is that sticking to the middle lane pays off more than ever, because the edge lanes funnel you into the widest of those coin arcs — and into the obstacles planted right behind them.</p>
 <h3>Read the Ground, Not the Horizon</h3>
@@ -148,7 +147,6 @@ module.exports = [
 <li><strong>Estimated play time:</strong> 3–6 minutes per run</li>
 <li><strong>Best for:</strong> Veterans who found the base map too easy</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> The fogged mountain pass at the start of Spooky Summit</p>
 <h2>How Spooky Summit Differs From the Base Map</h2>
 <p>Three changes define this map, and none of them are cosmetic:</p>
 <ul>

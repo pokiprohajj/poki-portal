@@ -20,7 +20,6 @@ module.exports = [
 <li><strong>Platform:</strong> Any modern browser on any device</li>
 <li><strong>Best for:</strong> Players curious about how the tab became a gaming platform</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A timeline graphic showing browser gaming eras from 2000 to 2026</p>
 <h2>The Flash Era: 2000–2010</h2>
 <p>Flash was the browser gaming platform for a decade, and its strengths defined the genre's early identity. Animations were smooth, physics felt approachable, and a single small file could contain an entire game. Sites with simple names like "gaming portal" became the default destination for school and office procrastinators. The limits were just as defining: plugin dependencies, inconsistent performance, and a reputation for running like treacle on anything but a fast desktop.</p>
 <h3>Why Flash Left a Generation Hooked</h3>
@@ -71,7 +70,6 @@ module.exports = [
 <li><strong>Estimated play time:</strong> 2–4 minutes per attempt</li>
 <li><strong>Best for:</strong> Players who like physics challenges and clean runs</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A Drive Mad car balanced on a ramp mid-jump</p>
 <h2>Understanding Drive Mad's Physics</h2>
 <p>Every track in Drive Mad punishes the same mistakes because they all come from one source: momentum. Your car's center of gravity decides how easily it tips, and every input — acceleration, brake, tilt — changes where that weight sits. Long vehicles stay planted but turn sluggishly; short ones flip easily but handle agilely. On jump-heavy sections a lighter car flies further but lands harder, while a heavier one powers through obstacles but climbs slower. Choosing a car that matches the track is half the battle; the rest is not fighting your own momentum.</p>
 <h3>The Two Golden Rules</h3>
@@ -132,7 +130,6 @@ module.exports = [
 <li><strong>Estimated play time:</strong> 3–6 minutes per race</li>
 <li><strong>Best for:</strong> Players who like progression and vehicle tuning</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> The Monster Tracks garage screen with upgrade categories</p>
 <h2>How the Upgrade System Works</h2>
 <p>Monster Tracks upgrades split into a few clear categories: tires for traction, suspension for landings, engine for acceleration and top speed, and handling for steering. Each category costs coins, and prices rise as you invest. The system rewards depth over breadth — a truck with two fully upgraded areas beats one with six mediocre ones on most tracks. The practical implication: decide what your truck is for, then commit to the categories that serve that purpose.</p>
 <h2>The Upgrade Order That Wins</h2>
@@ -208,7 +205,6 @@ module.exports = [
 <li><strong>Estimated play time:</strong> 10–20 minutes per case</li>
 <li><strong>Best for:</strong> Players who enjoy logic and deduction puzzles</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> A Murder crime scene with clues highlighted</p>
 <h2>How a Murder Case Actually Works</h2>
 <p>Every case follows the same loop: examine the scene, interview witnesses, collect evidence, and cross-reference what you find until one explanation covers all of it. The game is deliberately generous with information — there is always enough to solve the case — and deliberately unfair with relevance. Most of what you collect will not matter. The skill is not gathering clues; it is deciding which clues earn the right to drive your conclusion.</p>
 <h2>The Early Cases: Learning the Loop</h2>
@@ -271,7 +267,6 @@ module.exports = [
 <li><strong>Estimated play time:</strong> 2–10 minutes per level</li>
 <li><strong>Best for:</strong> Players who enjoy physics and spatial puzzles</li>
 </ul></div>
-<p class="screenshot-note"><strong>Screenshot:</strong> An Apple Worm level with the worm mid-swing toward the apple</p>
 <h2>How Apple Worm's Physics Work</h2>
 <p>The worm is a chain of segments with a head and a tail, and it moves by stretching, grabbing, and releasing. Three properties rule every level: momentum, which the worm builds by swinging back and forth; elasticity, which lets the body compress and launch; and gravity, which determines how far a release carries you. Nearly every solution is a version of the same move — build a swing, time the release, and let the arc carry you where you need to go.</p>
 <h2>Early Levels (1–10): Learning to Swing</h2>
