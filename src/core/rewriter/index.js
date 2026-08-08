@@ -48,7 +48,8 @@ function rewriteHtml(html, sourcePath) {
 
   // Pass 1: Remove only ad-related scripts by src URL pattern (scripts aren't tracked by React hydration)
   // NOTE: Skip DOM element stripping — Poki's React SPA requires the full server HTML for hydration.
-  // Client-side portal-ad-blocker script handles ad element removal + Adsense injection after mount.
+  // The React-safe ad manager in the portal-iframe-rw script claims Poki's ad containers
+  // AFTER React mounts and defends them against re-renders (see Pass 9d).
 
   // Remove ad scripts by URL pattern
   $('script').each(function () {
@@ -384,32 +385,125 @@ function rewriteHtml(html, sourcePath) {
       'arguments[1]=rw(u)||u;return ox.apply(this,arguments)};' +
       'var clientId=' + JSON.stringify(config.ads.adsenseClientId || '') + ';' +
       'var slots={"728x90":' + JSON.stringify(config.ads.slotLeaderboard || '') + ',"300x250":' + JSON.stringify(config.ads.slotRectangle || '') + ',"160x600":' + JSON.stringify(config.ads.slotSkyscraper || '') + '};' +
-      'function nukeAndReplace(){' +
-      'if(!clientId)return;' +
-      'var targets=document.querySelectorAll(".poki-ad-slot,[data-poki-ad-size]");' +
-      'for(var i=0;i<targets.length;i++){var t=targets[i];' +
-      'if(t.querySelector&&t.querySelector("ins.adsbygoogle"))continue;' +
-      'var sizeAttr=t.getAttribute("data-poki-ad-size")||"";' +
-      'var slot=slots[sizeAttr];if(!slot)continue;' +
-      'var w=sizeAttr.split("x")[0]||"300";var h=sizeAttr.split("x")[1]||"250";' +
-      'var c=document.createElement("div");' +
-      'c.style.cssText="width:"+w+"px;height:"+h+"px;overflow:hidden;";' +
-      'var ins=document.createElement("ins");ins.className="adsbygoogle";' +
-      'ins.style.display="inline-block";ins.style.width=w+"px";ins.style.height=h+"px";' +
-      'ins.setAttribute("data-ad-client",clientId);ins.setAttribute("data-ad-slot",slot);' +
-      'c.appendChild(ins);' +
-      't.parentNode.replaceChild(c,t);' +
-      'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}' +
-      'nukeAndReplace();' +
-      'var adObs=new MutationObserver(function(muts){' +
-      'for(var i=0;i<muts.length;i++){var added=muts[i].addedNodes;' +
-      'for(var j=0;j<added.length;j++){var n=added[j];' +
-      'if(n.nodeType!==1)continue;' +
-      'if((n.classList&&(n.classList.contains("poki-ad-slot")||(n.hasAttribute&&n.hasAttribute("data-poki-ad-size"))))||' +
-      '(n.querySelectorAll&&(n.querySelectorAll(".poki-ad-slot,[data-poki-ad-size]").length>0))){' +
-      'nukeAndReplace();break}}}});' +
-      'adObs.observe(document.documentElement||document.body,{childList:true,subtree:true});' +
-      'setInterval(nukeAndReplace,1000);' +
+      // React-safe AdSense manager (v2). Poki's React app hydrates the game page and,
+      // during hydration adoption, WIPES any server-rendered children out of the gp_*
+      // ad containers (one-time, observed in production ~1-3s after load, before the
+      // game iframe appears). Re-attaching a wiped <ins> makes AdSense fire a NEW fill,
+      // so we never restore. Instead we CLAIM containers only AFTER the app has hydrated
+      // (game iframe present, or 12s fallback) so React never sees the <ins> to remove
+      // it; each container is claimed once (WeakMap) and survives re-renders + SPA route
+      // changes. If a claimed <ins> is still removed, we re-claim after a 5s quiet window.
+      // Pushes are gated on the AdSense loader having loaded: pushing into the queue
+      // while the async loader is still loading can leave stale pushes that fire "all
+      // ins already have ads" after React wipes the original <ins> before the loader
+      // processes them. flush() pushes only for ins we created, still connected, and
+      // not yet pushed.
+      `if(clientId){
+        var claimed=new WeakMap();
+        var claimedList=[];
+        var loaderAdded=false;
+        var loaderLoaded=false;
+        var bootTime=(new Date()).getTime();
+        function loadAdLoader(){
+        if(loaderAdded)return;
+        loaderAdded=true;
+        if(document.querySelector("script[src*=adsbygoogle]")){loaderLoaded=true;return;}
+        if(window.adsbygoogle&&window.adsbygoogle.loaded){loaderLoaded=true;return;}
+        var s=document.createElement("script");
+        s.async=true;
+        s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client="+encodeURIComponent(clientId);
+        s.onload=s.onerror=function(){loaderLoaded=true;flush();};
+        (document.head||document.documentElement).appendChild(s);}
+        function pushFor(el){
+        var ins=claimed.get(el);
+        if(!ins||!ins.isConnected||ins.__bghPushed)return;
+        ins.__bghPushed=true;
+        try{(window.adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}
+        function flush(){
+        for(var i=0;i<claimedList.length;i++){var el=claimedList[i];
+        if(!claimed.has(el))continue;
+        pushFor(el);}}
+        function slotSize(el){
+        var s=el.getAttribute&&el.getAttribute("data-poki-ad-size")||"";
+        if(s)return s;
+        var id=el.id||"";
+        if(id==="gp_728x90")return "728x90";
+        if(id==="gp_300x250")return "300x250";
+        if(id==="gp_160x600")return "160x600";
+        if(el.style&&el.style.width&&el.style.height){var w=parseInt(el.style.width),h=parseInt(el.style.height);
+        if(w&&h)return w+"x"+h;}
+        var st=el.getAttribute&&el.getAttribute("style")||"";
+        var mw=st.match(/width:\\s*(\\d+)/),mh=st.match(/height:\\s*(\\d+)/);
+        if(mw&&mh)return mw[1]+"x"+mh[1];
+        return "";}
+        function buildIns(size,slot){
+        var p=size.split("x");
+        var ins=document.createElement("ins");
+        ins.className="adsbygoogle";
+        ins.style.display="inline-block";
+        ins.style.width=p[0]+"px";
+        ins.style.height=p[1]+"px";
+        ins.setAttribute("data-ad-client",clientId);
+        ins.setAttribute("data-ad-slot",slot);
+        return ins;}
+        function appHydrated(){
+        if(Date.now()-bootTime>12000)return true;
+        var ifs=document.querySelectorAll("iframe");
+        for(var i=0;i<ifs.length;i++){
+        var u=ifs[i].getAttribute("src")||"";
+        if(u&&u!=="about:blank"&&u.indexOf("javascript:")!==0)return true;}
+        return false;}
+        function claim(el){
+        if(!el||!el.isConnected||claimed.has(el)||el.children.length>0)return;
+        if(!appHydrated())return;
+        if(el.__wipeAt&&Date.now()-el.__wipeAt<5000)return;
+        var size=slotSize(el),slot=slots[size];
+        if(!slot)return;
+        var ins=buildIns(size,slot);
+        ins.__bghContainer=el;
+        el.appendChild(ins);
+        claimed.set(el,ins);
+        claimedList.push(el);
+        loadAdLoader();
+        if(loaderLoaded)pushFor(el);}
+        function nukeHouseAds(){
+        var els=document.querySelectorAll(".poki-ad-slot,[data-poki-ad-size]");
+        for(var i=0;i<els.length;i++){var el=els[i];
+        if(!claimed.has(el)&&el.parentNode)el.parentNode.removeChild(el);}}
+        function ensureAds(){
+        nukeHouseAds();
+        var els=document.querySelectorAll("#gp_728x90,#gp_300x250,#gp_160x600,.poki-ad-slot,[data-poki-ad-size]");
+        for(var i=0;i<els.length;i++)claim(els[i]);}
+        var adObs=new MutationObserver(function(muts){
+        for(var i=0;i<muts.length;i++){
+        var rem=muts[i].removedNodes;
+        for(var j=0;j<rem.length;j++){
+        var rn=rem[j];
+        if(!rn||rn.nodeType!==1)continue;
+        if(rn.__bghContainer){
+        var el=rn.__bghContainer;
+        claimed.delete(el);
+        var ix=claimedList.indexOf(el);if(ix>-1)claimedList.splice(ix,1);
+        if(el&&el.isConnected)el.__wipeAt=Date.now();}
+        else if(rn.querySelectorAll){
+        var own=rn.querySelectorAll("ins.adsbygoogle");
+        for(var k=0;k<own.length;k++){
+        var ins=own[k];
+        var c=ins.__bghContainer;
+        if(c){claimed.delete(c);
+        var ix2=claimedList.indexOf(c);if(ix2>-1)claimedList.splice(ix2,1);
+        if(c&&c.isConnected)c.__wipeAt=Date.now();}}}}
+        var add=muts[i].addedNodes;
+        for(var j=0;j<add.length;j++){
+        var n=add[j];
+        if(!n||n.nodeType!==1)continue;
+        if(n.id==="gp_728x90"||n.id==="gp_300x250"||n.id==="gp_160x600"||(n.classList&&(n.classList.contains("poki-ad-slot")||n.hasAttribute("data-poki-ad-size")))){claim(n);}
+        else if(n.querySelectorAll){
+        var q=n.querySelectorAll("#gp_728x90,#gp_300x250,#gp_160x600,.poki-ad-slot,[data-poki-ad-size]");
+        for(var l=0;l<q.length;l++)claim(q[l]);}}}});
+        try{adObs.observe(document.documentElement||document.body,{childList:true,subtree:true})}catch(e){}
+        setTimeout(ensureAds,300);
+        setInterval(ensureAds,2000);}` +
       '})();</script>');
   }
 
@@ -481,120 +575,6 @@ function rewriteTwitterCards($, sourceDomain, targetDomain) {
       $(this).attr('content', content.replace(/Poki/gi, 'BrowserGamesHQ'));
     }
   });
-}
-
-function replaceGamePageAds($, sourcePath) {
-  var hasAd = false;
-  ['gp_728x90', 'gp_300x250', 'gp_160x600'].forEach(function (id) {
-    if ($('#' + id).length) hasAd = true;
-  });
-  var isGamePage = typeof sourcePath === 'string' && (sourcePath.match(/\/[a-z]{2}\/g\/.+/i) || sourcePath.indexOf('/g/') !== -1);
-  if (!hasAd && !isGamePage) return;
-  if (!$('head').length) return;
-  // Nullify Poki house ad data in INITIAL_STATE before React boots
-  // Keep gp_* containers empty for React hydration (don't inject ad units here - React would break)
-  // Inject MutationObserver to block Poki ad networks and set up our own ad injection
-  var clientId = config.ads.adsenseClientId;
-  $('head').append('<script id="portal-ad-blocker">' +
-    '(function(){' +
-    // Step 1: Nullify house ad replacement data
-    'var s=window.INITIAL_STATE;' +
-    'if(s&&s.background){' +
-    'var cfg=s.background;' +
-    'for(var k in cfg){' +
-    'if(k.indexOf("getImvitaConfigs")!==-1||k.indexOf("Imvita")!==-1){' +
-    'var d=cfg[k];' +
-    'if(d&&d.data){for(var id in d.data){if(d.data[id]&&d.data[id].replacements){d.data[id].replacements={}}}}' +
-    '}}' +
-    '}' +
-    'if(s&&s.ads){s.ads.takeover=null}' +
-    // Step 2a: Rewrite games.poki.com URLs in INITIAL_STATE before React reads them
-    'var gp="games.poki.com";var pp="/game-proxy";' +
-    'function rewriteGameUrls(o){' +
-    'if(typeof o==="string"&&o.indexOf(gp)!==-1){return o.replace("https://"+gp,pp).replace("http://"+gp,pp).replace("//"+gp,pp)}' +
-    'if(o&&typeof o==="object"){for(var k in o){if(o.hasOwnProperty(k)){var v=rewriteGameUrls(o[k]);if(v!==o[k]){o[k]=v}}}' +
-    '}return o}' +
-    'setTimeout(function(){if(window.INITIAL_STATE)rewriteGameUrls(window.INITIAL_STATE)},0);' +
-    // Step 2b: Keep gp_* containers empty for React hydration, then inject our ads after React mounts
-    'var c=["gp_728x90","gp_300x250","gp_160x600"];' +
-    'var cc=["okjidGhocmXN7zKxDo6s"];' +
-    'function nukePokiAds(){' +
-    'var pa=document.querySelectorAll(".poki-ad-slot,[data-poki-ad-size]");' +
-    'for(var i=0;i<pa.length;i++){var el=pa[i];if(el.parentNode)el.parentNode.removeChild(el)}' +
-    '}' +
-    'function emptyContainers(){' +
-    'for(var i=0;i<c.length;i++){var el=document.getElementById(c[i]);if(el&&el.children.length>0&&!el.querySelector("ins.adsbygoogle")){el.innerHTML=""}}' +
-    'for(var i=0;i<cc.length;i++){var els=document.querySelectorAll("."+cc[i]);for(var j=0;j<els.length;j++){if(els[j].children.length>0&&!els[j].querySelector("ins.adsbygoogle")){els[j].innerHTML=""}}}' +
-    '}' +
-    // Step 3: Inject our AdSense ads into empty containers
-    'var clientId=' + JSON.stringify(clientId) + ';' +
-    'var slots={"728x90":' + JSON.stringify(config.ads.slotLeaderboard) + ',"300x250":' + JSON.stringify(config.ads.slotRectangle) + ',"160x600":' + JSON.stringify(config.ads.slotSkyscraper) + '};' +
-    'function injectOurAds(){' +
-    'nukePokiAds();emptyContainers();' +
-    'for(var i=0;i<c.length;i++){var el=document.getElementById(c[i]);if(el&&el.children.length===0){' +
-    'var w=el.style&&el.style.width?parseInt(el.style.width):0;' +
-    'var h=el.style&&el.style.height?parseInt(el.style.height):0;' +
-    'if(!w||!h){var style=(el.getAttribute("style")||"");var mw=style.match(/width:\\s*(\\d+)/);var mh=style.match(/height:\\s*(\\d+)/);if(mw&&mh){w=parseInt(mw[1]);h=parseInt(mh[1])}}' +
-    'var key=w+"x"+h;var slot=slots[key];' +
-    'if(slot&&clientId){' +
-    'var ins=document.createElement("ins");' +
-    'ins.className="adsbygoogle";' +
-    'ins.style.display="inline-block";' +
-    'ins.style.width=w+"px";' +
-    'ins.style.height=h+"px";' +
-    'ins.setAttribute("data-ad-client",clientId);' +
-    'ins.setAttribute("data-ad-slot",slot);' +
-    'el.appendChild(ins);' +
-    'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}}}' +
-    // Inject into okjid* containers
-    'var els=document.querySelectorAll(".okjidGhocmXN7zKxDo6s");' +
-    'for(var i=0;i<els.length;i++){var el=els[i];' +
-    'if(el.children.length===0){' +
-    'var style=(el.getAttribute("style")||"");' +
-    'var mw=style.match(/width:\\s*(\\d+)/);' +
-    'var mh=style.match(/height:\\s*(\\d+)/);' +
-    'if(mw&&mh){var key=mw[1]+"x"+mh[1];var slot=slots[key];' +
-    'if(slot&&clientId){' +
-    'var ins=document.createElement("ins");' +
-    'ins.className="adsbygoogle";' +
-    'ins.style.display="inline-block";' +
-    'ins.style.width=mw[1]+"px";' +
-    'ins.style.height=mh[1]+"px";' +
-    'ins.setAttribute("data-ad-client",clientId);' +
-    'ins.setAttribute("data-ad-slot",slot);' +
-    'el.appendChild(ins);' +
-    'try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}}}}' +
-    // Block Poki-specific ad networks
-    'var p=["ads.poki.com","ads.poki-cdn.com","taboola","outbrain","criteo","moatads","adnxs","adsrvr","prebid","amazon-adsystem"];' +
-    // Rewrite games.poki.com iframes to go through our proxy (prevents embed fallback)
-    'function rewriteGameIframe(el){' +
-    'if(el.tagName==="IFRAME"&&el.src&&el.src.indexOf(gp)!==-1){' +
-    'var newSrc=el.src.replace("https://"+gp,"").replace("http://"+gp,"");' +
-    'if(newSrc.indexOf("/")!==0)newSrc="/"+newSrc;' +
-    'el.src=pp+newSrc;return true}return false}' +
-    'function matchUrl(u){if(!u)return false;for(var i=0;i<p.length;i++){if(u.indexOf(p[i])!==-1)return true}return false}' +
-    'var o=new MutationObserver(function(m){' +
-    'for(var i=0;i<m.length;i++){var mut=m[i];' +
-    'for(var j=0;j<mut.addedNodes.length;j++){var n=mut.addedNodes[j];' +
-    'if(n.tagName==="SCRIPT"&&n.src&&matchUrl(n.src)){n.type="text/placeholder";n.src="";try{n.remove()}catch(e){}}' +
-    'if(n.tagName==="IFRAME"&&n.src){' +
-    'if(rewriteGameIframe(n)){}else if(matchUrl(n.src)){n.src="about:blank";try{n.remove()}catch(e){}}' +
-    '}' +
-    'if(n.tagName==="IMG"&&n.src&&matchUrl(n.src)){n.src="";try{n.remove()}catch(e){}}' +
-    'if(n.nodeType===1){' +
-    'if(n.matches&&n.matches(".okjidGhocmXN7zKxDo6s")){' +
-    'var el=n;if(el.children.length===0){var style=(el.getAttribute("style")||"");var mw=style.match(/width:\\s*(\\d+)/);var mh=style.match(/height:\\s*(\\d+)/);if(mw&&mh){var key=mw[1]+"x"+mh[1];var slot=slots[key];if(slot&&clientId){var ins=document.createElement("ins");ins.className="adsbygoogle";ins.style.display="inline-block";ins.style.width=mw[1]+"px";ins.style.height=mh[1]+"px";ins.setAttribute("data-ad-client",clientId);ins.setAttribute("data-ad-slot",slot);el.appendChild(ins);try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}}}}' +
-    'var a=n.querySelectorAll&&n.querySelectorAll("script,iframe,img");if(a){for(var l=0;l<a.length;l++){var s=a[l];if(s.src){if(rewriteGameIframe(s)){}else if(matchUrl(s.src)){s.src="";try{s.remove()}catch(e){}}}}}}' +
-    '}' +
-    '});' +
-    'var t=document.documentElement;if(t){o.observe(t,{childList:true,subtree:true})}' +
-    // Run after React has a chance to hydrate, then periodically
-    'setTimeout(function(){nukePokiAds();injectOurAds()},300);' +
-    'setTimeout(function(){nukePokiAds();injectOurAds()},1000);' +
-    'setTimeout(function(){nukePokiAds();injectOurAds()},3000);' +
-    'setInterval(function(){nukePokiAds();injectOurAds()},2000);' +
-    '})();' +
-    '</script>');
 }
 
 function replacePokiLogo($) {

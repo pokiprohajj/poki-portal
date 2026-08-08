@@ -51,17 +51,6 @@ function buildTrackerScript() {
 </script>`;
 }
 
-function buildAdUnit(slotId, width, height) {
-  if (!config.ads.adsenseClientId || !slotId) return '';
-  return `
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:${width}px;height:${height}px"
-         data-ad-client="${config.ads.adsenseClientId}"
-         data-ad-slot="${slotId}"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  `;
-}
-
 function injectAds(html) {
   const adScript = buildAdSenseScript();
   const ga4Script = buildGA4Script();
@@ -78,20 +67,11 @@ function injectAds(html) {
     result = result.replace('<head>', `<head>${allHeadInjection}`);
   }
 
-  // Fill empty gp_* ad containers with real ad units
-  if (result.includes('gp_728x90') && !result.includes('data-ad-slot="3616266206"')) {
-    const ad = buildAdUnit(config.ads.slotLeaderboard, 728, 90);
-    if (ad) result = result.replace(/<div[^>]*id="gp_728x90"[^>]*><\/div>/g, `<div id="gp_728x90">${ad}</div>`);
-  }
-  if (result.includes('gp_300x250') && !result.includes('data-ad-slot="7744193417"')) {
-    const ad = buildAdUnit(config.ads.slotRectangle, 300, 250);
-    if (ad) result = result.replace(/<div[^>]*id="gp_300x250"[^>]*><\/div>/g, `<div id="gp_300x250">${ad}</div>`);
-  }
-  if (result.includes('gp_160x600') && !result.includes('data-ad-slot="3025953274"')) {
-    const ad = buildAdUnit(config.ads.slotSkyscraper, 160, 600);
-    if (ad) result = result.replace(/<div[^>]*id="gp_160x600"[^>]*><\/div>/g, `<div id="gp_160x600">${ad}</div>`);
-  }
-
+  // NOTE: gp_* ad containers are intentionally left EMPTY in the served HTML.
+  // They live inside Poki's React tree — any element we put in them server-side
+  // is wiped by React's hydration reconciliation (its VDOM renders them empty).
+  // The React-safe ad manager injected by the rewriter claims those containers
+  // AFTER mount and defends the <ins> against re-renders (one request each).
   return result;
 }
 
