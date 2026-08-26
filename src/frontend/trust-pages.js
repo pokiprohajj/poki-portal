@@ -5,6 +5,29 @@ const config = require('../config');
 const site = 'https://browsergameshq.com';
 
 const pages = {
+  '/about': {
+    title: 'About BrowserGamesHQ - Free Online Browser Games',
+    desc: 'BrowserGamesHQ is a free online gaming platform. Learn about our mission to make browser games accessible to everyone.',
+    h1: 'About BrowserGamesHQ',
+    updated: 'Last updated: August 1, 2026',
+    body: `<p>BrowserGamesHQ is a free online gaming platform where you can play thousands of browser games instantly. No downloads, no sign-ups, no hassle — just open a page and start playing.</p>
+<h2>Our Mission</h2>
+<p>We believe great games should be accessible to everyone. BrowserGamesHQ brings together the best free HTML5 and browser-based games across every genre — action, puzzle, racing, sports, multiplayer, dress-up, and more — so you can find something fun to play in seconds.</p>
+<h2>How It Works</h2>
+<p>Every game on BrowserGamesHQ runs directly in your web browser. There is nothing to install. Whether you are on a desktop, laptop, tablet, or phone, our games load fast and play smoothly. We curate our catalog to include only games that work reliably across modern browsers.</p>
+<h2>What We Offer</h2>
+<ul>
+<li><strong>1,500+ free browser games</strong> across dozens of categories</li>
+<li><strong>Game guides and tips</strong> to help you improve your play</li>
+<li><strong>Regular updates</strong> with new games added frequently</li>
+<li><strong>Mobile-friendly design</strong> — play on any device</li>
+<li><strong>No account required</strong> — just click and play</li>
+</ul>
+<h2>Our Content</h2>
+<p>Our editorial team publishes in-depth game guides, comparison articles, and curated lists to help you discover the best browser games. Every guide is written by people who actually play the games and test the controls.</p>
+<h2>Contact</h2>
+<p>Have a question, suggestion, or need to report a game? Visit our <a href="/contact">contact page</a> to reach us.</p>`,
+  },
   '/privacy-policy': {
     title: 'Privacy Policy - BrowserGamesHQ',
     desc: 'BrowserGamesHQ privacy policy: what data we collect, how we use it, and your rights.',

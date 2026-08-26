@@ -239,16 +239,16 @@ const render = (req, res) => {
       <div class="footer-links">
         <h4>Discover</h4>
         <a href="/en/popular">Popular Games</a>
-        <a href="/en/categories">Categories</a>
+        <a href="/en/multiplayer">Multiplayer</a>
         <a href="/en/dress-up">Dress Up</a>
         <a href="/en/car">Car Games</a>
         <a href="/blog">Blog</a>
       </div>
       <div class="footer-links">
         <h4>Info</h4>
-        <a href="/en/about-us">About</a>
-        <a href="/en/privacy-policy">Privacy</a>
-        <a href="/en/c/contact">Contact</a>
+        <a href="/about">About</a>
+        <a href="/privacy-policy">Privacy</a>
+        <a href="/contact">Contact</a>
       </div>
     </div>
     <div class="footer-bottom">

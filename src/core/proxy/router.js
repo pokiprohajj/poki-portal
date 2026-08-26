@@ -207,8 +207,8 @@ const SUBDOMAIN_SOURCE = {
 };
 
 const ROUTE_SOURCE = {
-  '/about': 'https://about.poki.com',
-  '/en/about-us': 'https://about.poki.com',
+  // /about and /en/about-us are now handled by trust-pages (BrowserGamesHQ-owned)
+  // Poki proxy routes removed — these pages must not be proxied from Poki
 };
 
 async function handlePageRequest(req, res) {
@@ -407,10 +407,10 @@ router.get(['/assets/*', '/g/*'], async (req, res) => {
   }
 });
 
-// Local trust pages (privacy, contact, terms) — served directly, no proxy.
+// Local trust pages (privacy, contact, terms, about) — served directly, no proxy.
 // Registered before the catch-all so they never touch homepage or game routes.
 const trustPages = require('../../frontend/trust-pages');
-router.get(['/privacy-policy', '/contact', '/terms-of-service'], function trustPageRoute(req, res) {
+router.get(['/privacy-policy', '/contact', '/terms-of-service', '/about'], function trustPageRoute(req, res) {
   const html = trustPages.render(req.path);
   if (!html) return res.status(404).send(generate404Page());
   res.set({

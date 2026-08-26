@@ -142,16 +142,15 @@ BrowserGamesHQ is a free online gaming platform featuring thousands of games acr
 - **Homepage**: https://browsergameshq.com/ — Browse featured games, categories, and new releases
 - **Game Pages**: https://browsergameshq.com/en/g/[game-slug] — Play games directly in your browser
 - **Blog**: https://browsergameshq.com/blog — Game guides, tips, reviews, and industry articles
-- **Categories**: Action, Puzzle, Racing, Sports, Multiplayer, Dress Up, io Games, 2 Player, Car Games, and more
+  - **Categories**: Action, Puzzle, Racing, Sports, Multiplayer, Dress Up, Car Games, and more
 
 ## Key Links
 - [Homepage](https://browsergameshq.com/)
 - [Blog](https://browsergameshq.com/blog)
-- [New Games](https://browsergameshq.com/en/new-games)
 - [Multiplayer Games](https://browsergameshq.com/en/multiplayer)
-- [Action Games](https://browsergameshq.com/en/action-games)
-- [Puzzle Games](https://browsergameshq.com/en/puzzle-games)
-- [Racing Games](https://browsergameshq.com/en/racing-games)
+- [Action Games](https://browsergameshq.com/en/action)
+- [Puzzle Games](https://browsergameshq.com/en/puzzle)
+- [Racing Games](https://browsergameshq.com/en/racing)
 - [Sitemap](https://browsergameshq.com/sitemap.xml)
 
 ## Popular Game Guides
@@ -174,16 +173,17 @@ app.get('/sitemap.xml', (req, res) => {
   res.type('application/xml');
   const today = new Date().toISOString().split('T')[0];
 
-  const pages = ['', 'games', 'categories'].map(p =>
+  // Homepage — the only root-level indexable page (/games and /categories are soft-404s)
+  const pages = [''].map(p =>
     `  <url>\n    <loc>https://${config.domain}/${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`
   ).join('\n');
 
-  const gamePages = [
-    '/en/new-games', '/en/top-rated', '/en/multiplayer', '/en/action-games',
-    '/en/puzzle-games', '/en/racing-games', '/en/sports-games', '/en/adventure-games',
-    '/en/casual-games', '/en/strategy-games', '/en/io-games',
+  // Validated category pages (must match homepage slugs exactly; no -games suffix variants)
+  const categoryPages = [
+    '/en/popular', '/en/action', '/en/puzzle', '/en/racing',
+    '/en/sports', '/en/multiplayer', '/en/dress-up', '/en/car',
   ];
-  const gameUrls = gamePages.map(p =>
+  const categoryUrls = categoryPages.map(p =>
     `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
@@ -207,12 +207,12 @@ app.get('/sitemap.xml', (req, res) => {
     `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
-  // Trust pages (local static — indexable, low priority)
-  const trustPageUrls = ['/privacy-policy', '/contact', '/terms-of-service', '/about'].map(p =>
+  // Trust pages (local static — indexable, low priority; /about replaces /en/about-us)
+  const trustPageUrls = ['/about', '/privacy-policy', '/contact', '/terms-of-service'].map(p =>
     `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.2</priority>\n  </url>`
   ).join('\n');
 
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${gameUrls}\n${gamePageUrls}\n${blogIndexUrl}\n${blogCatUrls}\n${blogUrls}\n${trustPageUrls}\n</urlset>`);
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${categoryUrls}\n${gamePageUrls}\n${blogIndexUrl}\n${blogCatUrls}\n${blogUrls}\n${trustPageUrls}\n</urlset>`);
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
@@ -228,6 +228,12 @@ app.use('/', (req, res, next) => {
   if (blogRouter(req, res)) return;
   next();
 });
+
+// 301 redirects for legacy routes — BEFORE proxy catch-all
+app.get('/en/privacy-policy', (req, res) => res.redirect(301, '/privacy-policy'));
+app.get('/en/about-us', (req, res) => res.redirect(301, '/about'));
+app.get('/en/about-us/', (req, res) => res.redirect(301, '/about'));
+
 app.use('/', proxyRouter);
 
 app.use((err, req, res, _next) => {

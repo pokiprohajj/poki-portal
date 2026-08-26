@@ -112,4 +112,50 @@ assert('Pipeline: ads removed', !p.includes('poki-ads'));
 assert('Pipeline: AdSense added', p.includes('adsbygoogle'));
 
 console.log('\n=== Results: ' + passed + ' passed, ' + failed + ' failed ===');
+
+console.log('\n5. Server-side Canonicals (Phase 2A)');
+// Test: canonical is injected with correct domain and path
+const canonicalHtml = '<!DOCTYPE html><html><head><title>Test</title></head><body></body></html>';
+const canonicalResult = rewriteHtml(canonicalHtml, '/en/subway-surfers');
+assert('Canonical: exactly one canonical tag', (canonicalResult.match(/rel="canonical"/g) || []).length === 1);
+assert('Canonical: correct domain', canonicalResult.includes('https://browsergameshq.com/en/subway-surfers'));
+assert('Canonical: no Poki domain in canonical', !canonicalResult.includes('poki.com/en/subway-surfers'));
+
+// Test: existing Poki canonical is replaced
+const withPokiCanonical = '<!DOCTYPE html><html><head><link rel="canonical" href="https://poki.com/en/test"></head><body></body></html>';
+const fixed = rewriteHtml(withPokiCanonical, '/en/test');
+assert('Canonical: Poki canonical replaced', fixed.includes('browsergameshq.com/en/test') && !fixed.includes('poki.com/en/test'));
+assert('Canonical: only one after replacement', (fixed.match(/rel="canonical"/g) || []).length === 1);
+
+// Test: homepage canonical
+const homeResult = rewriteHtml(canonicalHtml, '/');
+assert('Canonical: homepage gets root canonical', homeResult.includes('https://browsergameshq.com/'));
+
+// Test: non-HTML paths don't get canonicals (API, admin, tracking)
+const apiResult = rewriteHtml(canonicalHtml, '/t');
+assert('Canonical: tracking path /t gets no canonical', (apiResult.match(/rel="canonical"/g) || []).length === 0);
+
+console.log('\n6. Server-Rendered Related Guides (Phase 2A)');
+// Test: game page with guides gets server-rendered HTML links
+const gameHtml = '<!DOCTYPE html><html><head><title>Subway Surfers - Poki</title></head><body><div class="game"></div></body></html>';
+const gameResult = rewriteHtml(gameHtml, '/en/g/subway-surfers');
+assert('Related guides: server-rendered HTML nav present', gameResult.includes('portal-related-guides'));
+assert('Related guides: contains blog links', gameResult.includes('/blog/'));
+assert('Related guides: aria-label present', gameResult.includes('aria-label="Related guides"'));
+assert('Related guides: actual anchor tags', gameResult.includes('<a href="/blog/'));
+
+console.log('\n7. Trust Pages (Phase 2A)');
+const trustPages = require('../frontend/trust-pages');
+const aboutPage = trustPages.render('/about');
+assert('About page: renders HTML', aboutPage && aboutPage.includes('<!DOCTYPE html>'));
+assert('About page: BrowserGamesHQ title', aboutPage.includes('About BrowserGamesHQ'));
+assert('About page: self-referencing canonical', aboutPage.includes('href="https://browsergameshq.com/about"'));
+assert('About page: no Poki references', !aboutPage.includes('poki.com') && !aboutPage.includes('Poki B.V.'));
+assert('About page: Article/AboutPage schema present', aboutPage.includes('schema.org'));
+const privacyPage = trustPages.render('/privacy-policy');
+assert('Privacy page: renders HTML', privacyPage && privacyPage.includes('<!DOCTYPE html>'));
+assert('Privacy page: self-referencing canonical', privacyPage.includes('href="https://browsergameshq.com/privacy-policy"'));
+assert('Trust pages: /about exists in pages map', trustPages.pages['/about'] !== undefined);
+
+console.log('\n=== Results: ' + passed + ' passed, ' + failed + ' failed ===');
 process.exit(failed > 0 ? 1 : 0);

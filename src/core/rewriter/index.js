@@ -141,6 +141,16 @@ function rewriteHtml(html, sourcePath) {
   rewriteOpenGraph($, sourceDomain, targetDomain);
   rewriteTwitterCards($, sourceDomain, targetDomain);
 
+  // Pass 8b: Server-side canonical injection — exactly ONE self-referencing canonical
+  // Only for indexable HTML pages (not 404, error, or non-HTML responses).
+  // Removes ALL existing canonical tags (link + meta) and replaces with the correct one.
+  if (sourcePath && !sourcePath.startsWith('/t') && !sourcePath.startsWith('/admin')) {
+    $('link[rel="canonical"]').remove();
+    $('meta[name="canonical"]').remove();
+    const canonicalUrl = 'https://' + targetDomain + sourcePath.split('?')[0];
+    $('head').append('<link rel="canonical" href="' + canonicalUrl + '">');
+  }
+
   // Pass 8a: For homepage (root path), generate unique SEO metadata instead of Poki-derivative text
   var isHomepage = !sourcePath || sourcePath === '/' || sourcePath === '';
   if (isHomepage) {
@@ -273,10 +283,21 @@ function rewriteHtml(html, sourcePath) {
       }
 
       // Related guides strip — internal links from game page to its blog guides.
-      // Injected as a fixed-position widget via head script so Poki's React DOM
-      // (gameplay iframe + hydration) stays byte-for-byte untouched.
+      // Pass 6a: Server-rendered HTML links (crawlable by Googlebot without JS)
+      // Pass 6b: JS widget for UI (fixed-position floating panel)
       var guides = RELATED_GUIDES[gameSlug] || [];
       if (guides.length) {
+        // Server-rendered related guides — raw <a> tags in HTML, crawlable without JS
+        var guideLinksHtml = '<nav class="portal-related-guides" aria-label="Related guides" style="max-width:700px;margin:24px auto;padding:0 16px"><h2 style="font-size:1.1rem;color:#e8e8f0;margin-bottom:10px">Related Guides</h2><ul style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px">' +
+          guides.map(function (s) {
+            var label = s.split('/').pop().replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+            return '<li><a href="/blog/' + s + '" style="display:inline-block;padding:6px 14px;background:#1a1a3e;color:#6ee7ff;border-radius:6px;text-decoration:none;font-size:.9rem;font-weight:500;border:1px solid #2a2a5a">' + label + '</a></li>';
+          }).join('') +
+          '</ul></nav>';
+        // Inject before </body> as a server-rendered HTML block
+        $('body').append(guideLinksHtml);
+
+        // JS widget (existing — kept for UI floating panel)
         var links = guides.map(function (s) {
           return 'https://browsergameshq.com/blog/' + s;
         });
