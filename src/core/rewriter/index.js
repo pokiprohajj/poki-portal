@@ -148,7 +148,7 @@ function rewriteHtml(html, sourcePath) {
     $('link[rel="canonical"]').remove();
     $('meta[name="canonical"]').remove();
     const canonicalUrl = 'https://' + targetDomain + sourcePath.split('?')[0];
-    $('head').append('<link rel="canonical" href="' + canonicalUrl + '">');
+    $('head').append('<link data-react-helmet="true" rel="canonical" href="' + canonicalUrl + '">');
   }
 
   // Pass 8a: For homepage (root path), generate unique SEO metadata instead of Poki-derivative text
@@ -179,6 +179,27 @@ function rewriteHtml(html, sourcePath) {
   // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side — only for game pages (skip for homepage etc)
   if (sourcePath && (sourcePath.includes('/g/') || sourcePath.includes('/game/'))) {
     rewriteGameInitState($, sourcePath);
+  }
+  // Pass 9b2: Rewrite window.context SEO identity for game pages (surgical, no gameplay URLs)
+  if (sourcePath && (sourcePath.includes('/g/') || sourcePath.includes('/game/'))) {
+    rewriteContext($);
+  }
+  // Pass 9b3: Client-side Helmet override fix — ensures exactly 1 canonical, correct og:url/title after hydration
+  if (sourcePath && (sourcePath.includes('/g/') || sourcePath.includes('/game/'))) {
+    const seoFix = '<script>(function(){var TD="browsergameshq.com";function fix(){'
+      + 'if(document.title&&document.title.indexOf(" | Poki")!==-1) document.title=document.title.replace(" | Poki"," | BrowserGamesHQ");'
+      + 'var cans=document.querySelectorAll(\'link[rel="canonical"]\');'
+      + 'if(cans.length>1){for(var i=1;i<cans.length;i++) cans[i].parentNode.removeChild(cans[i]);}'
+      + 'var c=document.querySelector(\'link[rel="canonical"]\');'
+      + 'if(c){var canonical="https://"+TD+location.pathname; if(c.href!==canonical) c.href=canonical; if(!c.getAttribute("data-react-helmet")) c.setAttribute("data-react-helmet","true");}'
+      + 'var og=document.querySelector(\'meta[property="og:url"]\'); if(og&&og.content&&og.content.indexOf("poki.com")!==-1) og.content=og.content.replace(/https?:\\/\\/[^\\/]+/,"https://"+TD);'
+      + 'if(og&&og.content&&og.content!==("https://"+TD+location.pathname)) og.content="https://"+TD+location.pathname;'
+      + 'var hrs=document.querySelectorAll(\'link[rel="alternate"][hreflang]\'); for(var i=0;i<hrs.length;i++){var h=hrs[i].getAttribute("hreflang"); if(h!=="en"&&h!=="x-default") hrs[i].parentNode.removeChild(hrs[i]); else if(hrs[i].href.indexOf("poki.com")!==-1) hrs[i].href=hrs[i].href.replace(/https?:\\/\\/[^\\/]+/,"https://"+TD);}'
+      + '}'
+      + 'var mo=new MutationObserver(fix); try{mo.observe(document.head,{childList:true,subtree:true,attributes:true,attributeFilter:["href","content"]});}catch(e){}'
+      + 'document.addEventListener("DOMContentLoaded",fix); setTimeout(fix,1000); setInterval(fix,2000); fix();'
+      + '})();</script>';
+    $('head').append(seoFix);
   }
 
   // Pass 9c: On ALL pages, inject TikTok pixel
@@ -730,6 +751,43 @@ function rewriteGameInitState($, sourcePath) {
         }
         if (mirrorWalk(data)) modified = true;
       }
+      // V2 surgical SEO identity — only Helmet-consumed fields (no global poki.com replace)
+      // Fixes Helmet canonical/og:title/hreflang without touching gameplay URLs
+      (function patchSeoIdentity(){
+        const TD = "browsergameshq.com";
+        let seoChanged = false;
+        if(data.site && data.site.site){
+          if(data.site.site.domain === "poki.com"){ data.site.site.domain = TD; seoChanged = true; }
+          if(data.site.site.domain_title === "Poki.com"){ data.site.site.domain_title = "BrowserGamesHQ.com"; seoChanged = true; }
+          if(data.site.site.title === "Poki"){ data.site.site.title = "BrowserGamesHQ"; seoChanged = true; }
+        }
+        if(data.site && data.site.sites && data.site.sites["3"]){
+          if(data.site.sites["3"].domain === "poki.com"){ data.site.sites["3"].domain = TD; seoChanged = true; }
+          if(data.site.sites["3"].domain_title === "Poki.com"){ data.site.sites["3"].domain_title = "BrowserGamesHQ.com"; seoChanged = true; }
+          if(data.site.sites["3"].title === "Poki"){ data.site.sites["3"].title = "BrowserGamesHQ"; seoChanged = true; }
+        }
+        // Remove hreflang locales that would 404 on BrowserGamesHQ (keep only en)
+        if(data.site && data.site.sites){
+          for(const k in data.site.sites){ if(k !== "3"){ delete data.site.sites[k]; seoChanged = true; } }
+        }
+        // Fix game meta title for current slug only
+        if(data.api && data.api.queries){
+          for(const qk in data.api.queries){
+            const q = data.api.queries[qk];
+            if(q && q.originalArgs && q.originalArgs.slug === slug){
+              if(q.data && q.data.meta && typeof q.data.meta.title === "string" && q.data.meta.title.endsWith(" | Poki")){
+                q.data.meta.title = q.data.meta.title.replace(" | Poki", " | BrowserGamesHQ"); seoChanged = true;
+              }
+              if(q.originalArgs.site){
+                if(q.originalArgs.site.domain === "poki.com"){ q.originalArgs.site.domain = TD; seoChanged = true; }
+                if(q.originalArgs.site.domain_title === "Poki.com"){ q.originalArgs.site.domain_title = "BrowserGamesHQ.com"; seoChanged = true; }
+                if(q.originalArgs.site.title === "Poki"){ q.originalArgs.site.title = "BrowserGamesHQ"; seoChanged = true; }
+              }
+            }
+          }
+        }
+        if(seoChanged) modified = true;
+      })();
       if (!modified) return;
       var newJson = JSON.stringify(data).replace(/\//g, '\\u002F');
       var newText = text.substring(0, start) + newJson + text.substring(end);
@@ -737,6 +795,41 @@ function rewriteGameInitState($, sourcePath) {
     } catch (e) {
       // Silent fail - don't break page rendering
     }
+  });
+}
+
+function rewriteContext($) {
+  $('script').each(function () {
+    var text = $(this).html() || '';
+    if (text.indexOf('window.context') === -1) return;
+    var start = text.indexOf('{', text.indexOf('window.context'));
+    if (start === -1) return;
+    var depth = 0, inStr = false, esc = false, end = -1;
+    for (var i = start; i < text.length; i++) {
+      var c = text[i];
+      if (esc) { esc = false; continue; }
+      if (c === '\\' && inStr) { esc = true; continue; }
+      if (c === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if (c === '{') depth++;
+      else if (c === '}') { depth--; if (depth === 0) { end = i + 1; break; } }
+    }
+    if (end === -1) return;
+    try {
+      var jsonStr = text.substring(start, end);
+      var cleanJson = jsonStr.replace(/\\u002F/g, '/');
+      var data = JSON.parse(cleanJson);
+      var changed = false;
+      if (data.site) {
+        if (data.site.domain === "poki.com") { data.site.domain = "browsergameshq.com"; changed = true; }
+        if (data.site.domain_title === "Poki.com") { data.site.domain_title = "BrowserGamesHQ.com"; changed = true; }
+        if (data.site.title === "Poki") { data.site.title = "BrowserGamesHQ"; changed = true; }
+      }
+      if (!changed) return;
+      var newJson = JSON.stringify(data).replace(/\//g, '\\u002F');
+      var newText = text.substring(0, start) + newJson + text.substring(end);
+      $(this).html(newText);
+    } catch (e) {}
   });
 }
 
