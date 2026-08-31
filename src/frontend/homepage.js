@@ -207,6 +207,15 @@ const render = (req, res) => {
 
     ${CAROUSELS.map((c, i) => (i === 0 ? carouselBlock(c) + '\n    <section class="carousel-section continue-slot reveal" id="continueSection" hidden></section>' : carouselBlock(c))).join('')}
 
+    <section class="blog-section reveal" style="max-width:1200px;margin:48px auto;padding:0 16px">
+      <div class="section-header"><h2>From the Blog</h2><a href="/blog" class="see-all">See All <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a></div>
+      <div class="blog-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+        <a href="/blog/retro-bowl-how-to-play-online" class="blog-card" style="display:block;padding:16px;background:#1a1a2e;border-radius:8px;text-decoration:none;color:#e8e8f0"><h3>How to Play Retro Bowl Online</h3><p style="color:#a0a0c0;font-size:0.9rem">Complete beginner guide for the retro football favorite — controls, play calling and roster tips.</p></a>
+        <a href="/blog/drift-boss-how-to-play-online" class="blog-card" style="display:block;padding:16px;background:#1a1a2e;border-radius:8px;text-decoration:none;color:#e8e8f0"><h3>How to Play Drift Boss Online</h3><p style="color:#a0a0c0;font-size:0.9rem">Learn the one-button drift rhythm that keeps you on the track and builds high scores.</p></a>
+        <a href="/blog/subway-surfers-for-beginners" class="blog-card" style="display:block;padding:16px;background:#1a1a2e;border-radius:8px;text-decoration:none;color:#e8e8f0"><h3>Subway Surfers for Beginners</h3><p style="color:#a0a0c0;font-size:0.9rem">Master lane changes, jumps and power-ups in the endless runner that never gets old.</p></a>
+      </div>
+    </section>
+
     <section class="why-section reveal">
       <div class="section-header"><h2>Why BrowserGamesHQ?</h2></div>
       <p class="why-lead">Thousands of free games. No downloads. No sign-ups. Just click and play.</p>

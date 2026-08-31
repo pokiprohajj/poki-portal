@@ -3,10 +3,10 @@ const cheerio = require('cheerio');
 const blogPosts = require('../../blog/posts');
 
 // Map game slug -> related blog guide slugs (complete-guide, pro-tips-and-tricks,
-// review, best-games-like, unblocked). Used for the on-page related-guides strip.
+// review, best-games-like, unblocked, for-beginners, why-is-so-popular, on-mobile, how-to-play-online, tips-and-strategies, advanced-guide). Used for the on-page related-guides strip.
 const RELATED_GUIDES = {};
 for (const p of blogPosts) {
-  const m = p.slug.match(/^(.+)-(complete-guide|pro-tips-and-tricks|review|best-games-like|unblocked)$/);
+  const m = p.slug.match(/^(.+)-(complete-guide|pro-tips-and-tricks|review|best-games-like|unblocked|for-beginners|why-is-so-popular|on-mobile|how-to-play-online|tips-and-strategies|advanced-guide)$/);
   if (m) {
     (RELATED_GUIDES[m[1]] = RELATED_GUIDES[m[1]] || []).push(p.slug);
   }
@@ -173,55 +173,55 @@ function rewriteHtml(html, sourcePath) {
     }
   }
 
-  // Pass 8c: Category intros for 8 canonical categories (100-200 words, server-rendered)
+  // Pass 8c: Category intros for 8 canonical categories (100-200 words, server-rendered) with 2-3 contextual links
   const CATEGORY_INTROS = {
     '/en/popular': {
       title: 'Popular Games - Most Played Browser Games | BrowserGamesHQ',
       desc: 'Discover the most played browser games on BrowserGamesHQ. Trending titles, community favorites and editors picks — all free to play instantly.',
       h1: 'Popular Games',
-      intro: '<p>Popular Games brings together the titles people play most right now on BrowserGamesHQ. You will find fast session games you can finish in a few minutes, longer progression games you can return to daily, and new hits that have just entered the charts. The selection is updated from real play data, not from a fixed editorial list, so the order reflects what players actually keep coming back to. Use this page when you want a reliable shortlist without scrolling through hundreds of thumbnails. Every game here runs in the browser, loads quickly on desktop and mobile, and can be started without an account.</p><p>Browse the grid, open a few candidates in new tabs, and keep the ones that match your taste. If you like competition, try the multiplayer and sports rows near the top. If you prefer solo focus, the puzzle and casual tiles further down are a good entry point.</p>'
+      intro: '<p>Popular Games brings together the titles people play most right now on BrowserGamesHQ. You will find fast session games you can finish in a few minutes, longer progression games you can return to daily, and new hits that have just entered the charts. The selection is updated from real play data, not from a fixed editorial list, so the order reflects what players actually keep coming back to. Use this page when you want a reliable shortlist without scrolling through hundreds of thumbnails. Every game here runs in the browser, loads quickly on desktop and mobile, and can be started without an account.</p><p>Browse the grid, open a few candidates in new tabs, and keep the ones that match your taste. If you like competition, try <a href="/en/g/gobattle2">GoBattle 2</a> or <a href="/en/g/retro-bowl">Retro Bowl</a>. For quick solo focus, <a href="/en/g/drift-boss">Drift Boss</a> is a good entry point.</p>'
     },
     '/en/action': {
       title: 'Action Games - Fast-Paced Free Online Action | BrowserGamesHQ',
       desc: 'Play free action games online. Reflex, timing and quick decisions — browser action you can start instantly.',
       h1: 'Action Games',
-      intro: '<p>Action Games on BrowserGamesHQ are built for players who like movement, timing and short feedback loops. You will find run-and-gun shooters, close-combat brawlers, stealth and survival challenges, and physics-based action where one mistake resets the run. The controls are deliberately simple — arrows, WASD or mouse — so you can learn the first level in under a minute and then push for a cleaner execution.</p><p>Pick a game by the feel you want: precise platforming, chaotic brawls, or tactical shooters. All titles in this category are free, run without install, and work with keyboard or touch. Open a few, test the first 30 seconds, and keep the one where the rhythm clicks.</p>'
+      intro: '<p>Action Games on BrowserGamesHQ are built for players who like movement, timing and short feedback loops. You will find run-and-gun shooters, close-combat brawlers, stealth and survival challenges, and physics-based action where one mistake resets the run. The controls are deliberately simple — arrows, WASD or mouse — so you can learn the first level in under a minute and then push for a cleaner execution.</p><p>Pick a game by the feel you want: precise platforming, chaotic brawls, or tactical shooters. Try <a href="/en/g/subway-surfers">Subway Surfers</a> for endless running, <a href="/en/g/murder">Murder</a> for stealth, or <a href="/en/g/stickman-hook">Stickman Hook</a> for physics action.</p>'
     },
     '/en/puzzle': {
       title: 'Puzzle Games - Logic and Brain Teasers | BrowserGamesHQ',
       desc: 'Free puzzle games to test logic, memory and planning. Play in your browser, no download required.',
       h1: 'Puzzle Games',
-      intro: '<p>Puzzle Games are for players who enjoy a clear problem and a satisfying solution. This selection covers logic grids, sorting and stacking puzzles, path-finding, physics puzzles and word and number challenges. Most puzzles can be played at your own pace, so you can pause, think and try a different approach without a timer forcing you.</p><p>Start with the difficulty you are comfortable with — many titles scale from easy tutorials to hard later levels. If you like to learn systems, look for games with move counters or star ratings. All puzzles here run directly in the browser and save progress locally, so you can return later without losing your place.</p>'
+      intro: '<p>Puzzle Games are for players who enjoy a clear problem and a satisfying solution. This selection covers logic grids, sorting and stacking puzzles, path-finding, physics puzzles and word and number challenges. Most puzzles can be played at your own pace, so you can pause, think and try a different approach without a timer forcing you.</p><p>Start with the difficulty you are comfortable with — many titles scale from easy tutorials to hard later levels. Try <a href="/en/g/blocky-blast-puzzle">Blocky Blast Puzzle</a> for sorting, <a href="/en/g/level-devil">Level Devil</a> for tricky platform puzzles, or <a href="/en/g/bubble-shooter">Bubble Shooter</a> for a classic.</p>'
     },
     '/en/racing': {
       title: 'Racing Games - Drive, Drift and Win | BrowserGamesHQ',
       desc: 'Free racing games online. Cars, bikes and karts — drift, overtake and reach the finish line.',
       h1: 'Racing Games',
-      intro: '<p>Racing Games bring speed, control and quick restarts to the browser. You will find circuit racers, drift and parking challenges, bike and kart games, and stunt tracks that reward clean lines more than raw speed. The handling varies from arcade to more grounded, so you can choose the feel you like without learning a new control scheme each time.</p><p>Use the first lap to learn braking points, then push for a better time. Many titles include ghost cars, time trials or traffic modes that make a single track replayable. Every game here is free and runs on desktop and mobile without a download.</p>'
+      intro: '<p>Racing Games bring speed, control and quick restarts to the browser. You will find circuit racers, drift and parking challenges, bike and kart games, and stunt tracks that reward clean lines more than raw speed. The handling varies from arcade to more grounded, so you can choose the feel you like without learning a new control scheme each time.</p><p>Use the first lap to learn braking points, then push for a better time. Try <a href="/en/g/drift-boss">Drift Boss</a> for one-button drifting, <a href="/en/g/madalin-stunt-cars-2">Madalin Stunt Cars</a> for open-world stunts, or <a href="/en/g/slope">Slope</a> for 3D speed.</p>'
     },
     '/en/sports': {
       title: 'Sports Games - Free Online Sports | BrowserGamesHQ',
       desc: 'Play free sports games in your browser. Football, basketball, golf and more — no download.',
       h1: 'Sports Games',
-      intro: '<p>Sports Games collect quick, readable sports action for the browser. Expect football shootouts, basketball free throws, golf puzzles, bowling, table tennis and other one-button or two-button sports that are easy to learn and hard to master. The rules are simplified compared to real sports, so you can focus on timing and placement rather than complex tactics.</p><p>Choose a sport you already follow or try a new one for a change of pace. Most games let you play a single match or a short tournament, so you can get a complete session in a few minutes. All titles are free, run instantly, and work with mouse or touch.</p>'
+      intro: '<p>Sports Games collect quick, readable sports action for the browser. Expect football shootouts, basketball free throws, golf puzzles, bowling, table tennis and other one-button or two-button sports that are easy to learn and hard to master. The rules are simplified compared to real sports, so you can focus on timing and placement rather than complex tactics.</p><p>Choose a sport you already follow or try a new one. Try <a href="/en/g/retro-bowl">Retro Bowl</a> for football management, <a href="/en/g/basketball-stars">Basketball Stars</a> for 1v1, or <a href="/en/g/soccer-random">Soccer Random</a> for chaotic fun.</p>'
     },
     '/en/multiplayer': {
       title: 'Multiplayer Games - Play With Friends Online | BrowserGamesHQ',
       desc: 'Free multiplayer browser games. Play with friends or strangers — no download, just share and play.',
       h1: 'Multiplayer Games',
-      intro: '<p>Multiplayer Games are about playing with or against other people without installing anything. You will find .io arenas, co-op puzzles, team shooters, party games and asynchronous turn-based games you can join from a link. The lobbies are browser-based, so you can invite a friend by sharing the page and be in the same match in seconds.</p><p>Check the player count and whether the game supports private rooms if you want to play with friends only. For quick sessions, pick games with short rounds. For longer play, look for progression and private servers. Every game here runs in the browser and does not require an account to start.</p>'
+      intro: '<p>Multiplayer Games are about playing with or against other people without installing anything. You will find .io arenas, co-op puzzles, team shooters, party games and asynchronous turn-based games you can join from a link. The lobbies are browser-based, so you can invite a friend by sharing the page and be in the same match in seconds.</p><p>Check the player count and whether the game supports private rooms. Try <a href="/en/g/gobattle2">GoBattle 2</a> for arena combat, <a href="/en/g/paper-io-2">Paper.io 2</a> for territory control, or <a href="/en/g/shell-shockers">Shell Shockers</a> for FPS.</p>'
     },
     '/en/dress-up': {
       title: 'Dress Up Games - Fashion and Creativity | BrowserGamesHQ',
       desc: 'Free dress up games online. Style, fashion and creative dress-up play for everyone.',
       h1: 'Dress Up Games',
-      intro: '<p>Dress Up Games focus on style, color and creative choices rather than competition. You will find character creators, fashion contests, salon and makeup games, and decor games that use the same mix-and-match mechanics. The interfaces are drag-and-drop, so you can try many combinations quickly and save the look you like.</p><p>Browse by the style you prefer — casual, formal, fantasy or streetwear — and use the wardrobe filters to narrow the options. These games are free, run without download, and work well on both desktop and touch devices.</p>'
+      intro: '<p>Dress Up Games focus on style, color and creative choices rather than competition. You will find character creators, fashion contests, salon and makeup games, and decor games that use the same mix-and-match mechanics. The interfaces are drag-and-drop, so you can try many combinations quickly and save the look you like.</p><p>Browse by the style you prefer — casual, formal, fantasy or streetwear — and use the wardrobe filters to narrow the options. Try <a href="/en/g/vortellas-dress-up">Vortella\'s Dress Up</a> or <a href="/en/g/fashion-legends">Fashion Legends</a> to start.</p>'
     },
     '/en/car': {
       title: 'Car Games - Driving and Parking | BrowserGamesHQ',
       desc: 'Free car games online. Drive, park and stunt — browser car games for every driver.',
       h1: 'Car Games',
-      intro: '<p>Car Games gather driving, parking and stunt games that work well in short browser sessions. You will find realistic parking challenges, drift and stunt tracks, traffic and highway games, and car customization games where tuning changes how the car feels. The controls are usually arrows or WASD with automatic acceleration, so you can focus on steering and timing.</p><p>Start with a parking or trial game to learn the handling, then move to faster tracks once the controls feel natural. Many titles include multiple cars or tracks that unlock as you progress. All games here are free and run directly in your browser.</p>'
+      intro: '<p>Car Games gather driving, parking and stunt games that work well in short browser sessions. You will find realistic parking challenges, drift and stunt tracks, traffic and highway games, and car customization games where tuning changes how the car feels. The controls are usually arrows or WASD with automatic acceleration, so you can focus on steering and timing.</p><p>Start with a parking or trial game to learn the handling, then move to faster tracks. Try <a href="/en/g/drift-boss">Drift Boss</a>, <a href="/en/g/madalin-stunt-cars-2">Madalin Stunt Cars 2</a>, or <a href="/en/g/city-car-driving">City Car Driving</a>.</p>'
     }
   };
   if (CATEGORY_INTROS[sourcePath]) {
@@ -240,8 +240,90 @@ function rewriteHtml(html, sourcePath) {
     else $('body').prepend(rawIntro);
   }
 
+  // Pass 8d: Game pilot intros for 10 high-value games (SSR, before iframe, 300-600w)
+  const GAME_INTROS = {
+    'subway-surfers': {
+      intro: '<p>Subway Surfers is an endless runner where you dash along subway tracks, dodge trains, and collect coins while being chased by a security guard. The goal is simple to understand but hard to master: stay alive as long as possible, use quick lane changes, jumps, and rolls to avoid obstacles, and chain power-ups to extend your run. Each run rewards you with coins and keys that unlock new characters, hoverboards, and upgrades.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Move left or right to switch lanes, swipe up to jump over barriers, and swipe down to roll under low obstacles. Time your moves to the rhythm of the track — trains and barriers appear in repeating patterns that you can learn to anticipate. Collect coins continuously and grab power-ups like jetpacks, super sneakers, and coin magnets when they appear. Use hoverboards to survive a crash without ending the run.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> Left/Right arrows or A/D to change lanes, Up/W to jump, Down/S to roll. <strong>Mobile:</strong> Swipe left/right to change lanes, swipe up to jump, swipe down to roll, double-tap to activate hoverboard. The controls are the same across devices, so skills transfer directly.</p>',
+      features: '<h2>Features</h2><ul><li>Endless track with increasing speed and obstacle density</li><li>Power-ups: jetpack, super sneakers, coin magnet, 2x multiplier</li><li>Hoverboards that absorb one crash</li><li>Daily challenges and world tour cities with unique themes</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Stay centered when possible — it gives you more time to react to either side.</li><li>Save hoverboards for high-speed sections where a single mistake ends the run.</li><li>Upgrade coin magnet and jetpack first; they pay for themselves quickly.</li><li>Practice rolling under barriers early — it is faster than jumping over low obstacles.</li></ul>'
+    },
+    'temple-run-2': {
+      intro: '<p>Temple Run 2 is a 3D endless runner set in ancient temples where you sprint through cliffs, zip lines, and mine tracks while avoiding obstacles. You control an explorer stealing an idol, and the temple itself tries to stop you. The game tests reflexes, lane awareness, and timing as the speed steadily increases.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Swipe to turn at forks, swipe up to jump over gaps and swipe down to slide under low ceilings. Tilt or swipe to collect coins and gems while staying on the path. React quickly to sudden drops, waterfalls, and mine cart sections that change the camera and movement.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> Arrow keys to move, Space to jump, tilt with mouse or keys where supported. <strong>Mobile:</strong> Swipe and tilt. The game is designed for touch first, so swipes feel most natural.</p>',
+      features: '<h2>Features</h2><ul><li>Multiple environments: cliffs, zip lines, mines, forests</li><li>Collectible coins and gems for upgrades</li><li>Power-ups and character abilities</li><li>Daily and weekly challenges</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Look two turns ahead, not at your character.</li><li>Upgrade coin magnet and boost distance early.</li><li>Use tilt sparingly — small corrections are more reliable than large swings.</li><li>Save gems for the most impactful upgrades.</li></ul>'
+    },
+    'drift-boss': {
+      intro: '<p>Drift Boss is a one-button driving game about holding a drift on a narrow, winding track that never ends. The challenge is not speed, but control — keep the car on the platform by tapping to steer right and releasing to steer left, maintaining a smooth arc through each corner.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Hold to drift right, release to drift left. The car moves forward automatically. Time your holds so the car stays centered on the track. Each successful drift builds a combo and increases your score. Fall off and the run ends.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> Hold Space or mouse button to drift right, release to go left. <strong>Mobile:</strong> Tap and hold to drift right, release to go left. Only one input is needed.</p>',
+      features: '<h2>Features</h2><ul><li>Procedurally generated track that gets longer and tighter</li><li>Multiple cars with different handling</li><li>Coin collection and car unlocks</li><li>Score multiplier for long drifts</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Use short taps, not long holds, for precise control.</li><li>Look ahead to the next corner, not the current one.</li><li>Stay in the middle of the platform to give yourself margin.</li><li>Practice rhythm — most corners have a consistent timing.</li></ul>'
+    },
+    'rainbow-obby': {
+      intro: '<p>Rainbow Obby is a colorful obstacle course game where you jump, climb, and time your movements through bright rainbow-themed stages. Each level introduces new mechanics, from moving platforms to disappearing floors, that test timing and precision.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Use movement keys to run and jump, and time your jumps to land on moving platforms. Avoid falling and touching hazards. Each stage ends with a checkpoint, so you can retry difficult sections without restarting the whole course.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> WASD or arrows to move, Space to jump. <strong>Mobile:</strong> On-screen joystick and jump button.</p>',
+      features: '<h2>Features</h2><ul><li>Multiple rainbow-themed worlds</li><li>Moving and disappearing platforms</li><li>Checkpoints in each stage</li><li>Collectible stars</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Wait for moving platforms to reach you, don’t chase them.</li><li>Use small jumps for precision, large jumps for distance.</li><li>Observe disappearing patterns before moving.</li><li>Take your time — rushing causes most falls.</li></ul>'
+    },
+    'murder': {
+      intro: '<p>Murder is a stealth game where you must assassinate a target without being seen. You play as a silent killer who must time movements, hide in shadows, and strike when no one is watching. Each level adds more guards and cameras.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Move quietly, stay out of sight cones, and wait for the right moment to strike. Use distractions and hide bodies to avoid detection. If you are seen, the level restarts.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> Arrow keys to move, Space to interact/attack. <strong>Mobile:</strong> Swipe to move, tap to interact.</p>',
+      features: '<h2>Features</h2><ul><li>Stealth-based levels with patrol patterns</li><li>Multiple ways to approach each target</li><li>Environmental hiding spots</li><li>Increasing difficulty with more guards</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Watch guard patterns for 10 seconds before moving.</li><li>Strike when guards are looking away, not just when far.</li><li>Hide bodies immediately after a kill.</li><li>Use sound distractions to lure guards from posts.</li></ul>'
+    },
+    'gobattle2': {
+      intro: '<p>GoBattle 2 is a multiplayer battle game where you fight other players in arena-style combat. Choose a character, learn its abilities, and outplay opponents in fast matches that reward timing and positioning.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Move with keys, attack with clicks, and use abilities on cooldown. Dodge enemy attacks and control key areas of the map. Wins come from consistent hits, not risky all-ins.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> WASD to move, mouse to aim, Left click to attack, Q/E for abilities. <strong>Mobile:</strong> Virtual joystick and buttons.</p>',
+      features: '<h2>Features</h2><ul><li>Multiple characters with unique kits</li><li>Arena maps with hazards</li><li>Quick matchmaking</li><li>Progression and unlocks</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Learn one character well before switching.</li><li>Use abilities to escape, not just to engage.</li><li>Control the center of the map.</li><li>Watch cooldowns — attack when enemies have none.</li></ul>'
+    },
+    'hide-and-paint': {
+      intro: '<p>Hide and Paint is a hide-and-seek game where one team hides as objects and the other team seeks. Hiders must blend into the environment by choosing spots that match their object size and color.</p>',
+      howToPlay: '<h2>How to Play</h2><p>As hider, find a spot that matches your object and stay still. As seeker, look for objects that look out of place and shoot them to reveal hiders. Use the timer wisely.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> WASD to move, mouse to look, Left click to shoot/interact. <strong>Mobile:</strong> Joystick and tap.</p>',
+      features: '<h2>Features</h2><ul><li>Team-based hide and seek</li><li>Multiple maps with many hiding spots</li><li>Different objects to hide as</li><li>Seeker weapons</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>As hider, choose spots at eye level — seekers look high and low.</li><li>Stay still — movement gives you away.</li><li>As seeker, shoot suspicious objects, not random ones.</li><li>Listen for sounds — hiders make faint noises.</li></ul>'
+    },
+    'tag': {
+      intro: '<p>Tag is a fast multiplayer chasing game where one player is “it” and must tag others. The tagged player becomes it, and the chase continues. Rounds are short and frantic.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Run away if you are not it, chase if you are. Use the map’s obstacles to block line of sight and cut corners to escape. Tag by touching.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> WASD/arrows to move. <strong>Mobile:</strong> Joystick.</p>',
+      features: '<h2>Features</h2><ul><li>Quick tag matches</li><li>Multiple maps with obstacles</li><li>Power-ups</li><li>Score based on time not it</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Stay near obstacles to break chase.</li><li>Change direction suddenly when chased.</li><li>As it, cut off escape routes, don’t chase directly.</li><li>Use speed boosts at the right moment.</li></ul>'
+    },
+    'minefun-io': {
+      intro: '<p>MineFun.io is a 2D multiplayer survival game where you gather resources, craft tools, and build while competing with other players. The world is block-based and fully destructible.</p>',
+      howToPlay: '<h2>How to Play</h2><p>Collect wood, stone, and food, craft better tools, and build shelter. Avoid or fight other players. Hunger and health matter, so keep them up.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> WASD to move, mouse to break/place, E for inventory, Left click to attack. <strong>Mobile:</strong> Joystick and buttons.</p>',
+      features: '<h2>Features</h2><ul><li>Gathering and crafting</li><li>Building and base defense</li><li>Hunger/health systems</li><li>PvP and PvE</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Gather wood first, then stone.</li><li>Build shelter before night.</li><li>Keep food above half.</li><li>Avoid fights until you have better gear.</li></ul>'
+    },
+    'retro-bowl': {
+      intro: '<p>Retro Bowl is a retro-style football management game where you control a team as player and coach. Call plays, throw passes, and manage your roster through a season.</p>',
+      howToPlay: '<h2>How to Play</h2><p>On offense, choose a play, then control the quarterback to pass or run. Swipe or drag to aim passes. On defense, the game simulates, but your roster choices matter. Manage morale, upgrades, and contracts between games.</p>',
+      controls: '<h2>Controls</h2><p><strong>Desktop:</strong> Mouse to select plays and aim, click to throw, arrow keys for runner. <strong>Mobile:</strong> Swipe to aim and throw, tap to select.</p>',
+      features: '<h2>Features</h2><ul><li>Season and playoff mode</li><li>Roster management and morale</li><li>Playbook customization</li><li>Retro pixel art</li></ul>',
+      tips: '<h2>Tips</h2><ul><li>Short passes are more reliable than long bombs.</li><li>Upgrade offensive line early — it helps both run and pass.</li><li>Keep morale high with wins and contract extensions.</li><li>On defense, invest in secondary to stop big plays.</li></ul>'
+    }
+  };
+  if (sourcePath && GAME_INTROS[sourcePath.split('/').pop().split('?')[0]]) {
+    const g = GAME_INTROS[sourcePath.split('/').pop().split('?')[0]];
+    const gameIntroHtml = `<section class="game-intro" style="max-width:800px;margin:24px auto;padding:0 16px;line-height:1.7;color:#e8e8f0">${g.intro}${g.howToPlay}${g.controls}${g.features}${g.tips}</section>`;
+    // Inject after header (outside React root) so it survives hydration
+    const header = $('header').first();
+    if (header.length) header.after(gameIntroHtml);
+    else if ($('main').length) $('main').prepend(gameIntroHtml);
+    else $('body').prepend(gameIntroHtml);
+  }
+
   // Pass 9: Replace Poki logo with custom logo (responsive for all devices)
-  replacePokiLogo($);
 
   // Pass 9b: Rewrite games.poki.com URLs in INITIAL_STATE server-side — only for game pages (skip for homepage etc)
   if (sourcePath && (sourcePath.includes('/g/') || sourcePath.includes('/game/'))) {
@@ -361,7 +443,6 @@ function rewriteHtml(html, sourcePath) {
           'name': gameTitle,
           'description': gameDesc,
           'thumbnailUrl': ogImage || gameVideo,
-          'uploadDate': '2026-01-01',
           'contentUrl': gameVideo,
           'embedUrl': gameUrl,
           'duration': 'PT30S',
