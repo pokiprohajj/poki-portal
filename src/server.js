@@ -171,11 +171,14 @@ app.get('/sitemap.xml', (req, res) => {
   const cacheHeaders = { 'Cache-Control': 'public, max-age=86400' };
   res.set(cacheHeaders);
   res.type('application/xml');
-  const today = new Date().toISOString().split('T')[0];
+  // 3A-2: lastmod realistic — only when content truly changed. No mass-bump "today".
+  // For static pages (homepage, categories, games, trust) use the last real deployment date.
+  // For blog posts use the post's own date (stableDate) without fallback to today.
+  const staticLastmod = '2026-08-28';
 
-  // Homepage — the only root-level indexable page (/games and /categories are soft-404s)
+  // Homepage — the only root-level indexable page
   const pages = [''].map(p =>
-    `  <url>\n    <loc>https://${config.domain}/${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}/${p}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`
   ).join('\n');
 
   // Validated category pages (must match homepage slugs exactly; no -games suffix variants)
@@ -184,32 +187,32 @@ app.get('/sitemap.xml', (req, res) => {
     '/en/sports', '/en/multiplayer', '/en/dress-up', '/en/car',
   ];
   const categoryUrls = categoryPages.map(p =>
-    `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
-  // Individual game pages — 147 verified live game URLs (priority 0.9)
+  // Individual game pages — 147 verified live game URLs
   const games = require('./frontend/games-data');
   const gamePageUrls = games
     .map(g => g.slug)
     .filter((s, i, arr) => arr.indexOf(s) === i)
     .map(s =>
-      `  <url>\n    <loc>https://${config.domain}/en/g/${s}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>`
+      `  <url>\n    <loc>https://${config.domain}/en/g/${s}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>`
     ).join('\n');
 
   const posts = require('./blog/posts');
   const blogUrls = posts.map(p =>
-    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <lastmod>${p.date || today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <lastmod>${p.date}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
   ).join('\n');
 
-  const blogIndexUrl = `  <url>\n    <loc>https://${config.domain}/blog/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://${config.domain}/blog/popular</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`;
+  const blogIndexUrl = `  <url>\n    <loc>https://${config.domain}/blog/</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://${config.domain}/blog/popular</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`;
 
   const blogCatUrls = ['guides', 'lists', 'comparisons', 'articles'].map(c =>
-    `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
-  // Trust pages (local static — indexable, low priority; /about replaces /en/about-us)
+  // Trust pages (local static — indexable, low priority)
   const trustPageUrls = ['/about', '/privacy-policy', '/contact', '/terms-of-service'].map(p =>
-    `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.2</priority>\n  </url>`
+    `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.2</priority>\n  </url>`
   ).join('\n');
 
   res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${categoryUrls}\n${gamePageUrls}\n${blogIndexUrl}\n${blogCatUrls}\n${blogUrls}\n${trustPageUrls}\n</urlset>`);

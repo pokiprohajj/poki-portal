@@ -173,6 +173,73 @@ function rewriteHtml(html, sourcePath) {
     }
   }
 
+  // Pass 8c: Category intros for 8 canonical categories (100-200 words, server-rendered)
+  const CATEGORY_INTROS = {
+    '/en/popular': {
+      title: 'Popular Games - Most Played Browser Games | BrowserGamesHQ',
+      desc: 'Discover the most played browser games on BrowserGamesHQ. Trending titles, community favorites and editors picks — all free to play instantly.',
+      h1: 'Popular Games',
+      intro: '<p>Popular Games brings together the titles people play most right now on BrowserGamesHQ. You will find fast session games you can finish in a few minutes, longer progression games you can return to daily, and new hits that have just entered the charts. The selection is updated from real play data, not from a fixed editorial list, so the order reflects what players actually keep coming back to. Use this page when you want a reliable shortlist without scrolling through hundreds of thumbnails. Every game here runs in the browser, loads quickly on desktop and mobile, and can be started without an account.</p><p>Browse the grid, open a few candidates in new tabs, and keep the ones that match your taste. If you like competition, try the multiplayer and sports rows near the top. If you prefer solo focus, the puzzle and casual tiles further down are a good entry point.</p>'
+    },
+    '/en/action': {
+      title: 'Action Games - Fast-Paced Free Online Action | BrowserGamesHQ',
+      desc: 'Play free action games online. Reflex, timing and quick decisions — browser action you can start instantly.',
+      h1: 'Action Games',
+      intro: '<p>Action Games on BrowserGamesHQ are built for players who like movement, timing and short feedback loops. You will find run-and-gun shooters, close-combat brawlers, stealth and survival challenges, and physics-based action where one mistake resets the run. The controls are deliberately simple — arrows, WASD or mouse — so you can learn the first level in under a minute and then push for a cleaner execution.</p><p>Pick a game by the feel you want: precise platforming, chaotic brawls, or tactical shooters. All titles in this category are free, run without install, and work with keyboard or touch. Open a few, test the first 30 seconds, and keep the one where the rhythm clicks.</p>'
+    },
+    '/en/puzzle': {
+      title: 'Puzzle Games - Logic and Brain Teasers | BrowserGamesHQ',
+      desc: 'Free puzzle games to test logic, memory and planning. Play in your browser, no download required.',
+      h1: 'Puzzle Games',
+      intro: '<p>Puzzle Games are for players who enjoy a clear problem and a satisfying solution. This selection covers logic grids, sorting and stacking puzzles, path-finding, physics puzzles and word and number challenges. Most puzzles can be played at your own pace, so you can pause, think and try a different approach without a timer forcing you.</p><p>Start with the difficulty you are comfortable with — many titles scale from easy tutorials to hard later levels. If you like to learn systems, look for games with move counters or star ratings. All puzzles here run directly in the browser and save progress locally, so you can return later without losing your place.</p>'
+    },
+    '/en/racing': {
+      title: 'Racing Games - Drive, Drift and Win | BrowserGamesHQ',
+      desc: 'Free racing games online. Cars, bikes and karts — drift, overtake and reach the finish line.',
+      h1: 'Racing Games',
+      intro: '<p>Racing Games bring speed, control and quick restarts to the browser. You will find circuit racers, drift and parking challenges, bike and kart games, and stunt tracks that reward clean lines more than raw speed. The handling varies from arcade to more grounded, so you can choose the feel you like without learning a new control scheme each time.</p><p>Use the first lap to learn braking points, then push for a better time. Many titles include ghost cars, time trials or traffic modes that make a single track replayable. Every game here is free and runs on desktop and mobile without a download.</p>'
+    },
+    '/en/sports': {
+      title: 'Sports Games - Free Online Sports | BrowserGamesHQ',
+      desc: 'Play free sports games in your browser. Football, basketball, golf and more — no download.',
+      h1: 'Sports Games',
+      intro: '<p>Sports Games collect quick, readable sports action for the browser. Expect football shootouts, basketball free throws, golf puzzles, bowling, table tennis and other one-button or two-button sports that are easy to learn and hard to master. The rules are simplified compared to real sports, so you can focus on timing and placement rather than complex tactics.</p><p>Choose a sport you already follow or try a new one for a change of pace. Most games let you play a single match or a short tournament, so you can get a complete session in a few minutes. All titles are free, run instantly, and work with mouse or touch.</p>'
+    },
+    '/en/multiplayer': {
+      title: 'Multiplayer Games - Play With Friends Online | BrowserGamesHQ',
+      desc: 'Free multiplayer browser games. Play with friends or strangers — no download, just share and play.',
+      h1: 'Multiplayer Games',
+      intro: '<p>Multiplayer Games are about playing with or against other people without installing anything. You will find .io arenas, co-op puzzles, team shooters, party games and asynchronous turn-based games you can join from a link. The lobbies are browser-based, so you can invite a friend by sharing the page and be in the same match in seconds.</p><p>Check the player count and whether the game supports private rooms if you want to play with friends only. For quick sessions, pick games with short rounds. For longer play, look for progression and private servers. Every game here runs in the browser and does not require an account to start.</p>'
+    },
+    '/en/dress-up': {
+      title: 'Dress Up Games - Fashion and Creativity | BrowserGamesHQ',
+      desc: 'Free dress up games online. Style, fashion and creative dress-up play for everyone.',
+      h1: 'Dress Up Games',
+      intro: '<p>Dress Up Games focus on style, color and creative choices rather than competition. You will find character creators, fashion contests, salon and makeup games, and decor games that use the same mix-and-match mechanics. The interfaces are drag-and-drop, so you can try many combinations quickly and save the look you like.</p><p>Browse by the style you prefer — casual, formal, fantasy or streetwear — and use the wardrobe filters to narrow the options. These games are free, run without download, and work well on both desktop and touch devices.</p>'
+    },
+    '/en/car': {
+      title: 'Car Games - Driving and Parking | BrowserGamesHQ',
+      desc: 'Free car games online. Drive, park and stunt — browser car games for every driver.',
+      h1: 'Car Games',
+      intro: '<p>Car Games gather driving, parking and stunt games that work well in short browser sessions. You will find realistic parking challenges, drift and stunt tracks, traffic and highway games, and car customization games where tuning changes how the car feels. The controls are usually arrows or WASD with automatic acceleration, so you can focus on steering and timing.</p><p>Start with a parking or trial game to learn the handling, then move to faster tracks once the controls feel natural. Many titles include multiple cars or tracks that unlock as you progress. All games here are free and run directly in your browser.</p>'
+    }
+  };
+  if (CATEGORY_INTROS[sourcePath]) {
+    const cat = CATEGORY_INTROS[sourcePath];
+    $('title').text(cat.title);
+    $('meta[name="description"]').attr('content', cat.desc);
+    $('meta[property="og:title"]').attr('content', cat.h1 + ' | BrowserGamesHQ');
+    $('meta[property="og:description"]').attr('content', cat.desc);
+    // Inject intro after H1 if present, otherwise prepend to main
+    const h1 = $('h1').first();
+    const introHtml = `<section class="category-intro" style="max-width:800px;margin:24px auto;padding:0 16px;line-height:1.6;color:#e8e8f0"><p>${cat.intro.replace(/<p>/g,'').replace(/<\/p>/g,'</p><p>').replace(/<p><\/p>/g,'')}</p></section>`;
+    // Use raw intro (already contains <p> tags)
+    const rawIntro = `<section class="category-intro" style="max-width:800px;margin:24px auto;padding:0 16px;line-height:1.6;color:#e8e8f0">${cat.intro}</section>`;
+    if (h1.length) h1.after(rawIntro);
+    else if ($('main').length) $('main').prepend(rawIntro);
+    else $('body').prepend(rawIntro);
+  }
+
   // Pass 9: Replace Poki logo with custom logo (responsive for all devices)
   replacePokiLogo($);
 

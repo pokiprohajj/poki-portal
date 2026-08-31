@@ -595,6 +595,13 @@ ${popRobotsTag}<link rel="canonical" href="https://browsergameshq.com/blog/popul
   }
 
   if (path === '/blog' || path === '/blog/') {
+    // 3A-5: canonical /blog/ — redirect /blog → /blog/ for HTML
+    if (path === '/blog' && format !== 'json') {
+      const qs = url.search || '';
+      res.writeHead(301, { Location: '/blog/' + qs });
+      res.end();
+      return true;
+    }
     const perPage = 12;
     const start = (page - 1) * perPage;
     const pagePosts = posts.slice(start, start + perPage);

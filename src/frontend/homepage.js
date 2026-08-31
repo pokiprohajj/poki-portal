@@ -11,7 +11,7 @@ const MOBILE_SLUGS = ['subway-surfers', 'talking-tom-gold-run', 'drift-boss', 'h
 const HERO_SLUGS = ['subway-surfers', 'drift-boss', 'retro-bowl', 'stickman-hook', 'fruit-ninja', 'gobattle2', 'tunnel-rush', 'monkey-mart', 'hill-climb-racing-lite', 'my-perfect-hotel'];
 
 const CAROUSELS = [
-  { id: 'trending', title: 'Trending Now', slug: null, games: GAMES.slice(0, 16) },
+  { id: 'trending', title: 'Trending Now', slug: '/en/popular', games: GAMES.slice(0, 16) },
   { id: 'popular', title: 'Popular', slug: '/en/popular', games: GAMES.slice(16, 30) },
   { id: 'action', title: 'Action', slug: '/en/action', games: byCat('Action').slice(0, 12) },
   { id: 'puzzle', title: 'Puzzle', slug: '/en/puzzle', games: byCat('Puzzle').slice(0, 12) },
@@ -19,10 +19,10 @@ const CAROUSELS = [
   { id: 'sports', title: 'Sports', slug: '/en/sports', games: byCat('Sports').slice(0, 12) },
   { id: 'multiplayer', title: 'Multiplayer', slug: '/en/multiplayer', games: byCat('Multiplayer').slice(0, 12) },
   { id: 'dressup', title: 'Dress Up', slug: '/en/dress-up', games: byCat('Dress Up').slice(0, 12) },
-  { id: 'family', title: 'Family Games', slug: null, games: GAMES.filter((g) => g.family).slice(0, 12) },
-  { id: 'quickplay', title: 'Quick Play', slug: null, games: pick(QUICKPLAY_SLUGS) },
-  { id: 'editors', title: "Editor's Picks", slug: null, games: pick(FEATURED_SLUGS) },
-  { id: 'mobile', title: 'Mobile Favorites', slug: null, games: pick(MOBILE_SLUGS) },
+  { id: 'family', title: 'Family Games', slug: '/en/dress-up', games: GAMES.filter((g) => g.family).slice(0, 12) },
+  { id: 'quickplay', title: 'Quick Play', slug: '/en/popular', games: pick(QUICKPLAY_SLUGS) },
+  { id: 'editors', title: "Editor's Picks", slug: '/en/popular', games: pick(FEATURED_SLUGS) },
+  { id: 'mobile', title: 'Mobile Favorites', slug: '/en/car', games: pick(MOBILE_SLUGS) },
 ];
 
 function pick(slugs) {

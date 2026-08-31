@@ -69,7 +69,7 @@ async function fetchSource(path, visitorUA, sourceOrigin, fetchOpts) {
 
   const html = await response.text();
 
-  if (!response.ok && !html.includes('window.context')) {
+  if (!response.ok) {
     throw new Error(`Source responded with ${response.status}: ${response.statusText}`);
   }
 
@@ -223,6 +223,10 @@ async function handlePageRequest(req, res) {
     return res.redirect(301, '/en/c/contact');
   }
   const sourcePath = reqPath;
+  // 3A-1 True 404: only old category variants are hard 404; game soft-404 is detected after fetch
+  if (sourcePath && sourcePath.match(/^\/en\/(new-games|top-rated|action-games|puzzle-games|racing-games|sports-games|adventure-games|casual-games|strategy-games|io-games)\/?$/)) {
+    return res.status(404).send(generate404Page());
+  }
 
   const cacheKey = `html:${deviceType}:${reqPath}:${host}`;
   const cached = cache.getHtml(cacheKey);
