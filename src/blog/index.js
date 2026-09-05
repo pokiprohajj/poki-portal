@@ -28,9 +28,15 @@ const CAT_DESC = {
 const CAT_H1 = { guides: 'Game Guides & Tips', lists: 'Best Browser Games — Lists & Rankings', comparisons: 'Game Comparisons', articles: 'Gaming Articles & News' };
 
 function cardImgUrl(slug, cat) {
-  const cls = CAT_CLASS[cat] || 'guides';
-  const colors = { guides: '5f3dc4/ede9fe', lists: 'c62828/fce4ec', comparisons: '1565c0/e3f2fd', articles: '2e7d32/e8f5e9' };
-  return `https://placehold.co/600x400/${colors[cls]}?text=${encodeURIComponent(slug.split('-').slice(0,2).join(' '))}`;
+  // Prefer real game thumb if post slug contains a known game slug
+  try {
+    const games = require('../frontend/games-data');
+    const lower = slug.toLowerCase();
+    const match = games.find(g => lower.includes(g.slug));
+    if (match && match.thumb) return match.thumb;
+  } catch (e) {}
+  // No real image — return null to render card without image (do not use placehold.co)
+  return null;
 }
 
 function catBadge(cat) {
@@ -41,8 +47,10 @@ function catBadge(cat) {
 function cardHtml(post) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const emoji = CAT_EMOJI[post.category] || '🎮';
+  const imgUrl = cardImgUrl(post.slug, post.category);
+  const imgHtml = imgUrl ? `<div class="card-img cat-bg-${cls}"><img src="${imgUrl}" alt="${post.title}" loading="lazy"><div class="card-img-overlay"><span class="card-emoji">${emoji}</span></div></div>` : `<div class="card-img cat-bg-${cls} no-image"><div class="card-img-overlay"><span class="card-emoji">${emoji}</span></div></div>`;
   return `<article class="post-card" data-category="${post.category}">
-<div class="card-img cat-bg-${cls}"><img src="${cardImgUrl(post.slug, post.category)}" alt="${post.title}" loading="lazy"><div class="card-img-overlay"><span class="card-emoji">${emoji}</span></div></div>
+${imgHtml}
 <div class="card-body">
 ${catBadge(post.category)}
 <h3><a href="/blog/${post.slug}">${post.title}</a></h3>
@@ -55,8 +63,10 @@ ${catBadge(post.category)}
 function featuredCard(post) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const emoji = CAT_EMOJI[post.category] || '🎮';
+  const featImg = cardImgUrl(post.slug, post.category);
+  const featImgHtml = featImg ? `<img src="${featImg}" alt="${post.title}">` : '';
   return `<div class="post-featured">
-<div class="featured-img cat-bg-${cls}"><img src="${cardImgUrl(post.slug, post.category)}" alt="${post.title}"><div class="featured-img-overlay"><span class="featured-emoji">${emoji}</span></div></div>
+<div class="featured-img cat-bg-${cls}">${featImgHtml}<div class="featured-img-overlay"><span class="featured-emoji">${emoji}</span></div></div>
 <div class="featured-body">
 <div class="featured-label">Featured Article</div>
 ${catBadge(post.category)}
@@ -293,7 +303,7 @@ function faqSchema(post) {
 }
 
 function articleSchema(post) {
-  const img = cardImgUrl(post.slug, post.category);
+  const img = cardImgUrl(post.slug, post.category) || 'https://browsergameshq.com/static/img/og-image.png';
   const authorName = post.author || 'BrowserGamesHQ';
   const modified = post.lastUpdated || post.date;
   return `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":${JSON.stringify(post.title)},"description":${JSON.stringify(post.excerpt)},"image":${JSON.stringify(img)},"datePublished":"${post.date}","dateModified":"${modified}","author":{"@type":"Organization","name":${JSON.stringify(authorName)},"url":"https://browsergameshq.com"},"publisher":{"@type":"Organization","name":"BrowserGamesHQ","url":"https://browsergameshq.com","logo":{"@type":"ImageObject","url":"https://browsergameshq.com/logo.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://browsergameshq.com/blog/${post.slug}"}}</script>`;
@@ -414,7 +424,7 @@ function renderPostPage(post, allPosts) {
 <meta property="og:description" content="${post.excerpt}">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://browsergameshq.com/blog/${post.slug}">
-<meta property="og:image" content="${cardImgUrl(post.slug, post.category)}">
+<meta property="og:image" content="${cardImgUrl(post.slug, post.category) || 'https://browsergameshq.com/static/img/og-image.png'}">
 <meta property="og:site_name" content="BrowserGamesHQ">
 <meta property="article:published_time" content="${post.date}">
 <meta property="article:modified_time" content="${post.lastUpdated || post.date}">
@@ -425,7 +435,7 @@ function renderPostPage(post, allPosts) {
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${post.title}">
 <meta name="twitter:description" content="${post.excerpt}">
-<meta name="twitter:image" content="${cardImgUrl(post.slug, post.category)}">
+<meta name="twitter:image" content="${cardImgUrl(post.slug, post.category) || 'https://browsergameshq.com/static/img/og-image.png'}">
   <link rel="stylesheet" href="/static/css/blog.css?v=20260725">
   ${faqSchema(post)}
   ${articleSchema(post)}
