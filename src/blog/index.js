@@ -515,10 +515,13 @@ function blogRouter(req, res) {
   const path = url.pathname;
   const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
   const format = url.searchParams.get('format') || 'html';
+  // Phase A: only 40 indexable posts in listings (25 Strong + 15 pilot enriched) — others remain direct-access but not in navigation
+  const KEEP_SLUGS = new Set(['temple-run-2-holi-festival-walkthrough','temple-run-2-spooky-summit-walkthrough','improve-endless-runner-skills','why-browser-games-are-making-comeback','browsergameshq-your-new-gaming-hub','monster-tracks-complete-guide','monster-tracks-pro-tips','subway-surfers-complete-guide','subway-surfers-pro-tips','drive-mad-complete-guide','drive-mad-pro-tips','retro-bowl-complete-guide','retro-bowl-pro-tips','stickman-hook-complete-guide','stickman-hook-pro-tips','blocky-blast-puzzle-complete-guide','blocky-blast-puzzle-pro-tips','level-devil-complete-guide','level-devil-pro-tips','slope-complete-guide','ultimate-guide-free-browser-games','best-io-games-ranked-2026','browser-games-vs-downloaded-games','how-browser-games-work','safest-browser-games-for-kids','retro-bowl-how-to-play-online','retro-bowl-tips-and-strategies','retro-bowl-advanced-guide','drift-boss-how-to-play-online','drift-boss-tips-and-strategies','drift-boss-advanced-guide','monkey-mart-how-to-play-online','monkey-mart-tips-and-strategies','stickman-hook-how-to-play-online','stickman-hook-tips-and-strategies','blocky-blast-puzzle-how-to-play-online','blocky-blast-puzzle-tips-and-strategies','level-devil-how-to-play-online','level-devil-tips-and-strategies','slope-how-to-play-online']);
+  const indexablePosts = posts.filter(p=>KEEP_SLUGS.has(p.slug));
 
-  // Popular page: /blog/popular — top posts by content depth
+  // Popular page: /blog/popular — top posts by content depth (only indexable)
   if (path === '/blog/popular' || path === '/blog/popular/') {
-    const popular = posts.slice().sort((a, b) => {
+    const popular = indexablePosts.slice().sort((a, b) => {
       const aH2 = (a.content.match(/<h2>/g) || []).length;
       const bH2 = (b.content.match(/<h2>/g) || []).length;
       return bH2 - aH2 || (b.readingTime || 3) - (a.readingTime || 3);
@@ -573,12 +576,12 @@ ${popRobotsTag}<link rel="canonical" href="https://browsergameshq.com/blog/popul
     return true;
   }
 
-  // Category pages: /blog/category/guides, /blog/category/lists, etc
+  // Category pages: /blog/category/guides, /blog/category/lists, etc (only indexable)
   const catMatch = path.match(/^\/blog\/category\/(guides|lists|comparisons|articles)\/?$/);
   if (catMatch) {
     const catKey = catMatch[1];
     const catName = Object.keys(CAT_CLASS).find(k => CAT_CLASS[k] === catKey);
-    const filtered = posts.filter(p => p.category === catName);
+    const filtered = indexablePosts.filter(p => p.category === catName);
     const perPage = 12;
     const start = (page - 1) * perPage;
     const pagePosts = filtered.slice(start, start + perPage);
@@ -604,16 +607,16 @@ ${popRobotsTag}<link rel="canonical" href="https://browsergameshq.com/blog/popul
     }
     const perPage = 12;
     const start = (page - 1) * perPage;
-    const pagePosts = posts.slice(start, start + perPage);
+    const pagePosts = indexablePosts.slice(start, start + perPage);
 
     if (format === 'json') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(renderPostJson(pagePosts, page, posts.length)));
+      res.end(JSON.stringify(renderPostJson(pagePosts, page, indexablePosts.length)));
       return true;
     }
 
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPostList(pagePosts, page, posts.length));
+    res.end(renderPostList(pagePosts, page, indexablePosts.length));
     return true;
   }
 

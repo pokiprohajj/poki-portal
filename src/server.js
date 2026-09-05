@@ -171,17 +171,15 @@ app.get('/sitemap.xml', (req, res) => {
   const cacheHeaders = { 'Cache-Control': 'public, max-age=86400' };
   res.set(cacheHeaders);
   res.type('application/xml');
-  // 3A-2: lastmod realistic — only when content truly changed. No mass-bump "today".
-  // For static pages (homepage, categories, games, trust) use the last real deployment date.
-  // For blog posts use the post's own date (stableDate) without fallback to today.
+  // Phase A: Indexable core only — 64 URLs (homepage + 8 cats + 4 trust + /blog/ + 10 pilot games + 25 Strong + 15 enriched)
+  // lastmod reflects REAL significant modification (no stableDate pseudo-random mass-bump)
   const staticLastmod = '2026-08-28';
+  const pilotLastmod = '2026-08-31';
 
-  // Homepage — the only root-level indexable page
   const pages = [''].map(p =>
     `  <url>\n    <loc>https://${config.domain}/${p}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`
   ).join('\n');
 
-  // Validated category pages (must match homepage slugs exactly; no -games suffix variants)
   const categoryPages = [
     '/en/popular', '/en/action', '/en/puzzle', '/en/racing',
     '/en/sports', '/en/multiplayer', '/en/dress-up', '/en/car',
@@ -190,32 +188,29 @@ app.get('/sitemap.xml', (req, res) => {
     `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`
   ).join('\n');
 
-  // Individual game pages — 147 verified live game URLs
-  const games = require('./frontend/games-data');
-  const gamePageUrls = games
-    .map(g => g.slug)
-    .filter((s, i, arr) => arr.indexOf(s) === i)
-    .map(s =>
-      `  <url>\n    <loc>https://${config.domain}/en/g/${s}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>`
-    ).join('\n');
-
-  const posts = require('./blog/posts');
-  const blogUrls = posts.map(p =>
-    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <lastmod>${p.date}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
+  // Only 10 pilot games (enriched) — not all 147
+  const pilotGames = ['subway-surfers','temple-run-2','drift-boss','rainbow-obby','murder','gobattle2','hide-and-paint','tag','minefun-io','retro-bowl'];
+  const gamePageUrls = pilotGames.map(s =>
+    `  <url>\n    <loc>https://${config.domain}/en/g/${s}</loc>\n    <lastmod>${pilotLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>`
   ).join('\n');
 
-  const blogIndexUrl = `  <url>\n    <loc>https://${config.domain}/blog/</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://${config.domain}/blog/popular</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`;
-
-  const blogCatUrls = ['guides', 'lists', 'comparisons', 'articles'].map(c =>
-    `  <url>\n    <loc>https://${config.domain}/blog/category/${c}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`
+  // Only 40 blog posts: 25 Strong (actual present) + 15 enriched pilot
+  const allPosts = require('./blog/posts');
+  const strongSlugs = ['temple-run-2-holi-festival-walkthrough','why-browser-games-are-making-comeback','temple-run-2-spooky-summit-walkthrough','improve-endless-runner-skills','browsergameshq-your-new-gaming-hub','play-free-games-without-download','best-puzzle-games-browser','best-multiplayer-games-browser','why-browser-games-wont-load','browser-games-for-low-end-pc','how-browser-games-have-evolved','drive-mad-all-tracks-guide','monster-tracks-upgrade-guide','murder-all-cases-walkthrough','apple-worm-all-levels-guide','browser-games-for-grandparents','games-to-play-when-internet-slow','games-for-competitive-friends','subway-surfers-faq','retro-bowl-faq','ultimate-guide-free-browser-games','how-to-get-better-at-any-video-game','best-free-online-games-no-download-2026','browser-games-vs-downloadable-games-comparison','gobattle2-complete-guide'];
+  const enriched15 = ['retro-bowl-how-to-play-online','retro-bowl-tips-and-strategies','retro-bowl-advanced-guide','drift-boss-how-to-play-online','drift-boss-tips-and-strategies','drift-boss-advanced-guide','monkey-mart-how-to-play-online','monkey-mart-tips-and-strategies','stickman-hook-how-to-play-online','stickman-hook-tips-and-strategies','blocky-blast-puzzle-how-to-play-online','blocky-blast-puzzle-tips-and-strategies','level-devil-how-to-play-online','level-devil-tips-and-strategies','slope-how-to-play-online'];
+  const keepSlugs = new Set([...strongSlugs, ...enriched15]);
+  const blogUrls = allPosts.filter(p=>keepSlugs.has(p.slug)).map(p =>
+    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <lastmod>${p.slug.startsWith('retro-bowl')||p.slug.startsWith('drift-boss')||p.slug.startsWith('monkey-mart')||p.slug.startsWith('stickman-hook')||p.slug.startsWith('blocky-blast')||p.slug.startsWith('level-devil')||p.slug.startsWith('slope-') ? pilotLastmod : p.date}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
   ).join('\n');
 
-  // Trust pages (local static — indexable, low priority)
+  const blogIndexUrl = `  <url>\n    <loc>https://${config.domain}/blog/</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`;
+
+  // Trust pages
   const trustPageUrls = ['/about', '/privacy-policy', '/contact', '/terms-of-service'].map(p =>
     `  <url>\n    <loc>https://${config.domain}${p}</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.2</priority>\n  </url>`
   ).join('\n');
 
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${categoryUrls}\n${gamePageUrls}\n${blogIndexUrl}\n${blogCatUrls}\n${blogUrls}\n${trustPageUrls}\n</urlset>`);
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages}\n${categoryUrls}\n${gamePageUrls}\n${blogIndexUrl}\n${blogUrls}\n${trustPageUrls}\n</urlset>`);
 });
 
 app.use('/proxy-media', require('./core/proxy/media'));
