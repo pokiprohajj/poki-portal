@@ -173,6 +173,37 @@ function rewriteHtml(html, sourcePath) {
     }
   }
 
+  // Pass 8a2: Ensure game pages have correct title and robots in raw HTML (before JS)
+  // Core pilot games: 10 enriched — index,follow. Non-pilot 137: noindex,follow until enriched.
+  const PILOT_GAMES = ['subway-surfers','temple-run-2','drift-boss','rainbow-obby','murder','gobattle2','hide-and-paint','tag','minefun-io','retro-bowl'];
+  if (sourcePath && sourcePath.includes('/en/g/')) {
+    var gameSlug = (sourcePath.match(/\/g\/([^/]+)/) || [])[1] || '';
+    // Fix title if empty or not BrowserGamesHQ — create if missing
+    var $title = $('title');
+    var titleText = $title.text() || '';
+    if (!titleText || titleText.trim() === '' || titleText.indexOf('BrowserGamesHQ') === -1) {
+      var h1Text = $('h1').first().text() || gameSlug.replace(/-/g, ' ').replace(/\b\w/g, function(c){return c.toUpperCase();});
+      var newTitle = (h1Text ? h1Text + ' - Play Online for Free!' : gameSlug.replace(/-/g, ' ')) + ' | BrowserGamesHQ';
+      if ($title.length) $title.text(newTitle);
+      else $('head').append('<title>' + newTitle + '</title>');
+    } else if (titleText.indexOf(' | Poki') !== -1) {
+      $title.text(titleText.replace(' | Poki', ' | BrowserGamesHQ'));
+    }
+    // Robots: pilot = index,follow, non-pilot = noindex,follow
+    var isPilot = PILOT_GAMES.indexOf(gameSlug) !== -1;
+    var desiredRobots = isPilot ? 'index, follow' : 'noindex, follow';
+    var $robots = $('meta[name="robots"]');
+    if ($robots.length) {
+      $robots.attr('content', desiredRobots);
+    } else {
+      $('head').append('<meta name="robots" content="' + desiredRobots + '">');
+    }
+    // Also set X-Robots-Tag via meta http-equiv for consistency (will be overridden by header but keep for SSR)
+    if (isPilot) {
+      // Ensure no noindex remains
+    }
+  }
+
   // Pass 8c: Category intros for 8 canonical categories (100-200 words, server-rendered) with 2-3 contextual links
   const CATEGORY_INTROS = {
     '/en/popular': {

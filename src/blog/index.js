@@ -387,6 +387,10 @@ function monthYear(d) {
 function renderPostPage(post, allPosts) {
   const cls = CAT_CLASS[post.category] || 'guides';
   const keywords = extractKeywords(post.title);
+  // Phase B: core 40 index,follow, non-core 2359 noindex,follow
+  const KEEP_SLUGS_B = new Set(['temple-run-2-holi-festival-walkthrough','why-browser-games-are-making-comeback','temple-run-2-spooky-summit-walkthrough','improve-endless-runner-skills','browsergameshq-your-new-gaming-hub','play-free-games-without-download','best-puzzle-games-browser','best-multiplayer-games-browser','why-browser-games-wont-load','browser-games-for-low-end-pc','how-browser-games-have-evolved','drive-mad-all-tracks-guide','monster-tracks-upgrade-guide','murder-all-cases-walkthrough','apple-worm-all-levels-guide','browser-games-for-grandparents','games-to-play-when-internet-slow','games-for-competitive-friends','subway-surfers-faq','retro-bowl-faq','ultimate-guide-free-browser-games','how-to-get-better-at-any-video-game','best-free-online-games-no-download-2026','browser-games-vs-downloadable-games-comparison','gobattle2-complete-guide','retro-bowl-how-to-play-online','retro-bowl-tips-and-strategies','retro-bowl-advanced-guide','drift-boss-how-to-play-online','drift-boss-tips-and-strategies','drift-boss-advanced-guide','monkey-mart-how-to-play-online','monkey-mart-tips-and-strategies','stickman-hook-how-to-play-online','stickman-hook-tips-and-strategies','blocky-blast-puzzle-how-to-play-online','blocky-blast-puzzle-tips-and-strategies','level-devil-how-to-play-online','level-devil-tips-and-strategies','slope-how-to-play-online']);
+  const isKeep = KEEP_SLUGS_B.has(post.slug);
+  const robotsContent = isKeep ? 'index, follow' : 'noindex, follow';
   const sameCat = allPosts.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 4);
   const relatedHtml = sameCat.length
     ? `<div class="related-posts"><h3>More ${post.category}</h3><div class="related-grid">${sameCat.map(p =>
@@ -405,6 +409,7 @@ function renderPostPage(post, allPosts) {
 <meta name="description" content="${post.excerpt}">
 <meta name="keywords" content="${keywords}">
 <link rel="canonical" href="https://browsergameshq.com/blog/${post.slug}">
+<meta name="robots" content="${robotsContent}">
 <meta property="og:title" content="${post.title}">
 <meta property="og:description" content="${post.excerpt}">
 <meta property="og:type" content="article">

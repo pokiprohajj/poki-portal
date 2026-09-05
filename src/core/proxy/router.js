@@ -262,11 +262,19 @@ async function handlePageRequest(req, res) {
 
       cache.setHtml(cacheKey, html);
 
+      // Determine X-Robots-Tag based on pilot vs non-pilot for game pages
+      let xRobots = 'index, follow';
+      if (sourcePath && sourcePath.includes('/en/g/')) {
+        const m = sourcePath.match(/\/g\/([^/]+)/);
+        const slug = m ? m[1] : '';
+        const pilotGames = ['subway-surfers','temple-run-2','drift-boss','rainbow-obby','murder','gobattle2','hide-and-paint','tag','minefun-io','retro-bowl'];
+        if (slug && !pilotGames.includes(slug)) xRobots = 'noindex, follow';
+      }
       res.set({
         'Content-Type': 'text/html; charset=utf-8',
         'X-Cache': 'MISS',
         'Cache-Control': 'public, max-age=600',
-        'X-Robots-Tag': 'index, follow',
+        'X-Robots-Tag': xRobots,
       });
       res.send(html);
     });
