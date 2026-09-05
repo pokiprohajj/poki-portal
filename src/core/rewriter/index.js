@@ -402,8 +402,10 @@ function rewriteHtml(html, sourcePath) {
     // Google Search Console + Bing verification
     $('head').append('<meta name="google-site-verification" content="JdrC1oUAbTyddJDIO7HfqQuEtVcl_pxdiYpCmIU29Ws">');
     $('head').append('<meta name="msvalidate.01" content="9D9ADF6BB82D31433C1A9AC6236F7F66">');
-    // Meta robots tag for defense-in-depth indexing directive
-    $('head').append('<meta name="robots" content="index, follow">');
+    // Meta robots tag for defense-in-depth indexing directive — only if not already set (e.g., game pilot vs non-pilot)
+    if (!$('meta[name="robots"]').length) {
+      $('head').append('<meta name="robots" content="index, follow">');
+    }
     // Resource hints for Core Web Vitals optimization
     $('head').append('<link rel="dns-prefetch" href="//pagead2.googlesyndication.com">');
     $('head').append('<link rel="dns-prefetch" href="//www.googletagmanager.com">');

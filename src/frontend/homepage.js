@@ -179,7 +179,8 @@ const render = (req, res) => {
       <div class="hero-content">
         <div class="hero-copy">
           <span class="hero-eyebrow"><span class="dot"></span>Featured · ${HERO_GAME.category}</span>
-          <h1>${HERO_GAME.title}</h1>
+          <h1>Play Free Online Browser Games</h1>
+          <h2 class="hero-title" style="font-size:1.8rem;font-weight:700;margin:8px 0;color:#fff">${HERO_GAME.title}</h2>
           <p class="hero-sub">Jump into one of the most played browser games in the world — free, no download, no sign-up. Just open and play.</p>
           <div class="hero-cta">
             <a href="/en/g/${encodeURIComponent(HERO_GAME.slug)}" class="btn btn-primary">
