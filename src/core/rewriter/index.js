@@ -467,22 +467,10 @@ function rewriteHtml(html, sourcePath) {
 
       var gameSlug = (sourcePath.match(/\/g\/([^/]+)/) || [])[1] || '';
 
-      // VideoObject schema — enables video rich results using the game's Poki mp4
-      var gameVideo = GAME_VIDEOS[gameSlug] || '';
-      if (gameVideo) {
-        var videoSchema = {
-          '@context': 'https://schema.org',
-          '@type': 'VideoObject',
-          'name': gameTitle,
-          'description': gameDesc,
-          'thumbnailUrl': ogImage || gameVideo,
-          'contentUrl': gameVideo,
-          'embedUrl': gameUrl,
-          'duration': 'PT30S',
-          'publisher': { '@type': 'Organization', 'name': 'BrowserGamesHQ' },
-        };
-        $('head').append('<script type="application/ld+json">' + JSON.stringify(videoSchema) + '</script>');
-      }
+      // VideoObject: contentUrl video is not actually visible/watchable on the game page (thumbnail preview only)
+      // Per Google, VideoObject must represent a video that is visible on the page. Since the exact MP4 is not
+      // embedded as a watchable video on the game page, omit VideoObject entirely to avoid invalid markup.
+      // Keep VideoGame and Breadcrumb — do not emit VideoObject.
 
       // Related guides strip — internal links from game page to its blog guides.
       // Pass 6a: Server-rendered HTML links (crawlable by Googlebot without JS)
