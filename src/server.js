@@ -199,9 +199,12 @@ app.get('/sitemap.xml', (req, res) => {
   const strongSlugs = ['temple-run-2-holi-festival-walkthrough','why-browser-games-are-making-comeback','temple-run-2-spooky-summit-walkthrough','improve-endless-runner-skills','browsergameshq-your-new-gaming-hub','play-free-games-without-download','best-puzzle-games-browser','best-multiplayer-games-browser','why-browser-games-wont-load','browser-games-for-low-end-pc','how-browser-games-have-evolved','drive-mad-all-tracks-guide','monster-tracks-upgrade-guide','murder-all-cases-walkthrough','apple-worm-all-levels-guide','browser-games-for-grandparents','games-to-play-when-internet-slow','games-for-competitive-friends','subway-surfers-faq','retro-bowl-faq','ultimate-guide-free-browser-games','how-to-get-better-at-any-video-game','best-free-online-games-no-download-2026','browser-games-vs-downloadable-games-comparison','gobattle2-complete-guide'];
   const enriched15 = ['retro-bowl-how-to-play-online','retro-bowl-tips-and-strategies','retro-bowl-advanced-guide','drift-boss-how-to-play-online','drift-boss-tips-and-strategies','drift-boss-advanced-guide','monkey-mart-how-to-play-online','monkey-mart-tips-and-strategies','stickman-hook-how-to-play-online','stickman-hook-tips-and-strategies','blocky-blast-puzzle-how-to-play-online','blocky-blast-puzzle-tips-and-strategies','level-devil-how-to-play-online','level-devil-tips-and-strategies','slope-how-to-play-online'];
   const keepSlugs = new Set([...strongSlugs, ...enriched15]);
-  const blogUrls = allPosts.filter(p=>keepSlugs.has(p.slug)).map(p =>
-    `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>\n    <lastmod>${p.slug.startsWith('retro-bowl')||p.slug.startsWith('drift-boss')||p.slug.startsWith('monkey-mart')||p.slug.startsWith('stickman-hook')||p.slug.startsWith('blocky-blast')||p.slug.startsWith('level-devil')||p.slug.startsWith('slope-') ? pilotLastmod : p.date}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`
-  ).join('\n');
+  const blogUrls = allPosts.filter(p=>keepSlugs.has(p.slug)).map(p => {
+    // Use real lastmod: enriched -> pilotLastmod (real enrichment), Strong -> lastUpdated if present else omit (p.date is stableDate synthetic)
+    const lastmod = enriched15.includes(p.slug) ? pilotLastmod : (p.lastUpdated || null);
+    const lastmodTag = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : '';
+    return `  <url>\n    <loc>https://${config.domain}/blog/${p.slug}</loc>${lastmodTag}\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`;
+  }).join('\n');
 
   const blogIndexUrl = `  <url>\n    <loc>https://${config.domain}/blog/</loc>\n    <lastmod>${staticLastmod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>`;
 
