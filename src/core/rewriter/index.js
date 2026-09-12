@@ -402,9 +402,15 @@ function rewriteHtml(html, sourcePath) {
     // Google Search Console + Bing verification
     $('head').append('<meta name="google-site-verification" content="JdrC1oUAbTyddJDIO7HfqQuEtVcl_pxdiYpCmIU29Ws">');
     $('head').append('<meta name="msvalidate.01" content="9D9ADF6BB82D31433C1A9AC6236F7F66">');
-    // Meta robots tag for defense-in-depth indexing directive — only if not already set (e.g., game pilot vs non-pilot)
+    // Meta robots tag — strict allowlist: only 64 core URLs are index,follow, all others noindex,follow
     if (!$('meta[name="robots"]').length) {
-      $('head').append('<meta name="robots" content="index, follow">');
+      const allowlist = new Set(['/', '/en/popular','/en/action','/en/puzzle','/en/racing','/en/sports','/en/multiplayer','/en/dress-up','/en/car','/about','/privacy-policy','/contact','/terms-of-service','/blog/','/en/g/subway-surfers','/en/g/temple-run-2','/en/g/drift-boss','/en/g/rainbow-obby','/en/g/murder','/en/g/gobattle2','/en/g/hide-and-paint','/en/g/tag','/en/g/minefun-io','/en/g/retro-bowl','/blog/temple-run-2-holi-festival-walkthrough','/blog/why-browser-games-are-making-comeback','/blog/temple-run-2-spooky-summit-walkthrough','/blog/improve-endless-runner-skills','/blog/browsergameshq-your-new-gaming-hub','/blog/play-free-games-without-download','/blog/best-puzzle-games-browser','/blog/best-multiplayer-games-browser','/blog/why-browser-games-wont-load','/blog/browser-games-for-low-end-pc','/blog/how-browser-games-have-evolved','/blog/drive-mad-all-tracks-guide','/blog/monster-tracks-upgrade-guide','/blog/murder-all-cases-walkthrough','/blog/apple-worm-all-levels-guide','/blog/browser-games-for-grandparents','/blog/games-to-play-when-internet-slow','/blog/games-for-competitive-friends','/blog/subway-surfers-faq','/blog/retro-bowl-faq','/blog/ultimate-guide-free-browser-games','/blog/how-to-get-better-at-any-video-game','/blog/best-free-online-games-no-download-2026','/blog/browser-games-vs-downloadable-games-comparison','/blog/gobattle2-complete-guide','/blog/retro-bowl-how-to-play-online','/blog/retro-bowl-tips-and-strategies','/blog/retro-bowl-advanced-guide','/blog/drift-boss-how-to-play-online','/blog/drift-boss-tips-and-strategies','/blog/drift-boss-advanced-guide','/blog/monkey-mart-how-to-play-online','/blog/monkey-mart-tips-and-strategies','/blog/stickman-hook-how-to-play-online','/blog/stickman-hook-tips-and-strategies','/blog/blocky-blast-puzzle-how-to-play-online','/blog/blocky-blast-puzzle-tips-and-strategies','/blog/level-devil-how-to-play-online','/blog/level-devil-tips-and-strategies','/blog/slope-how-to-play-online']);
+      const path = sourcePath || '/';
+      const isCore = allowlist.has(path) || allowlist.has(path.replace(/\/$/, '')) || allowlist.has(path + '/');
+      const hasQuery = sourcePath && sourcePath.includes('?');
+      const isRandomGame = hasQuery && sourcePath.includes('randomgame');
+      const robotsContent = (isCore && !isRandomGame) ? 'index, follow' : 'noindex, follow';
+      $('head').append('<meta name="robots" content="' + robotsContent + '">');
     }
     // Resource hints for Core Web Vitals optimization
     $('head').append('<link rel="dns-prefetch" href="//pagead2.googlesyndication.com">');
