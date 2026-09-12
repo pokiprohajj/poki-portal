@@ -100,7 +100,7 @@ const render = (req, res) => {
   <title>Free Online Games - Play 1500+ Browser Games Instantly | BrowserGamesHQ</title>
   <meta name="description" content="Play thousands of free online browser games instantly at BrowserGamesHQ. No downloads, no sign-ups. Action, puzzle, racing, sports & more. Updated daily.">
   <meta name="keywords" content="free games, online games, browser games, play games, free online games, BrowserGamesHQ">
-  <meta name="robots" content="${robotsContent}">`;
+  <meta name="robots" content="${robotsContent}">
   <link rel="canonical" href="${siteUrl}/">
   <meta property="og:site_name" content="BrowserGamesHQ">
   <meta property="og:type" content="website">
