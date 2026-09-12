@@ -13,8 +13,12 @@ const HERO_SLUGS = ['subway-surfers', 'drift-boss', 'retro-bowl', 'stickman-hook
 const CORE_GAMES = ['subway-surfers','temple-run-2','drift-boss','rainbow-obby','murder','gobattle2','hide-and-paint','tag','minefun-io','retro-bowl'];
 const CORE_SET = new Set(CORE_GAMES);
 function coreGames(arr){ return arr.filter(g=>CORE_SET.has(g.slug)); }
+// Ensure trending includes all 10 core games (temple-run-2 not in GAMES, so create placeholder)
+const TRENDING_GAMES = (()=>{ const base=GAMES.slice(0, 16).filter(g=>CORE_SET.has(g.slug)); const missing=CORE_GAMES.filter(slug=>!base.find(g=>g.slug===slug)).map(slug=>{ const found=GAMES.find(g=>g.slug===slug); if(found) return found; // temple-run-2 not in GAMES, create minimal entry
+    if(slug==='temple-run-2') return {slug:'temple-run-2', title:'Temple Run 2', category:'Action', thumb:'https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=314,height=314,fit=cover,f=auto/5bbed14a2854def6efcd491ecabfa343/temple-run-2-logo.png', video:''};
+    return null; }).filter(Boolean); return [...base, ...missing].slice(0,12);})();
 const CAROUSELS = [
-  { id: 'trending', title: 'Trending Now', slug: '/en/popular', games: coreGames(GAMES.slice(0, 16)) },
+  { id: 'trending', title: 'Trending Now', slug: '/en/popular', games: TRENDING_GAMES },
   { id: 'popular', title: 'Popular', slug: '/en/popular', games: coreGames(GAMES.slice(16, 30)) },
   { id: 'action', title: 'Action', slug: '/en/action', games: coreGames(byCat('Action').slice(0, 12)) },
   { id: 'puzzle', title: 'Puzzle', slug: '/en/puzzle', games: coreGames(byCat('Puzzle').slice(0, 12)) },
@@ -84,6 +88,8 @@ function carouselBlock(c) {
 
 const render = (req, res) => {
   const siteUrl = `https://${config.domain}`;
+  const isRandomGame = req && req.url && req.url.includes('randomgame');
+  const robotsContent = isRandomGame ? 'noindex, follow' : 'index, follow';
   let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,7 +100,7 @@ const render = (req, res) => {
   <title>Free Online Games - Play 1500+ Browser Games Instantly | BrowserGamesHQ</title>
   <meta name="description" content="Play thousands of free online browser games instantly at BrowserGamesHQ. No downloads, no sign-ups. Action, puzzle, racing, sports & more. Updated daily.">
   <meta name="keywords" content="free games, online games, browser games, play games, free online games, BrowserGamesHQ">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="${robotsContent}">`;
   <link rel="canonical" href="${siteUrl}/">
   <meta property="og:site_name" content="BrowserGamesHQ">
   <meta property="og:type" content="website">
@@ -278,7 +284,7 @@ const render = (req, res) => {
   res.set({
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'public, max-age=600',
-    'X-Robots-Tag': 'index, follow',
+    'X-Robots-Tag': isRandomGame ? 'noindex, follow' : 'index, follow',
   });
   res.send(html);
 };

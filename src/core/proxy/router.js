@@ -223,6 +223,10 @@ async function handlePageRequest(req, res) {
     return res.redirect(301, '/en/c/contact');
   }
   const sourcePath = reqPath;
+  // Phase C: Strict allowlist — randomgame query makes homepage non-indexable
+  if (req.url && req.url.includes('randomgame')) {
+    // Mark for noindex via rewriter (pass via sourcePath with query marker)
+  }
   // Phase C: SEO allowlist — unsupported locales (/ar, /es, /fr, etc.) are not indexable
   const unsupportedLocaleMatch = sourcePath.match(/^\/(ar|es|fr|de|it|pt|ru|tr|nl|pl|ja|ko|zh|th|vi|id|ms|hi|bn|fa|tr|cs|da|fi|el|he|hu|no|ro|sk|sr|sv|th|uk|uz)\//);
   if (unsupportedLocaleMatch) {
@@ -269,9 +273,11 @@ async function handlePageRequest(req, res) {
 
       cache.setHtml(cacheKey, html);
 
-      // Determine X-Robots-Tag based on allowlist: unsupported locales and non-pilot games are noindex
+      // Determine X-Robots-Tag based on allowlist: unsupported locales, randomgame, and non-pilot games are noindex
       let xRobots = 'index, follow';
-      if (sourcePath && sourcePath.match(/^\/(ar|es|fr|de|it|pt|ru|tr|nl|pl|ja|ko|zh|th|vi|id|ms|hi|bn|fa|tr|cs|da|fi|el|he|hu|no|ro|sk|sr|sv|th|uk|uz)\//)) {
+      if (req.url && req.url.includes('randomgame')) {
+        xRobots = 'noindex, follow';
+      } else if (sourcePath && sourcePath.match(/^\/(ar|es|fr|de|it|pt|ru|tr|nl|pl|ja|ko|zh|th|vi|id|ms|hi|bn|fa|tr|cs|da|fi|el|he|hu|no|ro|sk|sr|sv|th|uk|uz)\//)) {
         xRobots = 'noindex, follow';
       } else if (sourcePath && sourcePath.includes('/en/g/')) {
         const m = sourcePath.match(/\/g\/([^/]+)/);
