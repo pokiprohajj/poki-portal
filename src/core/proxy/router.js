@@ -223,6 +223,13 @@ async function handlePageRequest(req, res) {
     return res.redirect(301, '/en/c/contact');
   }
   const sourcePath = reqPath;
+  // Phase C: SEO allowlist — unsupported locales (/ar, /es, /fr, etc.) are not indexable
+  const unsupportedLocaleMatch = sourcePath.match(/^\/(ar|es|fr|de|it|pt|ru|tr|nl|pl|ja|ko|zh|th|vi|id|ms|hi|bn|fa|tr|cs|da|fi|el|he|hu|no|ro|sk|sr|sv|th|uk|uz)\//);
+  if (unsupportedLocaleMatch) {
+    // Noindex for now; true 404 if no user-facing purpose (all unsupported locales for now)
+    // We return noindex,follow to avoid mass 404 spike, but not index
+    // The rewriter will also ensure no Poki SEO identity is exposed
+  }
   // 3A-1 True 404: only old category variants are hard 404; game soft-404 is detected after fetch
   if (sourcePath && sourcePath.match(/^\/en\/(new-games|top-rated|action-games|puzzle-games|racing-games|sports-games|adventure-games|casual-games|strategy-games|io-games)\/?$/)) {
     return res.status(404).send(generate404Page());
@@ -262,9 +269,11 @@ async function handlePageRequest(req, res) {
 
       cache.setHtml(cacheKey, html);
 
-      // Determine X-Robots-Tag based on pilot vs non-pilot for game pages
+      // Determine X-Robots-Tag based on allowlist: unsupported locales and non-pilot games are noindex
       let xRobots = 'index, follow';
-      if (sourcePath && sourcePath.includes('/en/g/')) {
+      if (sourcePath && sourcePath.match(/^\/(ar|es|fr|de|it|pt|ru|tr|nl|pl|ja|ko|zh|th|vi|id|ms|hi|bn|fa|tr|cs|da|fi|el|he|hu|no|ro|sk|sr|sv|th|uk|uz)\//)) {
+        xRobots = 'noindex, follow';
+      } else if (sourcePath && sourcePath.includes('/en/g/')) {
         const m = sourcePath.match(/\/g\/([^/]+)/);
         const slug = m ? m[1] : '';
         const pilotGames = ['subway-surfers','temple-run-2','drift-boss','rainbow-obby','murder','gobattle2','hide-and-paint','tag','minefun-io','retro-bowl'];
